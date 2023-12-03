@@ -1,0 +1,14 @@
+name: Skywarz
+version: '${project.version}'
+main: io.github.aparx.skywarz.startup.Main
+author: "aparx (@bonedfps)"
+
+description: "An intriguing Skywars minigame plugin"
+
+commands:
+  skywarz:
+    usage: "/skywarz <...>"
+    aliases: ["sw", "skywars"]
+
+libraries:
+  - org.apache.commons:commons-text:1.11.0

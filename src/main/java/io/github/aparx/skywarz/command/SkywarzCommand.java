@@ -1,0 +1,119 @@
+package io.github.aparx.skywarz.command;
+
+import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.command.arguments.CommandArgList;
+import io.github.aparx.skywarz.command.commands.HelpCommand;
+import io.github.aparx.skywarz.command.commands.arena.ArenaCreateCommand;
+import io.github.aparx.skywarz.command.commands.arena.ArenaDeleteCommand;
+import io.github.aparx.skywarz.command.commands.arena.ArenaListCommand;
+import io.github.aparx.skywarz.command.commands.arena.ArenaSaveCommand;
+import io.github.aparx.skywarz.command.commands.arena.add.ArenaAddSpawnCommand;
+import io.github.aparx.skywarz.command.commands.arena.remove.ArenaRemoveSpawnCommand;
+import io.github.aparx.skywarz.command.commands.arena.set.ArenaSetLobbyCommand;
+import io.github.aparx.skywarz.command.commands.arena.set.ArenaSetPointCommand;
+import io.github.aparx.skywarz.command.commands.arena.set.ArenaSetSpectatorCommand;
+import io.github.aparx.skywarz.command.tree.CommandBuilder;
+import io.github.aparx.skywarz.command.tree.CommandNode;
+import io.github.aparx.skywarz.command.tree.CommandNodeSet;
+import io.github.aparx.skywarz.command.tree.CommandTree;
+import io.github.aparx.skywarz.handler.configs.Language;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.plugin.Plugin;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * @author aparx (Vinzent Z.)
+ * @version 2023-12-01 05:27
+ * @since 1.0
+ */
+public class SkywarzCommand implements CommandExecutor, TabCompleter {
+
+  public static final CommandTree tree = buildTree();
+
+  private static CommandTree buildTree() {
+    CommandTree tree = new CommandTree();
+    CommandNodeSet roots = tree.getRoots();
+    // /skywars help <...>
+    roots.add(new HelpCommand());
+
+    // /skywars arena <...>
+    final CommandNode arena;
+    roots.add(arena = CommandBuilder.builder("arena")
+        .permission("skywars.setup")
+        .args("<{children}>")
+        .build());
+    List.of(
+        new ArenaCreateCommand(arena),
+        new ArenaDeleteCommand(arena),
+        new ArenaListCommand(arena),
+        new ArenaSaveCommand(arena)
+    ).forEach(arena::add);
+
+    arena.add(CommandBuilder.builder(arena, "set")
+        .args("<{children}>")
+        .build()
+        .add(ArenaSetLobbyCommand::new)
+        .add(ArenaSetSpectatorCommand::new)
+        .add(ArenaSetPointCommand::new));
+
+    arena.add(CommandBuilder.builder(arena, "add")
+        .args("<{children}>")
+        .build()
+        .add(ArenaAddSpawnCommand::new));
+
+    arena.add(CommandBuilder.builder(arena, "remove")
+        .args("<{children}>")
+        .build()
+        .add(ArenaRemoveSpawnCommand::new));
+
+    return tree;
+  }
+
+  @Override
+  public boolean onCommand(CommandSender sender, Command command, String label,
+                           String[] args) {
+    CommandArgList newArgs = CommandArgList.of(args);
+    if (newArgs.isEmpty()) {
+      Plugin plugin = Preconditions.checkNotNull(Skywars.plugin());
+      Language language = Language.getLanguage();
+      sender.sendMessage(String.format(
+          "%s %s v%s by aparx (@bonedfps)",
+          language.getPrefix(),
+          plugin.getName(),
+          plugin.getDescription().getVersion()));
+    }
+    tree.execute(new CommandContext(command, sender, newArgs, label), newArgs);
+    return true;
+  }
+
+
+  @Override
+  public List<String> onTabComplete(
+      CommandSender sender, Command command, String label, String[] args) {
+    final CommandArgList newArgs = CommandArgList.of(args);
+    CommandContext context = new CommandContext(command, sender, newArgs, label);
+    Optional<CommandNode> optNode = tree.locateLeaf(context, newArgs);
+    if (context.isStatus(CommandContext.Status.ERROR_PERMISSION))
+      return null;
+    List<String> suggestions =
+        optNode.<Collection<CommandNode>>map(CommandNode::getChildren)
+            .orElseGet(tree::getRoots).stream()
+            .filter((node) -> newArgs.length() <= 1 + node.getIndex())
+            .filter((node) -> node.hasPermission(sender))
+            .map((node) -> node.getInfo().getName())
+            .collect(Collectors.toList());
+    optNode.ifPresent((node) -> {
+      List<String> list = node.onTabComplete(context, newArgs.subargs(1 + node.getIndex()));
+      if (list != null && !list.isEmpty())
+        suggestions.addAll(list);
+    });
+    return suggestions;
+  }
+
+}
