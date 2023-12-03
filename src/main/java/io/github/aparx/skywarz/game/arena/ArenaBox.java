@@ -1,7 +1,6 @@
-package io.github.aparx.skywarz.skywars.arena;
+package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
@@ -21,25 +20,25 @@ import java.util.Optional;
  * @version 2023-12-01 01:38
  * @since 1.0
  */
-@SerializableAs("Skywarz.MutableArenaBox")
-public final class MutableArenaBox implements ConfigurationSerializable, CompletableSetup {
+@SerializableAs("Skywarz.ArenaBox")
+public final class ArenaBox implements ConfigurationSerializable, CompletableSetup {
 
   private final @Nullable Vector @NonNull [] points;
 
-  public MutableArenaBox() {
-    this(new Vector[Point.CONSTANTS.size()]);
+  public ArenaBox() {
+    this(new Vector[Point.values().length]);
   }
 
-  private MutableArenaBox(@Nullable Vector @NonNull [] points) {
+  private ArenaBox(@Nullable Vector @NonNull [] points) {
     Preconditions.checkArgument(
-        ArrayUtils.getLength(points) == Point.CONSTANTS.size(),
+        ArrayUtils.getLength(points) == Point.values().length,
         "Given points array length is not equal to what is required");
     this.points = points;
   }
 
   @SuppressWarnings("unchecked")
-  public static MutableArenaBox deserialize(@NonNull Map<?, ?> data) {
-    return new MutableArenaBox(((Collection<Vector>) data.get("points"))
+  public static ArenaBox deserialize(@NonNull Map<?, ?> data) {
+    return new ArenaBox(((Collection<Vector>) data.get("points"))
         .toArray(new Vector[0]));
   }
 
@@ -81,11 +80,10 @@ public final class MutableArenaBox implements ConfigurationSerializable, Complet
   public enum Point {
     MIN, MAX;
 
-    public static final ImmutableList<Point> CONSTANTS = ImmutableList.copyOf(values());
-
     public static @NonNull Point ofIndex(int index) {
-      Preconditions.checkElementIndex(index, CONSTANTS.size());
-      return CONSTANTS.get(index);
+      final Point[] values = values();
+      Preconditions.checkElementIndex(index, values.length);
+      return values[index];
     }
   }
 

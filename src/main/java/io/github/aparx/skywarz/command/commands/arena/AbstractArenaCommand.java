@@ -5,10 +5,12 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
+import io.github.aparx.skywarz.command.exceptions.CommandError;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.skywars.arena.Arena;
+import io.github.aparx.skywarz.game.arena.Arena;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +24,15 @@ public abstract class AbstractArenaCommand extends CommandNode {
 
   private final @NonNegative int arenaArgumentIndex;
 
+  public AbstractArenaCommand(@NonNull CommandInfo info, @NonNegative int arenaArgumentIndex) {
+    this(info, arenaArgumentIndex, null);
+  }
+
   public AbstractArenaCommand(
       @NonNull CommandInfo info,
-      @NonNull CommandNode parent,
-      @NonNegative int arenaArgumentIndex) {
-    super(info, Preconditions.checkNotNull(parent));
+      @NonNegative int arenaArgumentIndex,
+      @Nullable CommandNode parent) {
+    super(info, parent);
     this.arenaArgumentIndex = arenaArgumentIndex;
   }
 
@@ -39,8 +45,8 @@ public abstract class AbstractArenaCommand extends CommandNode {
     else {
       String name = args.get(arenaArgumentIndex).get();
       Arena arena = Skywars.getInstance().getArenaManager().find(name)
-          .orElseThrow(() -> new IllegalArgumentException(
-              String.format("Cannot find arena %s", name)));
+          .orElseThrow(() -> new CommandError((e, l) ->
+              l.substitute(l.getErrorArenaNotFound(), name)));
       execute(arena, context, args);
     }
   }

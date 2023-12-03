@@ -8,6 +8,7 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.apache.commons.lang.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -84,6 +85,8 @@ public final class CommandBuilder {
   }
 
   public CommandNode build() {
+    if (executor == null && StringUtils.isEmpty(infoBuilder.usage()))
+      usage("<{children}>"); // default usage if no usage has been applied
     return new CommandNode(infoBuilder.build(), parent) {
       @Override
       public void execute(CommandContext context, CommandArgList args) {

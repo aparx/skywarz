@@ -2,12 +2,11 @@ package io.github.aparx.skywarz;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.skywars.arena.Arena;
-import io.github.aparx.skywarz.skywars.arena.ArenaManager;
-import io.github.aparx.skywarz.skywars.arena.MutableArenaBox;
+import io.github.aparx.skywarz.game.SpawnMap;
+import io.github.aparx.skywarz.game.arena.*;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
-import io.github.aparx.skywarz.skywars.arena.SpawnList;
+import io.github.aparx.skywarz.game.match.MatchManager;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -30,11 +29,11 @@ import java.util.logging.Logger;
 public final class Skywars {
 
   static {
-    Set.of(
-        Arena.class,
-        MutableArenaBox.class,
-        SpawnList.class
-    ).forEach(ConfigurationSerialization::registerClass);
+    ConfigurationSerialization.registerClass(Arena.class);
+    ConfigurationSerialization.registerClass(ArenaBox.class);
+    ConfigurationSerialization.registerClass(SpawnMap.class);
+    ConfigurationSerialization.registerClass(GameSettings.class);
+    ConfigurationSerialization.registerClass(ArenaData.class);
   }
 
   @Getter
@@ -61,7 +60,8 @@ public final class Skywars {
 
   private Skywars() {
     handlers.addAll(Set.of(
-        new ArenaManager()
+        new ArenaManager(),
+        new MatchManager()
     ));
   }
 
@@ -110,6 +110,10 @@ public final class Skywars {
 
   public @NonNull ArenaManager getArenaManager() {
     return getHandlers().require(ArenaManager.class);
+  }
+
+  public @NonNull MatchManager getMatchManager() {
+    return getHandlers().require(MatchManager.class);
   }
 
   private final class HandlerSet extends KeyedByClassSet<SkywarsHandler> {

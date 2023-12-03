@@ -7,10 +7,11 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
+import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.skywars.arena.Arena;
-import io.github.aparx.skywarz.skywars.arena.SpawnList;
-import io.github.aparx.skywarz.skywars.team.TeamEnum;
+import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.SpawnMap;
+import io.github.aparx.skywarz.game.team.TeamEnum;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
@@ -34,7 +35,8 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
             .args("<Arena> <Team> (ID)")
             .description("Removes a certain spawn from a team")
             .build(),
-        parent, ARENA_ARGUMENT_INDEX);
+        ARENA_ARGUMENT_INDEX,
+        parent);
   }
 
   @Override
@@ -45,8 +47,8 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
       return;
     }
     TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
-    SpawnList spawns = arena.getSpawns(team)
-        .filter(Predicate.not(SpawnList::isEmpty))
+    SpawnGroup spawns = arena.getData().getSpawns(team)
+        .filter(Predicate.not(SpawnGroup::isEmpty))
         .orElseThrow(() -> new IllegalArgumentException(String.format(
             "There is no spawn added for team %s", team.getDefaultName())));
     if (args.length() == 1 + TEAM_ARGUMENT_INDEX) {
@@ -81,9 +83,9 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
       return Optional.ofNullable(args.get(TEAM_ARGUMENT_INDEX).getTeam(null))
           .flatMap((team) -> Skywars.getInstance().getArenaManager()
               .find(args.getString(ARENA_ARGUMENT_INDEX))
-              .flatMap((arena) -> arena.getSpawns(team))
-              .filter(Predicate.not(SpawnList::isEmpty)))
-          .map(SpawnList::stream)
+              .flatMap((arena) -> arena.getData().getSpawns(team))
+              .filter(Predicate.not(SpawnGroup::isEmpty)))
+          .map(SpawnGroup::stream)
           .map((stream) -> {
             List<String> list = new ArrayList<>();
             stream.forEach((entry) -> list.add(String.valueOf(entry.getKey())));

@@ -25,6 +25,8 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   public static final String ARENA_CONFIG_ID = "arenas";
 
+  public static final String GAME_CONFIG_ID = "games";
+
   /** Main configuration, handling all the general purpose configuration */
   private final MainConfig main = new MainConfig(this);
 
@@ -70,6 +72,10 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   public @NonNull Config getArenas() {
     return getOrCreate(ARENA_CONFIG_ID);
+  }
+
+  public @NonNull Config getGames() {
+    return getOrCreate(GAME_CONFIG_ID);
   }
 
   public @NonNull Language getLanguage() {

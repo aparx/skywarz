@@ -5,11 +5,10 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.skywars.arena.Arena;
-import io.github.aparx.skywarz.skywars.arena.ArenaManager;
+import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.ArenaManager;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
@@ -33,8 +32,9 @@ public class ArenaDeleteCommand extends AbstractArenaCommand {
             .name("delete")
             .args("<Arena>")
             .description("Deletes an arena with given name")
-            .build(), Preconditions.checkNotNull(parent),
-        ARENA_ARGUMENT_INDEX);
+            .build(),
+        ARENA_ARGUMENT_INDEX,
+        Preconditions.checkNotNull(parent));
   }
 
   @Override

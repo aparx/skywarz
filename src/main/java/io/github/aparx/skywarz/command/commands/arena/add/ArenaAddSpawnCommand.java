@@ -6,8 +6,8 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaSpawnCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.skywars.arena.Arena;
-import io.github.aparx.skywarz.skywars.team.TeamEnum;
+import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.team.TeamEnum;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -33,7 +33,8 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
             .description(
                 "Adds a spawn to a team (independent from team size)")
             .build(),
-        parent, ARENA_ARGUMENT_INDEX);
+        ARENA_ARGUMENT_INDEX,
+        parent);
   }
 
   @Override
@@ -44,12 +45,10 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
     else {
       Player player = context.getPlayer();
       TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
-      int spawnId = arena.createSpawnsIfAbsent(team).add(location);
+      int spawnId = arena.getData().createSpawnsIfAbsent(team).add(location);
       player.sendMessage(Language.getLanguage().substitute(
           "{successPrefix} Added spawn with ID {0} in arena {1} to team {2}",
-          spawnId,
-          arena.getName(),
-          team.getColor() + team.getDefaultName()
+          spawnId, arena.getName(), team.getColor() + team.getDefaultName()
       ));
     }
   }

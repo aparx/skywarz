@@ -7,7 +7,7 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.skywars.arena.Arena;
+import io.github.aparx.skywarz.game.arena.Arena;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.regex.Matcher;

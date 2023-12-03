@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.skywars.arena;
+package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -11,7 +11,6 @@ import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;

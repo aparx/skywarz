@@ -4,7 +4,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.skywars.arena.Arena;
+import io.github.aparx.skywarz.game.arena.Arena;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -20,13 +20,13 @@ public abstract class AbstractArenaSpawnCommand extends AbstractArenaCommand {
 
   public AbstractArenaSpawnCommand(
       @NonNull CommandInfo info,
-      @NonNull CommandNode parent,
-      @NonNegative int arenaArgumentIndex) {
-    super(info, parent, arenaArgumentIndex);
+      @NonNegative int arenaArgumentIndex,
+      @NonNull CommandNode parent) {
+    super(info, arenaArgumentIndex, parent);
   }
 
   public AbstractArenaSpawnCommand(@NonNull CommandInfo info, @NonNull CommandNode parent) {
-    super(info, parent, 0);
+    super(info, 0, parent);
   }
 
   protected abstract void setLocation(

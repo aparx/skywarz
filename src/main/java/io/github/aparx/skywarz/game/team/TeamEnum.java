@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.skywars.team;
+package io.github.aparx.skywarz.game.team;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +14,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Getter
 @RequiredArgsConstructor
 public enum TeamEnum {
+
+  /** This team is a special one, whereas this is used for purely solo Skywars arenas */
+  SOLO(ChatColor.WHITE),
 
   RED(ChatColor.RED),
   GREEN(ChatColor.GREEN),

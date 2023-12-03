@@ -5,26 +5,16 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
-import io.github.aparx.skywarz.command.SkywarzCommand;
+import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.command.tree.CommandNodeSet;
-import io.github.aparx.skywarz.command.tree.CommandTree;
 import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.utils.PaginationUtils;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -40,7 +30,7 @@ public final class HelpCommand extends CommandNode {
       Suppliers.memoize(new Supplier<ImmutableList<CommandNode>>() {
         @Override
         public ImmutableList<CommandNode> get() {
-          CommandNodeSet roots = SkywarzCommand.tree.getRoots();
+          CommandNodeSet roots = SkywarsCommand.tree.getRoots();
           ImmutableList.Builder<CommandNode> builder = ImmutableList.builder();
           for (CommandNode root : roots) accumulate(builder, root);
           return builder.build();

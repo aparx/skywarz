@@ -4,10 +4,9 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.skywars.arena.Arena;
+import io.github.aparx.skywarz.game.arena.Arena;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -24,8 +23,9 @@ public class ArenaSaveCommand extends AbstractArenaCommand {
             .name("save")
             .args("<Arena>")
             .description("Saves changes made to the target arena")
-            .build(), parent,
-        ARENA_ARGUMENT_INDEX);
+            .build(),
+        ARENA_ARGUMENT_INDEX,
+        parent);
   }
 
   @Override

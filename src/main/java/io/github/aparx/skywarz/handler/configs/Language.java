@@ -6,12 +6,13 @@ import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.bufig.handler.ConfigHandler;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.skywars.team.TeamEnum;
+import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
@@ -84,10 +85,38 @@ public final class Language extends ConfigObject {
   @ConfigMapping("errors.missing permission")
   private String errorPermission = "{warningPrefix} Missing permission to perform this action!";
 
+  @ConfigMapping("errors.in a match")
+  private String errorInMatch = "{warningPrefix} You are already in a match!";
+
+  @ConfigMapping("errors.not in a match")
+  private String errorNotInMatch = "{warningPrefix} You are not in a match!";
+
+  @ConfigMapping("errors.cannot join match")
+  private String errorJoinMatch = "{warningPrefix} You cannot join this match.";
+
+  @ConfigMapping("errors.arena not found")
+  private String errorArenaNotFound = "{warningPrefix} Arena {0} not found!";
+
   // ERRORS END
 
   @ConfigMapping("team names")
   private Map<String, String> teamNames = new HashMap<>(defaultTeamNames);
+
+  // SUCCESS START
+  @ConfigMapping("success.join match")
+  private String successJoinMatch = "{successPrefix} You joined the match!";
+
+  @ConfigMapping("success.leave match")
+  private String successLeaveMatch = "{successPrefix} You left the match!";
+  // SUCCESS END
+
+  // BROADCAST START
+  @ConfigMapping("broadcast.joined match")
+  private String broadcastJoinedMatch = "§b[+]§7 Player §r{player.name}§7 joined the game!";
+
+  @ConfigMapping("broadcast.left match")
+  private String broadcastLeftMatch = "§c[-]§7 Player §r{player.name}§7 left the game!";
+  // BROADCAST END
 
   // MESSAGES END
 
@@ -107,6 +136,15 @@ public final class Language extends ConfigObject {
 
   public static StringSubstitutor createPlainSubstitutor(Map<String, ?> valueMap) {
     return new StringSubstitutor(valueMap, SUBSTITUTOR_PREFIX, SUBSTITUTOR_SUFFIX);
+  }
+
+  public static Map<String, Object> newValueMapFromPlayer(Player player, String prefix) {
+    HashMap<String, Object> map = new HashMap<>();
+    map.put(prefix + ".name", player.getName());
+    map.put(prefix + ".displayName", player.getDisplayName());
+    map.put(prefix + ".health", String.format("%.1f", player.getHealth() / 2D));
+    map.put(prefix + ".foodLevel", String.format("%.1f", player.getFoodLevel() / 2D));
+    return map;
   }
 
   public static Map<String, Object> toValueMap(Object @NonNull [] array) {
