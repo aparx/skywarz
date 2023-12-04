@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.entity.data.PlayerDataSet;
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
+import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
+import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
@@ -96,6 +98,14 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
 
   public @NonNull String getDisplayName() {
     return findOnline().map(Player::getDisplayName).orElseGet(this::getName);
+  }
+
+  public PlayerSnapshot createPlayerSnapshot() {
+    return PlayerSnapshot.of(getOnline());
+  }
+
+  public @NonNull PlayerMatchData getMatchData() {
+    return getPlayerData().getOrCreate(PlayerMatchData.class);
   }
 
   public void sendMessage(Object message) {

@@ -1,69 +1,26 @@
 package io.github.aparx.skywarz.entity;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.utils.collection.WeakHashSet;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author aparx (Vinzent Z.)
  * @version 2023-12-03 04:34
  * @since 1.0
  */
-public class WeakGroupAudience<T extends Audience> extends AbstractSet<T>
+public class WeakGroupAudience<T extends Audience> extends WeakHashSet<T>
     implements Iterable<T>, Audience {
 
-  protected static final int DEFAULT_CAPACITY = 10;
+  public WeakGroupAudience() {}
 
-  private static final Object VALUE = new Object();
-
-  private final @NonNull WeakHashMap<T, Object> weakMap;
-
-  public WeakGroupAudience() {
-    this(DEFAULT_CAPACITY);
-  }
-
-  public WeakGroupAudience(int initialCapacity) {
-    this.weakMap = new WeakHashMap<>(initialCapacity);
-  }
-
-  public WeakGroupAudience(Collection<T> initialMembers) {
-    this(initialMembers.size());
-    if (!initialMembers.isEmpty())
-      addAll(initialMembers);
-  }
-
-  @Override
-  public int size() {
-    return weakMap.size();
-  }
-
-  @CanIgnoreReturnValue
-  public boolean add(T member) {
-    return weakMap.putIfAbsent(member, VALUE) != VALUE;
-  }
-
-  @CanIgnoreReturnValue
-  public boolean remove(Object member) {
-    return weakMap.remove(member) == VALUE;
-  }
-
-  @CanIgnoreReturnValue
-  @SuppressWarnings("SuspiciousMethodCalls")
-  public boolean contains(Object member) {
-    return weakMap.containsKey(member);
-  }
-
-  @Override
-  public void clear() {
-    weakMap.clear();
-  }
-
-  @Override
-  public @NonNull Iterator<T> iterator() {
-    return weakMap.keySet().iterator();
+  public WeakGroupAudience(Collection<? extends T> initialMembers) {
+    super(initialMembers);
   }
 
   @Override
@@ -92,17 +49,8 @@ public class WeakGroupAudience<T extends Audience> extends AbstractSet<T>
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    if (!super.equals(o)) return false;
-    WeakGroupAudience<?> that = (WeakGroupAudience<?>) o;
-    return Objects.equals(weakMap, that.weakMap);
+  public @NonNull Iterator<T> iterator() {
+    // avoid concurrency issues by copying for iterations
+    return Set.copyOf(internalMap.keySet()).iterator();
   }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), weakMap);
-  }
-
 }

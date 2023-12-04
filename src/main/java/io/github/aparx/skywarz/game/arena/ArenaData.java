@@ -78,6 +78,11 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     return map;
   }
 
+  @Override
+  public boolean isCompleted() {
+    return IArenaData.super.isCompleted() && world != null && world.get() != null;
+  }
+
   public @NonNull World getWorld() {
     return IArenaData.getWorldFromReference(world);
   }
@@ -100,10 +105,6 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
   @CanIgnoreReturnValue
   public SpawnGroup createSpawnsIfAbsent(@NonNull TeamEnum team) {
     return spawns.computeIfAbsent(team.name(), (key) -> new SpawnMap());
-  }
-
-  public Optional<SpawnGroup> getSpawns(@NonNull TeamEnum team) {
-    return Optional.ofNullable(spawns.get(team.name()));
   }
 
 }

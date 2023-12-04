@@ -110,13 +110,22 @@ public final class Language extends ConfigObject {
   private String successLeaveMatch = "{successPrefix} You left the match!";
   // SUCCESS END
 
-  // BROADCAST START
-  @ConfigMapping("broadcast.joined match")
-  private String broadcastJoinedMatch = "§b[+]§7 Player §r{player.name}§7 joined the game!";
+  // MATCH START
+  @ConfigMapping("match.player.joined")
+  private String matchPlayerJoined = "§b[+]§7 Player §r{player.name}§7 joined the game!";
 
-  @ConfigMapping("broadcast.left match")
-  private String broadcastLeftMatch = "§c[-]§7 Player §r{player.name}§7 left the game!";
-  // BROADCAST END
+  @ConfigMapping("match.player.left")
+  private String matchPlayerLeft = "§c[-]§7 Player §r{player.name}§7 left the game!";
+
+  @ConfigMapping("match.info.need more players")
+  private String matchInfoPlayersRequired = "{warningPrefix} §7Need §c{missing}§7 more players!";
+
+  @ConfigMapping("match.info.start")
+  private String matchInfoStart = "{prefix} §7The match starts in §b{time}§r seconds!";
+
+  @ConfigMapping("match.info.actionbar start")
+  private String matchInfoActionbarStart = "Start in §b{time}§r seconds";
+  // MATCH END
 
   // MESSAGES END
 

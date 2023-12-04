@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.game.SpawnMap;
 import io.github.aparx.skywarz.game.arena.*;
+import io.github.aparx.skywarz.game.items.GameItemManager;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
 import io.github.aparx.skywarz.game.match.MatchManager;
@@ -50,8 +51,8 @@ public final class Skywars {
 
   private SkywarsConfigHandler configHandler;
 
-  public static @Nullable Plugin plugin() {
-    return instance.plugin;
+  public static Plugin plugin() {
+    return Preconditions.checkNotNull(instance.plugin, "Plugin not initialized");
   }
 
   public static @NonNull Logger logger() {
@@ -61,7 +62,8 @@ public final class Skywars {
   private Skywars() {
     handlers.addAll(Set.of(
         new ArenaManager(),
-        new MatchManager()
+        new MatchManager(),
+        new GameItemManager()
     ));
   }
 
@@ -74,6 +76,7 @@ public final class Skywars {
       logger.info("Loading plugin");
       configHandler = new SkywarsConfigHandler(plugin);
       configHandler.getMain().load(); // TODO handle in handler?
+      configHandler.getItems().load(); // TODO handle in handler?
       getHandlers().forEach(SkywarsHandler::load);
       this.isLoaded = true;
     } catch (Exception e) {
@@ -85,7 +88,7 @@ public final class Skywars {
   @Synchronized
   @CanIgnoreReturnValue
   public boolean unload() {
-    if (isLoaded()) return false;
+    if (!isLoaded()) return false;
     try {
       logger.info("Unloading plugin");
       getHandlers().forEach(SkywarsHandler::unload);
@@ -114,6 +117,10 @@ public final class Skywars {
 
   public @NonNull MatchManager getMatchManager() {
     return getHandlers().require(MatchManager.class);
+  }
+
+  public @NonNull GameItemManager getGameItemManager() {
+    return getHandlers().require(GameItemManager.class);
   }
 
   private final class HandlerSet extends KeyedByClassSet<SkywarsHandler> {

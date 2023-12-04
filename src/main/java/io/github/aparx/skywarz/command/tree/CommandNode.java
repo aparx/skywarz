@@ -119,8 +119,8 @@ public abstract class CommandNode implements CommandNodeExecutor {
     return argsProcessed.get();
   }
 
-  public String createCommandLine(@NonNull String label) {
-    return '/' + label + getCommandArgs();
+  public String createCommand(@NonNull String label) {
+    return label + ' ' + getCommandArgs();
   }
 
   @CanIgnoreReturnValue

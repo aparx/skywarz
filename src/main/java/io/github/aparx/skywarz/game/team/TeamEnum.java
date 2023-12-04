@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -16,15 +17,16 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public enum TeamEnum {
 
   /** This team is a special one, whereas this is used for purely solo Skywars arenas */
-  SOLO(ChatColor.WHITE),
+  SOLO(ChatColor.WHITE, Material.WHITE_CONCRETE),
 
-  RED(ChatColor.RED),
-  GREEN(ChatColor.GREEN),
-  BLUE(ChatColor.BLUE),
-  WHITE(ChatColor.WHITE),
-  BLACK(ChatColor.BLACK);
+  RED(ChatColor.RED, Material.RED_CONCRETE),
+  GREEN(ChatColor.GREEN, Material.GREEN_CONCRETE),
+  BLUE(ChatColor.BLUE, Material.BLUE_CONCRETE),
+  WHITE(ChatColor.WHITE, Material.WHITE_CONCRETE),
+  BLACK(ChatColor.BLACK, Material.BLACK_CONCRETE);
 
   private final @NonNull ChatColor color;
+  private final @NonNull Material material;
 
   private final String defaultName = StringUtils.capitalize(name().toLowerCase());
 

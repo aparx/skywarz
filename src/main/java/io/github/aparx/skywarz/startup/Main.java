@@ -3,13 +3,9 @@ package io.github.aparx.skywarz.startup;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.handler.configs.Language;
-import io.github.aparx.skywarz.game.arena.Arena;
-import io.github.aparx.skywarz.game.arena.ArenaBox;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.util.BlockVector;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -18,12 +14,14 @@ import org.bukkit.util.BlockVector;
  */
 public final class Main extends JavaPlugin {
 
+  public static final String COMMAND_NAME = "skywars";
+
   @Override
   public void onEnable() {
     Skywars.getInstance().load(this);
 
     SkywarsCommand command = new SkywarsCommand();
-    PluginCommand skywars = getCommand("skywars");
+    PluginCommand skywars = getCommand(COMMAND_NAME);
     skywars.setExecutor(command);
     skywars.setTabCompleter(command);
 

@@ -116,4 +116,9 @@ public class SpawnMap implements SpawnGroup, ConfigurationSerializable {
     return map.entrySet().stream();
   }
 
+  @Override
+  public SpawnGroup createSnapshot() {
+    return new SpawnMap(new HashMap<>(map));
+  }
+
 }

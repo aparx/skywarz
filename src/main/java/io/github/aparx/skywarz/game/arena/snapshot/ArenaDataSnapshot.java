@@ -11,10 +11,13 @@ import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A shallow copy of an input {@code IArenaData} implementation.
+ * A copy of an input {@code IArenaData} implementation.
+ * <p>Most attributes are shallow copied, thus can still be deeply mutable except spawns, that
+ * are all copied to ensure a constant team size.
  *
  * @author aparx (Vinzent Z.)
  * @version 2023-12-03 09:01
@@ -36,11 +39,21 @@ public class ArenaDataSnapshot implements IArenaData {
     this.spectator = data.getSpectator();
     this.lobby = data.getLobby();
     this.world = new WeakReference<>(data.getWorld());
-    this.spawns = data.getSpawns();
     this.settings = data.getSettings();
+
+    // Deep copy
+    Map<String, SpawnGroup> spawns = data.getSpawns();
+    this.spawns = new HashMap<>(spawns.size());
+    for (Map.Entry<String, SpawnGroup> entry : spawns.entrySet())
+      this.spawns.put(entry.getKey(), entry.getValue().createSnapshot());
   }
 
   public @NonNull World getWorld() {
     return IArenaData.getWorldFromReference(world);
+  }
+
+  @Override
+  public boolean isCompleted() {
+    return IArenaData.super.isCompleted() && world != null && world.get() != null;
   }
 }

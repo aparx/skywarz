@@ -10,7 +10,7 @@ import lombok.Synchronized;
  * @version 2023-12-01 01:26
  * @since 1.0
  */
-public abstract class LockingSkywarsHandler implements SkywarsHandler {
+public abstract class DefaultSkywarsHandler implements SkywarsHandler {
 
   protected final transient Object handlerLock = new Object();
 

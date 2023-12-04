@@ -6,7 +6,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.Config;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
-import io.github.aparx.skywarz.handler.LockingSkywarsHandler;
+import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
  * @version 2023-12-01 02:51
  * @since 1.0
  */
-public final class ArenaManager extends LockingSkywarsHandler implements Iterable<Arena> {
+public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<Arena> {
 
   private final KeyValueSet<String, Arena> internalSet =
       KeyValueSets.of((arena) -> arena.getName().toLowerCase());

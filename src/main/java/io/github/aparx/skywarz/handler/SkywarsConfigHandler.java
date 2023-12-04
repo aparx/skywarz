@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.Config;
 import io.github.aparx.bufig.defaults.yaml.YamlConfig;
 import io.github.aparx.bufig.handler.ConfigMap;
+import io.github.aparx.skywarz.handler.configs.ItemConfig;
 import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.handler.configs.MainConfig;
 import lombok.Getter;
@@ -29,6 +30,9 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   /** Main configuration, handling all the general purpose configuration */
   private final MainConfig main = new MainConfig(this);
+
+  /** Generic item configuration (for lobby items and such) */
+  private final ItemConfig items = new ItemConfig(this);
 
   /** Language configuration (partially memorizing supplier) */
   private final Supplier<Language> language = new Supplier<>() {

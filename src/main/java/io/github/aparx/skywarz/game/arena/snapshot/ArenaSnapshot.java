@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.game.arena.snapshot;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.setup.CompletableSetup;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -14,7 +15,7 @@ import java.lang.ref.WeakReference;
  * @since 1.0
  */
 @Getter
-public class ArenaSnapshot {
+public class ArenaSnapshot implements CompletableSetup {
 
   private final @NonNull WeakReference<Arena> source;
   private final @NonNull String name;
@@ -29,5 +30,10 @@ public class ArenaSnapshot {
 
   public @Nullable Arena getSource() {
     return source.get();
+  }
+
+  @Override
+  public boolean isCompleted() {
+    return data.isCompleted();
   }
 }

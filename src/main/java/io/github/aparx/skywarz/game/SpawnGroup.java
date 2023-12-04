@@ -35,4 +35,7 @@ public interface SpawnGroup {
 
   Stream<Map.Entry<Integer, Location>> stream();
 
+  /** Returns a snapshot (shallow copy of this map) of the current group */
+  SpawnGroup createSnapshot();
+
 }
