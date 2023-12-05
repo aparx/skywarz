@@ -8,10 +8,9 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.game.arena.Arena;
-import io.github.aparx.skywarz.game.SpawnMap;
 import io.github.aparx.skywarz.game.team.TeamEnum;
+import io.github.aparx.skywarz.language.Language;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
@@ -54,17 +53,16 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
     if (args.length() == 1 + TEAM_ARGUMENT_INDEX) {
       int size = spawns.size();
       spawns.clear();
-      context.getSender().sendMessage(Language.getLanguage().substitute(
+      context.getSender().sendMessage(Language.getInstance().substitute(
           "{successPrefix} Removed all {0} spawns in arena {1} from team {2}",
-          size, arena.getName(), team.getColor() + team.getDefaultName()
-      ));
+          size, arena.getName(), team.getChatColor() + team.getDefaultName()));
     } else if (args.length() == 1 + SPAWN_ARGUMENT_INDEX) {
       int targetId = args.get(SPAWN_ARGUMENT_INDEX).getInt();
       Preconditions.checkState(spawns.remove(targetId) != null, String.format(
           "There is no spawn %s added for team %s", targetId, team.getDefaultName()));
-      context.getSender().sendMessage(Language.getLanguage().substitute(
+      context.getSender().sendMessage(Language.getInstance().substitute(
           "{successPrefix} Removed spawn {0} in arena {1} from team {2}",
-          targetId, arena.getName(), team.getColor() + team.getDefaultName()
+          targetId, arena.getName(), team.getChatColor() + team.getDefaultName()
       ));
     }
   }

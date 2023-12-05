@@ -20,7 +20,7 @@ import java.util.Map;
 @SerializableAs("Skywarz.GameSettings")
 public final class GameSettings implements ConfigurationSerializable {
 
-  private static final GameSettings DEFAULT_SETTINGS = of(2, Flags.PROTECTION_PHASE);
+  private static final GameSettings DEFAULT_SETTINGS = of(1, Flags.PROTECTION_PHASE);
 
   private final int teamSize;
 

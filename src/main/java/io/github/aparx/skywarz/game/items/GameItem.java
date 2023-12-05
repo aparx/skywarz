@@ -2,6 +2,8 @@ package io.github.aparx.skywarz.game.items;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.bufig.configurable.object.ConfigObject;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.Match;
@@ -26,7 +28,7 @@ import java.util.Optional;
  * @since 1.0
  */
 @Getter
-public abstract class GameItem {
+public abstract class GameItem extends ConfigObject {
 
   private final WeakHashSet<ItemStack> register = new WeakHashSet<>();
 
@@ -34,11 +36,12 @@ public abstract class GameItem {
 
   private final int flags;
 
-  public GameItem(@NonNull MatchState state) {
-    this(state, 0);
+  public GameItem(@NonNull String name, @NonNull MatchState state) {
+    this(name, state, 0);
   }
 
-  public GameItem(@NonNull MatchState state, int flags) {
+  public GameItem(@NonNull String name, @NonNull MatchState state, int flags) {
+    super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("items/" + name));
     Preconditions.checkNotNull(state, "State must not be null");
     Preconditions.checkState((flags & ~Flags.FLAGS) == 0, "Unknown flags");
     this.state = state;

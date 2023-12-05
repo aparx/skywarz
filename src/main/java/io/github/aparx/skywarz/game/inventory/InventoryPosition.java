@@ -17,24 +17,24 @@ public final class InventoryPosition {
 
   private static final int DEFAULT_LENGTH_X = 9;
 
-  private final @NonNegative int xPos;
-  private final @NonNegative int yPos;
+  private final @NonNegative int column;
+  private final @NonNegative int row;
 
-  private InventoryPosition(int xPos, int yPos) {
-    Preconditions.checkState(xPos >= 0, "xPos must be positive");
-    Preconditions.checkState(yPos >= 0, "yPos must be positive");
-    this.xPos = xPos;
-    this.yPos = yPos;
+  private InventoryPosition(int column, int row) {
+    Preconditions.checkState(column >= 0, "column must be positive");
+    Preconditions.checkState(row >= 0, "row must be positive");
+    this.column = column;
+    this.row = row;
   }
 
-  public static InventoryPosition ofPoint(@NonNegative int xPos, @NonNegative int yPos) {
-    if (xPos == 0 && yPos == 0)
+  public static InventoryPosition ofPoint(@NonNegative int column, @NonNegative int row) {
+    if (column == 0 && row == 0)
       return ZERO;
-    return new InventoryPosition(xPos, yPos);
+    return new InventoryPosition(column, row);
   }
 
-  public static InventoryPosition ofIndex(@NonNegative int index, int xLength) {
-    return ofPoint(index % (xLength - 1), index / (xLength - 1));
+  public static InventoryPosition ofIndex(@NonNegative int index, int rowLength) {
+    return ofPoint(index % (rowLength - 1), index / (rowLength - 1));
   }
 
   public static InventoryPosition ofIndex(@NonNegative int index) {
@@ -42,24 +42,28 @@ public final class InventoryPosition {
   }
 
   @CheckReturnValue
-  public InventoryPosition shift(@NonNegative int indexOffset, @NonNegative int xLength) {
-    return ofIndex(toIndex(xLength) + indexOffset);
+  public InventoryPosition shift(@NonNegative int offset, @NonNegative int columnLength) {
+    return ofIndex(toIndex(columnLength) + offset);
   }
 
   @CheckReturnValue
-  public InventoryPosition shift(@NonNegative int indexOffset) {
-    return shift(indexOffset, DEFAULT_LENGTH_X);
+  public InventoryPosition shift(@NonNegative int offset) {
+    return shift(offset, DEFAULT_LENGTH_X);
   }
 
-  public int toIndex(@NonNegative int xLength) {
-    return xPos + Math.max(yPos * (xLength - 1), 0);
+  public int toIndex(@NonNegative int rowLength) {
+    return toIndex(column, row, rowLength);
   }
 
   public int toIndex() {
-    return toIndex(DEFAULT_LENGTH_X);
+    return toIndex(column, row, DEFAULT_LENGTH_X);
   }
 
-  public boolean isEdge(@NonNegative int xLength, @NonNegative int yLength) {
-    return (xPos == 0 || xPos == xLength - 1) && (yPos == 0 || yPos == yLength);
+  public boolean isEdge(@NonNegative int columnLength, @NonNegative int rowLength) {
+    return (column == 0 || column == columnLength - 1) && (row == 0 || row == rowLength);
+  }
+
+  public static int toIndex(int column, int row, int rowLength) {
+    return column + Math.max(row * rowLength, 0);
   }
 }

@@ -9,7 +9,7 @@ import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
@@ -86,6 +86,11 @@ public class WaitingPhase extends GamePhase {
   }
 
   @Override
+  protected void onStart() {
+    super.onStart();
+  }
+
+  @Override
   protected void onStop(StopReason reason) {
     super.onStop(reason);
     if (reason == StopReason.TIME)
@@ -120,12 +125,12 @@ public class WaitingPhase extends GamePhase {
             || secsLeft % 30 == 0)) {
           Map<String, Long> time = Map.of("time", secsLeft);
           players.forEach((player) -> {
-            player.sendMessage(Language::getMatchInfoStart, time);
+            player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, time);
             player.playSound(Sound.BLOCK_DISPENSER_DISPENSE, .5f, 1.5f);
           });
         }
       } else if (playerSize != lastPlayerSize || trigger.isCycling(30, TimeUnit.SECONDS))
-        players.sendMessage(Language::getMatchInfoPlayersRequired,
+        players.sendFormattedMessage(MessageKeys.Match.BROADCAST_REQUIRE,
             Map.of("required", minPlayers, "missing", missingPlayerAmount));
     }
     if (hasMinimumPlayers) animateLevel((int) secsLeft);

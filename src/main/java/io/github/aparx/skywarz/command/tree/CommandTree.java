@@ -1,13 +1,12 @@
 package io.github.aparx.skywarz.command.tree;
 
-import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.exceptions.CommandError;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import lombok.Getter;
-import org.apache.commons.text.StringSubstitutor;
 import org.bukkit.command.CommandSender;
 
 import java.util.HashMap;
@@ -34,16 +33,16 @@ public final class CommandTree implements CommandNodeExecutor {
   }
 
   private static CommandError createSyntaxError(CommandContext context, CommandNode node) {
-    Map<String, Object> valueMap = createCommandSubstitutorContext(context);
+    Map<String, Object> vals = createCommandSubstitutorContext(context);
     Optional.ofNullable(node)
         .map(CommandNode::getUsage)
-        .ifPresent((usage) -> valueMap.put("usage", usage));
-    return new CommandError((t, lang) -> lang.substitute(lang.getErrorCommandSyntax(), valueMap));
+        .ifPresent((usage) -> vals.put("usage", usage));
+    return new CommandError((lang) -> lang.substitute(MessageKeys.Errors.SYNTAX, vals));
   }
 
   private static CommandError createPermissionError(CommandContext context) {
-    Map<String, Object> valueMap = createCommandSubstitutorContext(context);
-    return new CommandError((t, lang) -> lang.substitute(lang.getErrorPermission(), valueMap));
+    Map<String, Object> vals = createCommandSubstitutorContext(context);
+    return new CommandError((lang) -> lang.substitute(MessageKeys.Errors.PERMISSION, vals));
   }
 
   @Override
@@ -51,19 +50,18 @@ public final class CommandTree implements CommandNodeExecutor {
     CommandSender sender = context.getSender();
     try {
       CommandNode node = locateLeaf(context, args).orElseThrow(() -> {
-        Map<String, Object> valueMap = createCommandSubstitutorContext(context);
-        return new CommandError((t, l) -> l.substitute(l.getErrorCommandNotFound(), valueMap));
+        Map<String, Object> vals = createCommandSubstitutorContext(context);
+        return new CommandError((l) -> l.substitute(MessageKeys.Errors.COMMAND_NOT_FOUND, vals));
       });
       handleErrors(context, args, node);
       node.execute(context, args.subargs(1 + node.getIndex()));
       handleErrors(context, args, node);
     } catch (CommandError error) {
-      sender.sendMessage(error.getMessageFromLanguage());
-    } catch (IllegalArgumentException | IllegalStateException exception) {
-      exception.printStackTrace(); // TODO only for development mode
-      Skywars.logger().log(Level.FINE, "Error occurred on command execution", exception);
-      sender.sendMessage(Language.getLanguage().substitute((lang) -> lang.substitute(lang.getError(),
-          Map.of("message", exception.getMessage()))));
+      sender.sendMessage(error.getMessage());
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      e.printStackTrace(); // TODO only for development mode
+      Skywars.logger().log(Level.FINE, "Error occurred on command execution", e);
+      sender.sendMessage(Language.getInstance().substitute(MessageKeys.Errors.GENERIC, e.getMessage()));
     }
   }
 

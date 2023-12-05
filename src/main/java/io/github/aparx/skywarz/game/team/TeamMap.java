@@ -33,6 +33,10 @@ public final class TeamMap implements Iterable<Team> {
     return match;
   }
 
+  public int size() {
+    return teams.size();
+  }
+
   public void createTeams() {
     final Match match = getMatch();
     this.teams = match.getArena().getData().getSpawns().entrySet().stream()

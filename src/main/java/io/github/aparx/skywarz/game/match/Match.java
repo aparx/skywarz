@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.game.match;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
@@ -10,7 +11,8 @@ import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.team.TeamMap;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.Getter;
 import lombok.Setter;
@@ -95,13 +97,14 @@ public class Match implements Snowflake<UUID> {
   @CanIgnoreReturnValue
   public boolean join(@NonNull SkywarsPlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
-    Preconditions.checkState(getState().isJoinable(), "Match is not joinable");
     PlayerMatchData data = player.getMatchData();
-    Preconditions.checkState(!data.isInMatch(), "Already in a match");
+    if (data.isInMatch() || !getState().isJoinable())
+      return false;
     if (!getAudience().add(player)) return false;
     data.setSnapshot(player.createPlayerSnapshot());
-    getAudience().sendMessage(Language::getMatchPlayerJoined,
-        Language.newValueMapFromPlayer(player.getOnline(), "player"));
+    getAudience().sendMessage((language) -> language
+        .get(MessageKeys.Match.JOIN_BROADCAST)
+        .substitute(player.getOnline(), ArrayPath.of("player")));
     getCycler().getPhase().ifPresent((phase) -> phase.join(player));
     return true;
   }
@@ -112,8 +115,9 @@ public class Match implements Snowflake<UUID> {
     if (!getAudience().remove(player)) return false;
     PlayerMatchData data = player.getMatchData();
     Optional.ofNullable(data.getTeam()).ifPresent((team) -> team.remove(player));
-    getAudience().sendMessage((lang) -> lang.substitute(lang.getMatchPlayerLeft(),
-        Language.newValueMapFromPlayer(player.getOnline(), "player")));
+    getAudience().sendMessage((language) -> language
+        .get(MessageKeys.Match.LEAVE_BROADCAST)
+        .substitute(player.getOnline(), ArrayPath.of("player")));
 
     // Manage entity
     player.findOnline().ifPresent((entity) -> {

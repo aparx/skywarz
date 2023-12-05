@@ -11,7 +11,6 @@ import io.github.aparx.skywarz.game.phase.phases.WaitingPhase;
 import lombok.Getter;
 import lombok.Synchronized;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
@@ -75,14 +74,16 @@ public final class GamePhaseCycler {
     Preconditions.checkNotNull(state, "State must not be null");
     if (state == this.state)
       return findPhase(state);
-    findPhase(this.state).ifPresent((x) -> x.stop(GamePhase.StopReason.MANUALLY));
-    getMatch().setState(state);
-    this.state = state;
-    return findPhase(state).map((nextPhase) -> {
-      nextPhase.start();
-      return nextPhase;
+    findPhase(this.state).ifPresent((x) -> x.stop(GamePhase.StopReason.UNKNOWN));
+    return findMatch().flatMap((match) -> {
+      match.setState(state);
+      Optional<GamePhase> phase = findPhase(state);
+      phase.ifPresent(GamePhase::start);
+      this.state = state;
+      return phase;
     });
   }
+
 
   @Synchronized
   public Optional<GamePhase> findPhase(MatchState state) {

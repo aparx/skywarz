@@ -7,9 +7,9 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.game.arena.ArenaData;
-import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
+import io.github.aparx.skywarz.language.Language;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -47,7 +47,7 @@ public class ArenaSetPointCommand extends AbstractArenaCommand {
     ArenaBox.Point point = ArenaBox.Point.ofIndex(numericalPoint - 1);
     data.getBox().setPoint(point, player.getLocation().toVector());
     data.setWorld(player.getWorld());
-    player.sendMessage(Language.getLanguage().substitute(
+    player.sendMessage(Language.getInstance().substitute(
         "{successPrefix} Updated point {0} ({1}) of {2}!",
         point.name(), numericalPoint, arena.getName()));
   }

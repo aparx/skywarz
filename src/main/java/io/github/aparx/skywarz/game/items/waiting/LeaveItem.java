@@ -21,7 +21,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public final class LeaveItem extends GameItem {
 
   public LeaveItem() {
-    super(MatchState.WAITING);
+    super("leave", MatchState.WAITING);
   }
 
   @Override

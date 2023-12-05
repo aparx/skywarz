@@ -1,5 +1,6 @@
 package io.github.aparx.skywarz.command.commands.arena;
 
+import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
@@ -37,6 +38,7 @@ public abstract class AbstractArenaSpawnCommand extends AbstractArenaCommand {
     Player player = context.getPlayer();
     Location location = player.getLocation().clone();
     World world = location.getWorld();
+    Preconditions.checkNotNull(world);
     for (int i = 0; i < 2; ++i) {
       location.setY(1 + location.getBlockY());
       if (world.getBlockAt(location).getType().isSolid())

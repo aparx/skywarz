@@ -5,7 +5,6 @@ import lombok.Getter;
 import org.bukkit.event.inventory.InventoryType;
 import org.checkerframework.checker.index.qual.NonNegative;
 
-import java.util.Iterator;
 import java.util.stream.IntStream;
 
 /**
@@ -16,11 +15,13 @@ import java.util.stream.IntStream;
 @Getter
 public final class InventoryDimensions {
 
+  public static final int DEFAULT_COLUMN_COUNT = 9;
+
   public static final InventoryDimensions CHEST =
-      ofSize(InventoryType.CHEST.getDefaultSize(), 9);
+      ofSize(InventoryType.CHEST.getDefaultSize(), DEFAULT_COLUMN_COUNT);
 
   public static final InventoryDimensions WORKBENCH =
-      ofSize(InventoryType.WORKBENCH.getDefaultSize(), 9);
+      ofSize(InventoryType.WORKBENCH.getDefaultSize(), DEFAULT_COLUMN_COUNT);
 
   public static final InventoryDimensions ANVIL =
       ofSize(InventoryType.ANVIL.getDefaultSize(), 1);
@@ -36,6 +37,10 @@ public final class InventoryDimensions {
     Preconditions.checkState(height >= 0, "height must be positive");
     this.width = width;
     this.height = height;
+  }
+
+  public static InventoryDimensions ofRows(@NonNegative int rowCount) {
+    return ofLengths(DEFAULT_COLUMN_COUNT, rowCount);
   }
 
   public static InventoryDimensions ofUnary(@NonNegative int length) {

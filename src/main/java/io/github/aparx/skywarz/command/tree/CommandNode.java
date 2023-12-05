@@ -5,7 +5,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.command.CommandInfo;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.Language;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
@@ -48,8 +48,7 @@ public abstract class CommandNode implements CommandNodeExecutor {
   @Getter(AccessLevel.NONE)
   private final Supplier<String> usageProcessed = Suppliers.memoize(() -> {
     // substitutes string variables within the usage for further "usage"
-    return Language.createPlainSubstitutor(createValueMapForNode(this))
-        .replace(getInfo().getUsage());
+    return Language.getInstance().substitute(getInfo().getUsage(), createValueMapForNode(this));
   });
 
   public CommandNode(@NonNull CommandInfo info) {
@@ -111,7 +110,7 @@ public abstract class CommandNode implements CommandNodeExecutor {
 
   /** Returns the proper usage string with substitution of the label (root command). */
   public String getUsage(@NonNull String label) {
-    return Language.createPlainSubstitutor(Map.of("label", label)).replace(usageProcessed.get());
+    return Language.getInstance().substitute(usageProcessed.get(), Map.of("label", label));
   }
 
   /** Returns the command arguments to reach this node through a command line. */

@@ -8,6 +8,7 @@ import io.github.aparx.skywarz.game.items.GameItemManager;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
 import io.github.aparx.skywarz.game.match.MatchManager;
+import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -77,6 +78,7 @@ public final class Skywars {
       configHandler = new SkywarsConfigHandler(plugin);
       configHandler.getMain().load(); // TODO handle in handler?
       configHandler.getItems().load(); // TODO handle in handler?
+      Language.getInstance().load();
       getHandlers().forEach(SkywarsHandler::load);
       this.isLoaded = true;
     } catch (Exception e) {

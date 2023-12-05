@@ -6,9 +6,10 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.arena.ArenaManager;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.command.CommandSender;
@@ -39,7 +40,7 @@ public class ArenaDeleteCommand extends AbstractArenaCommand {
 
   @Override
   protected void execute(Arena arena, CommandContext context, CommandArgList args) {
-    Language language = Language.getLanguage();
+    Language language = Language.getInstance();
     CommandSender sender = context.getSender();
     ArenaManager arenaManager = Skywars.getInstance().getArenaManager();
     if (args.length() > CONFIRM_ARGUMENT_INDEX
@@ -48,13 +49,14 @@ public class ArenaDeleteCommand extends AbstractArenaCommand {
       // confirmation and consent has been given, continue deletion
       Preconditions.checkState(arenaManager.delete(arena),
           String.format("Could not delete arena %s (not found?)", arena.getName()));
-      sender.sendMessage(Language.getLanguage().substitute(
+      sender.sendMessage(Language.getInstance().substitute(
           "{successPrefix} Deleted arena {0}!", arena.getName()));
     } else {
+      String prefix = language.get(MessageKeys.PREFIX).get();
       // Confirmation of deletion required (since it is called in game)
       sender.sendMessage(String.format("%s Are you sure you want to delete %s?",
-          language.getPrefix(), arena.getName()));
-      TextComponent component = new TextComponent(language.getPrefix() + ' ');
+          language.get(MessageKeys.PREFIX).get(), arena.getName()));
+      TextComponent component = new TextComponent(prefix + ' ');
       TextComponent confirmButton = new TextComponent("§a§l[CONFIRM DELETION]");
       confirmButton.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, String.format(
           "/%s arena delete %s %s", context.getLabel(), arena.getName(), CONFIRM_ARGUMENT)));

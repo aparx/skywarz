@@ -2,7 +2,6 @@ package io.github.aparx.skywarz.startup;
 
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.SkywarsCommand;
-import io.github.aparx.skywarz.handler.configs.Language;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -24,13 +23,11 @@ public final class Main extends JavaPlugin {
     PluginCommand skywars = getCommand(COMMAND_NAME);
     skywars.setExecutor(command);
     skywars.setTabCompleter(command);
-
-    Bukkit.getConsoleSender().sendMessage(Language.getLanguage().substitute(Language::getLoadedLog));
   }
 
   @Override
   public void onDisable() {
     Skywars.getInstance().unload();
-    Bukkit.getConsoleSender().sendMessage(Language.getLanguage().substitute(Language::getUnloadedLog));
   }
+
 }

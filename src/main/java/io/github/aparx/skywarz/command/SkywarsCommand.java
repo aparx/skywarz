@@ -19,7 +19,8 @@ import io.github.aparx.skywarz.command.tree.CommandBuilder;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.command.tree.CommandNodeSet;
 import io.github.aparx.skywarz.command.tree.CommandTree;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -81,12 +82,13 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
   public boolean onCommand(CommandSender sender, Command command, String label,
                            String[] args) {
     CommandArgList newArgs = CommandArgList.of(args);
+    System.out.println(Language.getInstance().get(MessageKeys.PREFIX));
     if (newArgs.isEmpty()) {
       Plugin plugin = Preconditions.checkNotNull(Skywars.plugin());
-      Language language = Language.getLanguage();
+      Language language = Language.getInstance();
       sender.sendMessage(String.format(
           "%s %s v%s by aparx (@bonedfps)",
-          language.getPrefix(),
+          language.get(MessageKeys.PREFIX).substitute(),
           plugin.getName(),
           plugin.getDescription().getVersion()));
     }

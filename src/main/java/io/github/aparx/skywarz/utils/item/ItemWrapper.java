@@ -3,6 +3,7 @@ package io.github.aparx.skywarz.utils.item;
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -98,7 +99,7 @@ public class ItemWrapper implements ConfigurationSerializable {
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       String key = Objects.toString(entry.getKey());
       int level = Integer.parseInt(String.valueOf(entry.getValue()));
-      Enchantment enchantment = Enchantment.getByName(key);
+      Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(key));
       Preconditions.checkArgument(enchantment != null, "Enchantment not found", key);
       result.put(enchantment, level);
     }

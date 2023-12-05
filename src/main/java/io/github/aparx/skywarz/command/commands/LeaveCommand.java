@@ -9,7 +9,7 @@ import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -30,10 +30,10 @@ public class LeaveCommand extends CommandNode {
     SkywarsPlayer player = SkywarsPlayer.getPlayer(context.getPlayer());
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
-      throw new CommandError((e, l) -> l.substitute(l.getErrorNotInMatch()));
+      throw new CommandError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
     Match match = data.getMatch();
     Preconditions.checkNotNull(match, "Already left the match");
     Preconditions.checkState(match.leave(player), "Cannot leave match");
-    player.sendMessage(Language::getSuccessLeaveMatch);
+    player.sendFormattedMessage(MessageKeys.Match.LEAVE_SUCCESS);
   }
 }

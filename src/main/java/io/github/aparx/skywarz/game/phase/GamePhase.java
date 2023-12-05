@@ -106,6 +106,11 @@ public abstract class GamePhase implements Listener {
   @Synchronized
   public final void tick() {
     try {
+      if (findMatch().isEmpty()) {
+        Skywars.logger().fine("[GamePhaseCycler] Match became invalid (enforce stop)");
+        stop(StopReason.UNKNOWN);
+        return;
+      }
       if (ticker.hasElapsed(duration)) {
         stop(StopReason.TIME);
         getCycler().cycleNext();
@@ -114,7 +119,7 @@ public abstract class GamePhase implements Listener {
         ticker.tick();
       }
     } catch (Exception e) {
-      Skywars.logger().log(Level.WARNING, "Error in game phase", e);
+      Skywars.logger().log(Level.WARNING, "[GamePhaseCycler] Error in game phase", e);
       stop(StopReason.ERROR);
       getCycler().cycleNext();
     }
@@ -139,7 +144,7 @@ public abstract class GamePhase implements Listener {
 
   public enum StopReason {
     /** Phase has been stopped manually for a for this phase possibly unknown reason. */
-    MANUALLY,
+    UNKNOWN,
     /** Phase has been stopped manually due to an error. */
     ERROR,
     /** Phase has reached end of its duration, thus stopped due to time */

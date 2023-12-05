@@ -6,8 +6,9 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.PaginationUtils;
 import org.bukkit.ChatColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -35,9 +36,10 @@ public class ArenaListCommand extends CommandNode {
           .nextPageCommandFactory((c, i) -> String.format("/%s arena list %s", c.getLabel(), i))
           .contentFactory((ctx, stream) -> {
             StringBuilder builder = new StringBuilder();
-            Language language = Language.getLanguage();
+            Language language = Language.getInstance();
             stream.sorted(COMPLETION_COMPARATOR).forEach(arena -> {
-              builder.append(language.getPrefix()).append(ctx.isPlayer() ? " • " : " - ");
+              builder.append(language.get(MessageKeys.PREFIX).get());
+              builder.append(ctx.isPlayer() ? " • " : " - ");
               builder.append(arena.getName()).append(' ');
               if (arena.isCompleted())
                 builder.append(ChatColor.GRAY).append(ChatColor.ITALIC).append("(completed)");

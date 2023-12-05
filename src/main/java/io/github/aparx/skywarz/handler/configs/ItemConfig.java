@@ -30,7 +30,7 @@ public class ItemConfig extends ConfigObject {
   @ConfigMapping
   @Document("The team selector is what a player uses to select their team.")
   private ItemWrapper teamSelector = ItemBuilder
-      .builder(Material.PAPER)
+      .builder(Material.WHITE_WOOL)
       .lore("§8Click to select your team")
       .name("Team selector")
       .enchants(Map.of(Enchantment.LUCK, 2))

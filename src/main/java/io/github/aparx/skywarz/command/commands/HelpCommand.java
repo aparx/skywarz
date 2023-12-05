@@ -9,7 +9,8 @@ import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.command.tree.CommandNodeSet;
-import io.github.aparx.skywarz.handler.configs.Language;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.PaginationUtils;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -55,11 +56,12 @@ public final class HelpCommand extends CommandNode {
           })
           .contentFactory((ctx, stream) -> {
             StringBuilder builder = new StringBuilder();
-            Language language = Language.getLanguage();
+            Language language = Language.getInstance();
+            String prefix = language.get(MessageKeys.PREFIX).get();
             stream.forEach(node -> {
-              builder.append(language.getPrefix()).append(ctx.isPlayer() ? " • " : " - ");
+              builder.append(prefix).append(ctx.isPlayer() ? " • " : " - ");
               builder.append(node.getUsage("sw")).append('\n');
-              builder.append(language.getPrefix()).append(' ');
+              builder.append(prefix).append(' ');
               builder.append(ChatColor.GRAY).append(node.getInfo().getDescription()).append('\n');
             });
             return builder.toString();

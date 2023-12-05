@@ -47,14 +47,10 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
     }
   };
 
-  public GameItemManager() {
-    add(new LeaveItem());
-    add(new TeamSelectorItem());
-  }
-
   @CanIgnoreReturnValue
   public boolean add(GameItem gameItem) {
     Preconditions.checkNotNull(gameItem, "Item must not be null");
+    gameItem.load(); // initial configuration load
     return items.add(gameItem);
   }
 
@@ -65,6 +61,10 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
 
   @Override
   protected void onLoad() {
+    if (items.isEmpty()) {
+      add(new LeaveItem());
+      add(new TeamSelectorItem());
+    }
     items.forEach(GameItem::register);
     Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
   }

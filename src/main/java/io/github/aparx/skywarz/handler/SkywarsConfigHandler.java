@@ -5,7 +5,6 @@ import io.github.aparx.bufig.Config;
 import io.github.aparx.bufig.defaults.yaml.YamlConfig;
 import io.github.aparx.bufig.handler.ConfigMap;
 import io.github.aparx.skywarz.handler.configs.ItemConfig;
-import io.github.aparx.skywarz.handler.configs.Language;
 import io.github.aparx.skywarz.handler.configs.MainConfig;
 import lombok.Getter;
 import org.bukkit.plugin.Plugin;
@@ -33,21 +32,6 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   /** Generic item configuration (for lobby items and such) */
   private final ItemConfig items = new ItemConfig(this);
-
-  /** Language configuration (partially memorizing supplier) */
-  private final Supplier<Language> language = new Supplier<>() {
-    final AtomicReference<Language> lastConfig = new AtomicReference<>(null);
-
-    @Override
-    public Language get() {
-      return lastConfig.updateAndGet((config) -> {
-        String currentLanguage = main.getLanguage();
-        if (config == null || !Objects.equals(config.getId(), currentLanguage))
-          (config = new Language(currentLanguage, SkywarsConfigHandler.this)).load();
-        return config;
-      });
-    }
-  };
 
   public SkywarsConfigHandler(@NonNull Plugin plugin) {
     super((id) -> new YamlConfig(id, new File(plugin.getDataFolder(), id + ".yml")));
@@ -80,10 +64,6 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   public @NonNull Config getGames() {
     return getOrCreate(GAME_CONFIG_ID);
-  }
-
-  public @NonNull Language getLanguage() {
-    return language.get();
   }
 
 }

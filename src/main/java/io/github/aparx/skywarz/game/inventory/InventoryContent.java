@@ -84,4 +84,21 @@ public class InventoryContent {
     Arrays.fill(items, item);
   }
 
+  public void fillEdges(InventoryItem item) {
+    InventoryDimensions dimensions = getDimensions();
+    int columnLength = dimensions.getWidth();
+    int rowLength = dimensions.getHeight();
+    if (rowLength >= 1) // Fill top
+      Arrays.fill(items, 0, columnLength, item);
+    if (rowLength >= 2) // Fill bottom
+      Arrays.fill(items,
+          InventoryPosition.toIndex(0, rowLength - 1, columnLength),
+          items.length - 1, item);
+    // Fill left and right
+    for (int rowIndex = 0; rowIndex < rowLength; ++rowIndex) {
+      items[InventoryPosition.toIndex(0, rowIndex, columnLength)] = item;
+      items[InventoryPosition.toIndex(columnLength - 1, rowIndex, columnLength)] = item;
+    }
+  }
+
 }
