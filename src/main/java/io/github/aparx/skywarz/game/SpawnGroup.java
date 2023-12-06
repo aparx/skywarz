@@ -7,6 +7,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -33,9 +34,13 @@ public interface SpawnGroup {
 
   void clear();
 
+  Set<Integer> keys();
+
+  Integer[] toKeyArray();
+
   Stream<Map.Entry<Integer, Location>> stream();
 
-  /** Returns a snapshot (shallow copy of this map) of the current group */
-  SpawnGroup createSnapshot();
+  /** Returns a snapshot (copy of this map) of the current group */
+  SpawnGroup copy();
 
 }

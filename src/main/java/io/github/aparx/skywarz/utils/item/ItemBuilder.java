@@ -88,8 +88,8 @@ public final class ItemBuilder {
     return this;
   }
 
-  public ItemWrapper wrap() {
-    return new ItemWrapper(build());
+  public WrappedItemStack wrap() {
+    return new WrappedItemStack(build());
   }
 
   public ItemStack build() {

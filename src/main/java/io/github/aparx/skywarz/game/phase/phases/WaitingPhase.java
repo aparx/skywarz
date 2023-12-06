@@ -3,12 +3,14 @@ package io.github.aparx.skywarz.game.phase.phases;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
-import io.github.aparx.skywarz.game.items.waiting.LeaveItem;
-import io.github.aparx.skywarz.game.items.waiting.TeamSelectorItem;
+import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
+import io.github.aparx.skywarz.game.item.items.LeaveItem;
+import io.github.aparx.skywarz.game.item.items.waiting.TeamSelectorItem;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
+import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -16,7 +18,6 @@ import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import io.github.aparx.skywarz.utils.tick.Ticker;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -27,12 +28,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -57,32 +55,24 @@ public class WaitingPhase extends GamePhase {
   }
 
   @Override
-  public void join(SkywarsPlayer player) {
+  public void handleJoin(SkywarsPlayer player) {
     // Manage entity
     Player entity = player.getOnline();
     Match match = getMatch();
-    entity.teleport(match.getArena().getData().getLobby());
-    entity.getInventory().clear();
-    entity.setGameMode(GameMode.ADVENTURE);
-    entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(20);
-    entity.setHealth(entity.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
-    entity.setDisplayName(entity.getName());
-    entity.setPlayerListName(entity.getName());
-    entity.setFlying(false);
-    entity.setLevel(0);
-    entity.setExp(0.0F);
-
-    entity.getInventory().setItem(8, Skywars.getInstance()
+    PlayerSnapshot.ofReset(entity,
+        match.getArena().getData().getLobby(),
+        GameMode.ADVENTURE).restore(entity);
+    entity.getInventory().setItem(LeaveItem.SLOT, Skywars.getInstance()
         .getGameItemManager()
         .getItems()
         .require(LeaveItem.class)
         .create(match, entity));
 
-    entity.getInventory().setItem(0, Skywars.getInstance()
+    Skywars.getInstance()
         .getGameItemManager()
         .getItems()
         .require(TeamSelectorItem.class)
-        .create(match, entity));
+        .give(match, entity);
   }
 
   @Override
@@ -104,7 +94,7 @@ public class WaitingPhase extends GamePhase {
     Ticker ticker = getTicker();
     Match match = getMatch();
     WeakGroupAudience<SkywarsPlayer> players = match.getAudience();
-    final int minPlayers = 3;
+    final int minPlayers = match.getMinPlayerSize();
     final int playerSize = players.size();
     int missingPlayerAmount = minPlayers - playerSize;
     boolean lastMinimumPlayers = this.lastMinimumPlayers;
@@ -133,24 +123,9 @@ public class WaitingPhase extends GamePhase {
         players.sendFormattedMessage(MessageKeys.Match.BROADCAST_REQUIRE,
             Map.of("required", minPlayers, "missing", missingPlayerAmount));
     }
-    if (hasMinimumPlayers) animateLevel((int) secsLeft);
-    else if (lastMinimumPlayers) animateLevel(0);
+    if (hasMinimumPlayers) LevelAnimator.animate(this, (int) secsLeft);
+    else if (lastMinimumPlayers) LevelAnimator.animate(this, 0);
   }
-
-  void animateLevel(int secondsLeft) {
-    long durationSecs = getDuration().toTicks();
-    long elapsed = getTicker().getElapsed(TimeUnit.TICKS);
-    float exp = Math.max(Math.min(1.0F - ((1F + elapsed) / durationSecs), 1.0F), 0.0F);
-    getMatch().getAudience().stream()
-        .map(SkywarsPlayer::findOnline)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach((player) -> {
-          player.setExp(exp);
-          player.setLevel(secondsLeft);
-        });
-  }
-
 
   // EVENT HANDLERS
 
@@ -185,20 +160,6 @@ public class WaitingPhase extends GamePhase {
   void onPlace(BlockPlaceEvent event) {
     if (event.isCancelled()) return;
     event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
-  }
-
-  @EventHandler(priority = EventPriority.HIGHEST)
-  void onInteract(PlayerInteractEvent event) {
-    if (event.getClickedBlock() != null && event.getItem() != null)
-      event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
-  }
-
-  @EventHandler
-  void onQuit(PlayerQuitEvent event) {
-    SkywarsPlayer.findPlayer(event.getPlayer())
-        .ifPresent((player) ->
-            filterMatchFromPlayer(event.getPlayer())
-                .ifPresent((match) -> match.leave(player)));
   }
 
 }

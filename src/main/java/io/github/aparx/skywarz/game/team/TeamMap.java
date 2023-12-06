@@ -9,6 +9,7 @@ import java.lang.ref.WeakReference;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -67,5 +68,9 @@ public final class TeamMap implements Iterable<Team> {
   @Override
   public @NonNull Iterator<Team> iterator() {
     return teams.values().iterator();
+  }
+
+  public @NonNull Stream<@NonNull Team> stream() {
+    return teams.values().stream();
   }
 }

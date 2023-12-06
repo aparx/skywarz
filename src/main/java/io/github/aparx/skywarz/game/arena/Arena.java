@@ -1,11 +1,16 @@
 package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
+import io.github.aparx.skywarz.game.chest.ChestConfig;
+import io.github.aparx.skywarz.game.chest.ChestHandler;
+import io.github.aparx.skywarz.game.chest.ChestItems;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -25,6 +30,8 @@ public final class Arena implements ConfigurationSerializable, CompletableSetup 
   private final @NonNull String name;
 
   private final @NonNull ArenaData data;
+
+  private final ArenaReset reset = new ArenaReset(this);
 
   public Arena(@NonNull String name) {
     this(name, new ArenaData());

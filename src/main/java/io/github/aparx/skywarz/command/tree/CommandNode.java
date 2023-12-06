@@ -6,6 +6,7 @@ import com.google.common.base.Suppliers;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.permission.Permission;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.apache.commons.lang.StringUtils;
@@ -96,8 +97,8 @@ public abstract class CommandNode implements CommandNodeExecutor {
 
   public boolean hasPermission(Permissible permissible) {
     for (CommandNode p = this; p != null; p = p.getParent()) {
-      String permission = p.getInfo().getPermission();
-      if (permission != null && !permissible.hasPermission(permission))
+      Permission permission = p.getInfo().getPermission();
+      if (permission != null && !permission.has(permissible))
         return false;
     }
     return true;

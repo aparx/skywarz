@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.command;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.language.MessageKeys;
 import lombok.Getter;
 import org.bukkit.command.Command;
@@ -59,7 +59,7 @@ public class CommandContext {
 
   public @NonNull Player getPlayer() {
     if (!(sender instanceof Player))
-      throw new CommandError((lang) -> lang.get(MessageKeys.Errors.PLAYER));
+      throw new LocalizableError((lang) -> lang.get(MessageKeys.Errors.PLAYER));
     return (Player) sender;
   }
 

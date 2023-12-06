@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.bukkit.event.inventory.InventoryType;
 import org.checkerframework.checker.index.qual.NonNegative;
 
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
@@ -63,4 +64,16 @@ public final class InventoryDimensions {
     return IntStream.range(0, size());
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    InventoryDimensions that = (InventoryDimensions) o;
+    return width == that.width && height == that.height;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(width, height);
+  }
 }

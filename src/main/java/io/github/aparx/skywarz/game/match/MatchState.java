@@ -19,7 +19,7 @@ public enum MatchState {
   DONE;
 
   public boolean isJoinable() {
-    return this != SETUP;
+    return this != SETUP && this != DONE;
   }
 
   public MatchState previous() {

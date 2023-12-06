@@ -1,8 +1,6 @@
-package io.github.aparx.skywarz.command.exceptions;
+package io.github.aparx.skywarz.language;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.language.Language;
-import io.github.aparx.skywarz.language.LocalizedMessage;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -16,59 +14,53 @@ import java.util.function.Supplier;
  * @since 1.0
  */
 @Getter
-public final class CommandError extends RuntimeException {
+public final class LocalizableError extends RuntimeException {
 
   private final Function<Language, ?> errorMessageFactory;
 
-  public CommandError(Function<Language, ?> errorMessageFactory) {
+  public LocalizableError(Function<Language, ?> errorMessageFactory) {
     this.errorMessageFactory = errorMessageFactory;
   }
 
-  public CommandError(String message,
-                      Function<Language, ?> errorMessageFactory) {
+  public LocalizableError(String message,
+                          Function<Language, ?> errorMessageFactory) {
     super(message);
     this.errorMessageFactory = errorMessageFactory;
   }
 
-  public CommandError(String message, Throwable cause,
-                      Function<Language, ?> errorMessageFactory) {
+  public LocalizableError(String message, Throwable cause,
+                          Function<Language, ?> errorMessageFactory) {
     super(message, cause);
     this.errorMessageFactory = errorMessageFactory;
   }
 
-  public CommandError(Throwable cause,
-                      Function<Language, ?> errorMessageFactory) {
+  public LocalizableError(Throwable cause,
+                          Function<Language, ?> errorMessageFactory) {
     super(cause);
     this.errorMessageFactory = errorMessageFactory;
   }
 
-  public CommandError(String message, Throwable cause, boolean enableSuppression,
-                      boolean writableStackTrace,
-                      Function<Language, ?> errorMessageFactory) {
+  public LocalizableError(String message, Throwable cause, boolean enableSuppression,
+                          boolean writableStackTrace,
+                          Function<Language, ?> errorMessageFactory) {
     super(message, cause, enableSuppression, writableStackTrace);
     this.errorMessageFactory = errorMessageFactory;
   }
 
   @CanIgnoreReturnValue
-  public static <R> R supplyAndRethrowOnError(
+  public static <R> R localizeThrow(
       @NonNull Supplier<R> executor,
       @NonNull Function<Language, ?> errorMessageFactory) {
     try {
       return executor.get();
     } catch (Throwable throwable) {
-      throw new CommandError(throwable, errorMessageFactory);
+      throw new LocalizableError(throwable, errorMessageFactory);
     }
   }
 
-  @CanIgnoreReturnValue
-  public static void runAndRethrowOnError(
-      @NonNull Runnable executor,
-      @NonNull Function<Language, ?> errorMessageFactory) {
-    try {
-      executor.run();
-    } catch (Throwable throwable) {
-      throw new CommandError(throwable, errorMessageFactory);
-    }
+  @Override
+  public String getLocalizedMessage() {
+    return createMessage();
   }
 
   public String createMessage() {

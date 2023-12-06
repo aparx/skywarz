@@ -2,16 +2,18 @@ package io.github.aparx.skywarz.game.match;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.match.listener.MatchListener;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
 import lombok.Synchronized;
+import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Optional;
-import java.util.UUID;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -19,20 +21,29 @@ import java.util.function.Function;
  * @version 2023-12-03 06:26
  * @since 1.0
  */
-public final class MatchManager extends DefaultSkywarsHandler {
+public final class MatchManager extends DefaultSkywarsHandler implements Iterable<Match> {
 
   private static final Function<Arena, Match> DEFAULT_MATCH_FACTORY =
       (arena) -> new Match(UUID.randomUUID(), arena);
+
+  private static final MatchListener LISTENER = new MatchListener();
 
   private final KeyValueSet<UUID, Match> internalSet = KeyValueSets.ofSnowflake();
   private final WeakHashMap<Arena, Match> matchByArena = new WeakHashMap<>();
 
   @Override
+  protected void onLoad() {
+    Bukkit.getPluginManager().registerEvents(LISTENER, Skywars.plugin());
+  }
+
+  @Override
   @Synchronized
   protected void onUnload() {
-    internalSet.forEach((match) -> match.getAudience().forEach(match::leave));
+    new ArrayList<>(internalSet).forEach(this::remove);
+
     internalSet.clear();
     matchByArena.clear();
+    HandlerList.unregisterAll(LISTENER);
   }
 
   @Synchronized
@@ -121,4 +132,8 @@ public final class MatchManager extends DefaultSkywarsHandler {
     return arena != null && matchByArena.containsKey(arena);
   }
 
+  @Override
+  public @NonNull Iterator<Match> iterator() {
+    return internalSet.iterator();
+  }
 }

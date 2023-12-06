@@ -1,6 +1,7 @@
 package io.github.aparx.skywarz.entity;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -18,6 +19,24 @@ public class WeakPlayerGroup extends WeakGroupAudience<SkywarsPlayer> {
 
   public Stream<? extends SkywarsPlayer> online() {
     return stream().filter(SkywarsPlayer::isOnline);
+  }
+
+  /** Returns a stream of all online and alive players (non-spectators) */
+  public Stream<? extends SkywarsPlayer> alive() {
+    return online().filter((player) -> !player.getMatchData().isSpectator());
+  }
+
+  /** Returns a stream of all online and dead players (spectators) */
+  public Stream<? extends SkywarsPlayer> dead() {
+    return online().filter((player) -> player.getMatchData().isSpectator());
+  }
+
+  public int getOnlineCount() {
+    return (int) online().count();
+  }
+
+  public int getAliveCount() {
+    return (int) alive().count();
   }
 
 }

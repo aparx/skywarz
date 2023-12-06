@@ -1,6 +1,5 @@
 package io.github.aparx.skywarz.language;
 
-import com.google.common.collect.ImmutableMap;
 import io.github.aparx.bufig.ArrayPath;
 import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
@@ -34,6 +33,7 @@ public final class MessageKeys {
 
     public final ArrayPath IN_A_MATCH = ArrayPath.of("errors.in a match");
     public final ArrayPath NOT_IN_A_MATCH = ArrayPath.of("errors.not in a match");
+    public final ArrayPath MATCH_IS_FULL = ArrayPath.of("errors.match is full");
   }
 
   @UtilityClass
@@ -50,6 +50,15 @@ public final class MessageKeys {
 
     public final ArrayPath BROADCAST_START = ArrayPath.of("match.broadcast.start");
     public final ArrayPath BROADCAST_REQUIRE = ArrayPath.of("match.broadcast.require players");
+    public final ArrayPath BROADCAST_CLOSING = ArrayPath.of("match.broadcast.closing");
+
+    public final ArrayPath PRIORITY_ERROR = ArrayPath.of("match.priority.error");
+    public final ArrayPath PRIORITY_KICK = ArrayPath.of("match.priority.kick");
+
+    public final ArrayPath ERROR_DEQUEUED = ArrayPath.of("match.dequeued");
+
+    public final ArrayPath KILLED = ArrayPath.of("match.killed");
+    public final ArrayPath DIED = ArrayPath.of("match.death");
   }
 
   static final LinkedHashMap<ArrayPath, String> defaultMessages;
@@ -60,15 +69,16 @@ public final class MessageKeys {
     map.put(SUCCESS_PREFIX, ChatColor.GREEN + "[Skywarz]");
     map.put(WARNING_PREFIX, ChatColor.RED + "[Skywarz]");
 
-    map.put(Errors.GENERIC, "{warningPrefix} Error: {message}");
-    map.put(Errors.SYNTAX, "{warningPrefix} Syntax: {message}");
+    map.put(Errors.GENERIC, "{warningPrefix} Error: {0}");
+    map.put(Errors.SYNTAX, "{warningPrefix} Syntax: {usage}");
     map.put(Errors.IN_A_MATCH, "{warningPrefix} You are in a match already!");
     map.put(Errors.NOT_IN_A_MATCH, "{warningPrefix} You are not in a match!");
-    map.put(Errors.NUMBER, "{warningPrefix} Value {value} is not a number!");
-    map.put(Errors.INTEGER, "{warningPrefix} Value {value} is not an integer!");
-    map.put(Errors.ARENA_NOT_FOUND, "{warningPrefix} Cannot find arena {name}!");
+    map.put(Errors.NUMBER, "{warningPrefix} Value {0} is not a number!");
+    map.put(Errors.INTEGER, "{warningPrefix} Value {0} is not an integer!");
+    map.put(Errors.ARENA_NOT_FOUND, "{warningPrefix} Cannot find arena {0}!");
     map.put(Errors.PERMISSION, "{warningPrefix} You do not have the permission for this action!");
     map.put(Errors.COMMAND_NOT_FOUND, "{warningPrefix} Command not found. Try §r/sw help§c.");
+    map.put(Errors.MATCH_IS_FULL, "{warningPrefix} Cannot join: Match is full!");
 
     map.put(Match.JOIN_SUCCESS, "{successPrefix} You joined the match!");
     map.put(Match.JOIN_ERROR, "{warningPrefix} You cannot join this match!");
@@ -77,9 +87,16 @@ public final class MessageKeys {
     map.put(Match.LEAVE_BROADCAST, "§c[-]§7 Player §r{player.name}§7 has left the game.");
     map.put(Match.TEAM_SWITCH_SUCCESS, "{successPrefix} You joined Team {team.color}{team.name}§a!");
     map.put(Match.TEAM_SWITCH_ERROR, "{warningPrefix} You cannot join this team!");
+    map.put(Match.PRIORITY_ERROR, "{warningPrefix} Match is full. Could not find anyone that is kickable!");
+    map.put(Match.PRIORITY_KICK, "{warningPrefix} You have been kicked for someone that is VIP.");
+    map.put(Match.ERROR_DEQUEUED, "{warningPrefix} An error occurred. You have been dequeued.");
 
     map.put(Match.BROADCAST_START, "{prefix}§7 The game starts in §b{time}§7 seconds!");
     map.put(Match.BROADCAST_REQUIRE, "{prefix}§7 Require §c{missing}§7 more players to start!");
+    map.put(Match.BROADCAST_CLOSING, "{prefix}§7 The match closes in {time} seconds!");
+
+    map.put(Match.KILLED, "{prefix}§7 Player {player.team.color}{player.name}§7 was slained by {killer.team.color}{killer.name}§7!");
+    map.put(Match.DIED, "{prefix}§7 Player {player.team.color}{player.name}§7 died!");
 
     defaultMessages = map;
   }

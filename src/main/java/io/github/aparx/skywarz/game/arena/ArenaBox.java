@@ -3,12 +3,15 @@ package io.github.aparx.skywarz.game.arena;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import org.apache.commons.lang.ArrayUtils;
+import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.lang.management.MonitorInfo;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +26,7 @@ import java.util.Optional;
 @SerializableAs("Skywarz.ArenaBox")
 public final class ArenaBox implements ConfigurationSerializable, CompletableSetup {
 
-  private final @Nullable Vector @NonNull [] points;
+  private final Vector @NonNull [] points;
 
   public ArenaBox() {
     this(new Vector[Point.values().length]);
@@ -61,6 +64,44 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
   public boolean isWithin(@NonNull Vector position) {
     Preconditions.checkNotNull(position, "Position must not be null");
     return position.isInAABB(points[Point.MIN.ordinal()], points[Point.MAX.ordinal()]);
+  }
+
+  public boolean isWithin(@NonNull Location location) {
+    Preconditions.checkNotNull(location, "Location must not be null");
+    Vector min = points[Point.MIN.ordinal()];
+    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkNotNull(min);
+    Preconditions.checkNotNull(max);
+    return location.getX() >= min.getX()
+        && location.getZ() >= min.getZ()
+        && location.getY() >= min.getY()
+        && location.getX() <= max.getX()
+        && location.getZ() <= max.getZ()
+        && location.getY() <= max.getY();
+  }
+
+  public boolean isWithin(@NonNull BoundingBox boundingBox) {
+    Preconditions.checkNotNull(boundingBox, "BoundingBox must not be null");
+    Vector min = points[Point.MIN.ordinal()];
+    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkNotNull(min);
+    Preconditions.checkNotNull(max);
+    return boundingBox.getMinX() >= min.getX()
+        && boundingBox.getMinZ() >= min.getZ()
+        && boundingBox.getMinY() >= min.getY()
+        && boundingBox.getMaxX() <= max.getX()
+        && boundingBox.getMaxZ() <= max.getZ()
+        && boundingBox.getMaxZ() <= max.getY();
+  }
+
+  public BoundingBox toBoundingBox() {
+    Vector min = points[Point.MIN.ordinal()];
+    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkNotNull(min);
+    Preconditions.checkNotNull(max);
+    return new BoundingBox(
+        min.getX(), min.getY(), min.getZ(),
+        max.getX(), max.getY(), max.getZ());
   }
 
   private void sortMinAndMaxCoordinates() {

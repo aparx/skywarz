@@ -6,6 +6,7 @@ import io.github.aparx.skywarz.entity.data.PlayerDataSet;
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
+import io.github.aparx.skywarz.permission.Permission;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
@@ -106,6 +107,10 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
 
   public @NonNull PlayerMatchData getMatchData() {
     return getPlayerData().getOrCreate(PlayerMatchData.class);
+  }
+
+  public boolean hasPriority() {
+    return findOnline().filter(Permission.PRIORITY::has).isPresent();
   }
 
   public void sendMessage(Object message) {

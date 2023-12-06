@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.game.items;
+package io.github.aparx.skywarz.game.item;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -9,9 +9,10 @@ import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.utils.collection.WeakHashSet;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.Validate;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -32,19 +33,20 @@ public abstract class GameItem extends ConfigObject {
 
   private final WeakHashSet<ItemStack> register = new WeakHashSet<>();
 
-  private final @NonNull MatchState state;
+  private final @NonNull MatchState[] states;
 
   private final int flags;
 
-  public GameItem(@NonNull String name, @NonNull MatchState state) {
-    this(name, state, 0);
+  public GameItem(@NonNull String name, @NonNull MatchState[] states) {
+    this(name, states, 0);
   }
 
-  public GameItem(@NonNull String name, @NonNull MatchState state, int flags) {
+  public GameItem(@NonNull String name, @NonNull MatchState[] states, int flags) {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("items/" + name));
-    Preconditions.checkNotNull(state, "State must not be null");
+    Preconditions.checkNotNull(states, "States must not be null");
+    Validate.noNullElements(states, "State must not be null");
     Preconditions.checkState((flags & ~Flags.FLAGS) == 0, "Unknown flags");
-    this.state = state;
+    this.states = (MatchState[]) ArrayUtils.clone(states);
     this.flags = flags;
   }
 
@@ -54,7 +56,8 @@ public abstract class GameItem extends ConfigObject {
   public final ItemStack create(@NonNull Match match, @NonNull Player initiator) {
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(initiator, "Player must not be null");
-    Preconditions.checkState(match.isState(getState()), "Cannot create item at state of match");
+    Preconditions.checkState(Arrays.stream(states).anyMatch(match::isState),
+        "Cannot create item at state of match");
     ItemStack stack = createItemStack(match, initiator);
     register.add(stack);
     return stack;
@@ -64,7 +67,9 @@ public abstract class GameItem extends ConfigObject {
     return register.contains(itemStack);
   }
 
-  public void register() {}
+  public void register() {
+    load();
+  }
 
   public void unregister() {}
 
@@ -86,7 +91,7 @@ public abstract class GameItem extends ConfigObject {
         .map(SkywarsPlayer::getMatchData)
         .filter(PlayerMatchData::isInMatch)
         .map(PlayerMatchData::getMatch)
-        .filter((match) -> match.isState(getState()));
+        .filter((match) -> Arrays.stream(states).anyMatch(match::isState));
   }
 
   @UtilityClass

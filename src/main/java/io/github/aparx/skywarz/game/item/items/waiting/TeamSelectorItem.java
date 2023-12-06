@@ -1,21 +1,23 @@
-package io.github.aparx.skywarz.game.items.waiting;
+package io.github.aparx.skywarz.game.item.items.waiting;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.bufig.configurable.field.ConfigMapping;
+import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.inventory.*;
-import io.github.aparx.skywarz.game.items.GameItem;
+import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
+import io.github.aparx.skywarz.game.item.StaticGameItem;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.team.Team;
-import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
+import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.material.ColoredMaterial;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
@@ -32,7 +34,6 @@ import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -42,17 +43,65 @@ import java.util.stream.IntStream;
  * @version 2023-12-04 06:57
  * @since 1.0
  */
-public final class TeamSelectorItem extends GameItem {
+@Document("Team Selector")
+public final class TeamSelectorItem extends StaticGameItem {
+
+  private static final ColoredMaterial REPLACEABLE_MATERIAL = ColoredMaterial.CONCRETE;
 
   private final TickDuration INVENTORY_UPDATE_INTERVAL = TickDuration.of(TimeUnit.TICKS, 10);
 
+  @ConfigMapping("item.item")
+  @Document({
+      "The item configuration with which a player can interact. Use bed, concrete or wool as a " +
+          "type",
+      "to have it replaced with the color of the team a player has joined (it being the default)."
+  })
+  private WrappedItemStack item = ItemBuilder
+      .builder(Material.WHITE_BED)
+      .lore("§8Click to select your team")
+      .name("§bTeam selector")
+      .enchants(Map.of(Enchantment.ARROW_KNOCKBACK, 1))
+      .flags(ItemFlag.HIDE_ENCHANTS)
+      .wrap();
+
+
+  @ConfigMapping("menu.title")
+  @Document("The title of the team selector inventory")
+  private String menuTitle = "§bTeam Selector";
+
+  @ConfigMapping("menu.team.status.joined")
+  @Document("Applied to a team item to show a player that they have already joined the team")
+  private String teamStatusJoined = "Joined this team";
+
+  @ConfigMapping("menu.team.status.full")
+  @Document("Applied to a team item to indicate that the team is already full")
+  private String teamStatusFull = "This team is full";
+
+  @ConfigMapping("menu.team.status.joinable")
+  @Document("Applied to a team item to indicate the team to be joinable")
+  private String teamStatusJoinable = "Click to join this team";
+
+  @ConfigMapping("menu.team.member")
+  @Document("Applied to a team item to showcase who joined a team")
+  private String teamMemberSlot = "§8• {0}";
+
   public TeamSelectorItem() {
-    super("teamSelector", MatchState.WAITING);
+    super("selector", new MatchState[]{MatchState.WAITING});
+    setSlot(0);
   }
 
   @Override
   protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
-    return Skywars.getInstance().getConfigHandler().getItems().getTeamSelector().getStack();
+    ItemStack stack = item.getStack().clone();
+    Optional.ofNullable(ColoredMaterial.getColored(stack.getType()))
+        .ifPresent((colored) -> SkywarsPlayer.findPlayer(initiator)
+            .map(SkywarsPlayer::getMatchData)
+            .filter(PlayerMatchData::isInTeam)
+            .map(PlayerMatchData::getTeam)
+            .ifPresent((team) -> {
+              stack.setType(colored.getMaterial(team.getTeamEnum().getDyeColor()));
+            }));
+    return stack;
   }
 
   @Override
@@ -64,32 +113,33 @@ public final class TeamSelectorItem extends GameItem {
   }
 
   @CheckReturnValue
-  private GameInventory createInventory(@NonNull Match match, @NonNull SkywarsPlayer player) {
-    int maxTeamSize = match.getArena().getData().getSettings().getTeamSize();
+  private GameInventory<?> createInventory(@NonNull Match match, @NonNull SkywarsPlayer player) {
+    int maxTeamSize = match.getTeamSize();
     TeamMap teamMap = match.getTeamMap();
     InventoryDimensions dimensions = InventoryDimensions.ofLengths(
         InventoryDimensions.DEFAULT_COLUMN_COUNT,
         1 + ((teamMap.size() - 1) / InventoryDimensions.DEFAULT_COLUMN_COUNT));
-    GameInventory inventory = new GameInventory(null, dimensions, INVENTORY_UPDATE_INTERVAL,
-        "§bTeam Selector");
-    InventoryContent content = inventory.getContent();
+    InventoryPage page = new InventoryPage(dimensions);
+    GameInventory<?> inventory = new GameInventory<>(
+        null, INVENTORY_UPDATE_INTERVAL, menuTitle, page);
     InventoryItem glass = InventoryItem.of(
         ItemBuilder.builder(Material.GRAY_STAINED_GLASS_PANE)
             .name(StringUtils.SPACE)
             .build(),
         (ignored, event) -> event.setCancelled(true));
-    content.fill(glass);
+    page.fill(glass);
     final int width = dimensions.getWidth();
     Iterator<Team> iterator = match.getTeamMap().iterator();
     for (int cursor = 0; iterator.hasNext(); ++cursor)
-      content.set(InventoryPosition.toIndex(
+      page.set(InventoryPosition.toIndex(
               cursor % width, (cursor / width), width),
-          new TeamItem(player, iterator.next(), maxTeamSize, inventory));
+          new TeamItem(match, player, iterator.next(), maxTeamSize, inventory));
     return inventory;
   }
 
-  private static final class TeamItem implements InventoryItem {
+  private final class TeamItem implements InventoryItem {
 
+    private final @NonNull Match match;
     private final @NonNull SkywarsPlayer player;
     private final @NonNull Team team;
     private final int maxTeamSize;
@@ -98,23 +148,21 @@ public final class TeamSelectorItem extends GameItem {
     private final ItemBuilder itemBuilder;
 
     public TeamItem(
+        @NonNull Match match,
         @NonNull SkywarsPlayer player,
         @NonNull Team team,
         @NonNegative int maxTeamSize,
         @NonNull GameInventory inventory) {
+      this.match = match;
       this.player = player;
       this.team = team;
       this.maxTeamSize = maxTeamSize;
       this.inventory = inventory;
       this.itemBuilder = ItemBuilder
-          .builder(ColoredMaterial.CONCRETE.getMaterial(team.getTeamEnum().getDyeColor()))
+          .builder(REPLACEABLE_MATERIAL.getMaterial(team.getTeamEnum().getDyeColor()))
           .name(team.getTeamEnum().getChatColor().toString() + ChatColor.BOLD
               + Language.getInstance().getTeamName(team.getTeamEnum()))
           .flags(ItemFlag.HIDE_ENCHANTS);
-    }
-
-    public boolean isTeamFull() {
-      return team.size() >= maxTeamSize;
     }
 
     public boolean isInTeam() {
@@ -127,17 +175,17 @@ public final class TeamSelectorItem extends GameItem {
 
       List<String> lore = new ArrayList<>();
       // TODO add translatable
-      if (isTeam) lore.add("§7» Joined this team");
-      else if (isTeamFull()) lore.add("§8» This team is full");
-      else lore.add((ticks % 2 == 0 ? "§8» " : "   ") + "§7Click to join team");
+      if (isTeam) lore.add("§7» " + teamStatusJoined);
+      else if (!team.hasSpace()) lore.add("§8» " + teamStatusFull);
+      else lore.add((ticks % 2 == 0 ? "§8» " : "   ") + ChatColor.GRAY + teamStatusJoinable);
       List<String> members = team.stream()
           .map(SkywarsPlayer::getName)
-          .map((name) -> String.format("§8• %s", name))
+          .map((name) -> Language.getInstance().substitute(teamMemberSlot, name))
           .collect(Collectors.toList());
       lore.add(StringUtils.SPACE);
       lore.addAll(members);
       IntStream.range(0, maxTeamSize - members.size())
-          .forEach((i) -> lore.add("§8• (free)"));
+          .forEach((i) -> lore.add(Language.getInstance().substitute(teamMemberSlot, "(free)")));
 
       return itemBuilder
           .enchants(isTeam ? Map.of(Enchantment.LUCK, 1) : Map.of())
@@ -151,18 +199,19 @@ public final class TeamSelectorItem extends GameItem {
       event.setCancelled(true);
       if (isInTeam()) return;
       try {
-        Preconditions.checkState(!isTeamFull());
+        Preconditions.checkState(team.hasSpace());
         Optional.ofNullable(data.getTeam()).ifPresent((previous) -> {
           Preconditions.checkState(previous.remove(player));
         });
         Preconditions.checkState(team.add(player));
-        player.sendMessage((language) -> language
+        player.sendMessage(Language.getInstance()
             .get(MessageKeys.Match.TEAM_SWITCH_SUCCESS)
             .substitute(team, ArrayPath.of("team")));
         inventory.updateInventory();
+        player.findOnline().ifPresent((p) -> give(match, p));
         player.playSound(Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
       } catch (Exception e) {
-        player.sendMessage((language) -> language
+        player.sendMessage(Language.getInstance()
             .get(MessageKeys.Match.TEAM_SWITCH_ERROR)
             .substitute(team, ArrayPath.of("team")));
         player.playSound(Sound.BLOCK_ANVIL_LAND, .33f, .75f);

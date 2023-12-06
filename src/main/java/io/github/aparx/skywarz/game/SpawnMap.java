@@ -9,10 +9,7 @@ import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ConcurrentModificationException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
@@ -112,12 +109,22 @@ public class SpawnMap implements SpawnGroup, ConfigurationSerializable {
   }
 
   @Override
+  public Set<Integer> keys() {
+    return map.keySet();
+  }
+
+  @Override
+  public Integer[] toKeyArray() {
+    return map.keySet().toArray(Integer[]::new);
+  }
+
+  @Override
   public Stream<Map.Entry<Integer, Location>> stream() {
     return map.entrySet().stream();
   }
 
   @Override
-  public SpawnGroup createSnapshot() {
+  public SpawnGroup copy() {
     return new SpawnMap(new HashMap<>(map));
   }
 

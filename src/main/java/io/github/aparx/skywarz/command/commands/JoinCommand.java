@@ -6,12 +6,13 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.permission.Permission;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -25,7 +26,6 @@ public class JoinCommand extends AbstractArenaCommand {
   public JoinCommand() {
     super(CommandInfo.builder("join")
             .args("<Arena>")
-            .permission("skywarz.play")
             .description("Join the given arena")
             .build(),
         ARENA_ARGUMENT_INDEX);
@@ -38,10 +38,10 @@ public class JoinCommand extends AbstractArenaCommand {
       SkywarsPlayer player = SkywarsPlayer.getPlayer(context.getPlayer());
       PlayerMatchData data = player.getMatchData();
       if (data.isInMatch())
-        throw new CommandError((lang) -> lang.substitute(MessageKeys.Errors.IN_A_MATCH));
+        throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.IN_A_MATCH));
       Match match = Skywars.getInstance().getMatchManager().getOrCreate(arena);
       if (!match.getState().isJoinable())
-        throw new CommandError((lang) -> lang.substitute(MessageKeys.Match.JOIN_ERROR));
+        throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Match.JOIN_ERROR));
       Preconditions.checkState(match.join(player), "Cannot join match");
       player.sendFormattedMessage(MessageKeys.Match.JOIN_SUCCESS);
     }

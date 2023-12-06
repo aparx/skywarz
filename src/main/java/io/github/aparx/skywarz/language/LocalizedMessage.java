@@ -65,7 +65,7 @@ public final class LocalizedMessage {
         if (resolve != null) return resolve.toString();
         resolve = defaultSubstitutor.getStringLookup().lookup(variable);
         if (resolve != null) return resolve.toString();
-        return VARIABLE_PREFIX + variable + VARIABLE_SUFFIX;
+        return null;
       }, VARIABLE_PREFIX, VARIABLE_SUFFIX, VARIABLE_ESCAPE);
     return createSubstitutor();
   }

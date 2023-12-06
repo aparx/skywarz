@@ -4,16 +4,11 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.Config;
 import io.github.aparx.bufig.defaults.yaml.YamlConfig;
 import io.github.aparx.bufig.handler.ConfigMap;
-import io.github.aparx.skywarz.handler.configs.ItemConfig;
-import io.github.aparx.skywarz.handler.configs.MainConfig;
 import lombok.Getter;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -26,12 +21,6 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
   public static final String ARENA_CONFIG_ID = "arenas";
 
   public static final String GAME_CONFIG_ID = "games";
-
-  /** Main configuration, handling all the general purpose configuration */
-  private final MainConfig main = new MainConfig(this);
-
-  /** Generic item configuration (for lobby items and such) */
-  private final ItemConfig items = new ItemConfig(this);
 
   public SkywarsConfigHandler(@NonNull Plugin plugin) {
     super((id) -> new YamlConfig(id, new File(plugin.getDataFolder(), id + ".yml")));

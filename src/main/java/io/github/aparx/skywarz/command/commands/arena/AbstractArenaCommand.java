@@ -4,7 +4,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -45,7 +45,7 @@ public abstract class AbstractArenaCommand extends CommandNode {
     else {
       String name = args.get(arenaArgumentIndex).get();
       execute(Skywars.getInstance().getArenaManager().find(name).orElseThrow(() -> {
-        return new CommandError((l) -> l.substitute(MessageKeys.Errors.ARENA_NOT_FOUND, name));
+        return new LocalizableError((l) -> l.substitute(MessageKeys.Errors.ARENA_NOT_FOUND, name));
       }), context, args);
     }
   }

@@ -1,9 +1,10 @@
 package io.github.aparx.skywarz.command.tree;
 
+import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import lombok.Getter;
@@ -32,17 +33,17 @@ public final class CommandTree implements CommandNodeExecutor {
     return valueMap;
   }
 
-  private static CommandError createSyntaxError(CommandContext context, CommandNode node) {
-    Map<String, Object> vals = createCommandSubstitutorContext(context);
+  private static LocalizableError createSyntaxError(CommandContext context, CommandNode node) {
+    Map<String, Object> values = createCommandSubstitutorContext(context);
     Optional.ofNullable(node)
         .map(CommandNode::getUsage)
-        .ifPresent((usage) -> vals.put("usage", usage));
-    return new CommandError((lang) -> lang.substitute(MessageKeys.Errors.SYNTAX, vals));
+        .ifPresent((usage) -> values.put("usage", usage));
+    return new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.SYNTAX, values));
   }
 
-  private static CommandError createPermissionError(CommandContext context) {
-    Map<String, Object> vals = createCommandSubstitutorContext(context);
-    return new CommandError((lang) -> lang.substitute(MessageKeys.Errors.PERMISSION, vals));
+  private static LocalizableError createPermissionError(CommandContext context) {
+    Map<String, Object> values = createCommandSubstitutorContext(context);
+    return new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.PERMISSION, values));
   }
 
   @Override
@@ -51,15 +52,16 @@ public final class CommandTree implements CommandNodeExecutor {
     try {
       CommandNode node = locateLeaf(context, args).orElseThrow(() -> {
         Map<String, Object> vals = createCommandSubstitutorContext(context);
-        return new CommandError((l) -> l.substitute(MessageKeys.Errors.COMMAND_NOT_FOUND, vals));
+        return new LocalizableError((l) -> l.substitute(MessageKeys.Errors.COMMAND_NOT_FOUND, vals));
       });
       handleErrors(context, args, node);
       node.execute(context, args.subargs(1 + node.getIndex()));
       handleErrors(context, args, node);
-    } catch (CommandError error) {
-      sender.sendMessage(error.getMessage());
+    } catch (LocalizableError error) {
+      sender.sendMessage(error.getLocalizedMessage());
     } catch (IllegalArgumentException | IllegalStateException e) {
-      e.printStackTrace(); // TODO only for development mode
+      if (Magics.isDevelopment())
+        Skywars.logger().log(Level.WARNING, e.getMessage(), e);
       Skywars.logger().log(Level.FINE, "Error occurred on command execution", e);
       sender.sendMessage(Language.getInstance().substitute(MessageKeys.Errors.GENERIC, e.getMessage()));
     }
@@ -70,7 +72,7 @@ public final class CommandTree implements CommandNodeExecutor {
     String command = args.first().get();
     for (CommandNode root : roots) {
       if (!root.isMatching(command)) continue;
-      return Optional.ofNullable(locateLeaf0(context, args.subargs(1), root));
+      return Optional.of(locateLeaf0(context, args.subargs(1), root));
     }
     return Optional.empty();
   }

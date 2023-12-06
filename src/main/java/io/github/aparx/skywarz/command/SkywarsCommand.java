@@ -15,12 +15,14 @@ import io.github.aparx.skywarz.command.commands.arena.remove.ArenaRemoveSpawnCom
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetLobbyCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetPointCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetSpectatorCommand;
+import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetTeamSize;
 import io.github.aparx.skywarz.command.tree.CommandBuilder;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.command.tree.CommandNodeSet;
 import io.github.aparx.skywarz.command.tree.CommandTree;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.permission.Permission;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -48,7 +50,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     // /skywars arena <...>
     final CommandNode arena;
     roots.add(arena = CommandBuilder.builder("arena")
-        .permission("skywarz.setup")
+        .permission(Permission.SETUP)
         .build());
     List.of(
         new ArenaCreateCommand(arena),
@@ -58,16 +60,20 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     ).forEach(arena::add);
 
     arena.add(CommandBuilder.builder(arena, "set")
+        .permission(Permission.SETUP)
         .build()
         .add(ArenaSetSpectatorCommand::new)
         .add(ArenaSetLobbyCommand::new)
-        .add(ArenaSetPointCommand::new));
+        .add(ArenaSetPointCommand::new)
+        .add(ArenaSetTeamSize::new));
 
     arena.add(CommandBuilder.builder(arena, "add")
+        .permission(Permission.SETUP)
         .build()
         .add(ArenaAddSpawnCommand::new));
 
     arena.add(CommandBuilder.builder(arena, "remove")
+        .permission(Permission.SETUP)
         .build()
         .add(ArenaRemoveSpawnCommand::new));
 
@@ -82,7 +88,6 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
   public boolean onCommand(CommandSender sender, Command command, String label,
                            String[] args) {
     CommandArgList newArgs = CommandArgList.of(args);
-    System.out.println(Language.getInstance().get(MessageKeys.PREFIX));
     if (newArgs.isEmpty()) {
       Plugin plugin = Preconditions.checkNotNull(Skywars.plugin());
       Language language = Language.getInstance();

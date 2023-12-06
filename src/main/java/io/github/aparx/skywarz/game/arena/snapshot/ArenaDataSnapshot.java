@@ -45,7 +45,7 @@ public class ArenaDataSnapshot implements IArenaData {
     Map<String, SpawnGroup> spawns = data.getSpawns();
     this.spawns = new HashMap<>(spawns.size());
     for (Map.Entry<String, SpawnGroup> entry : spawns.entrySet())
-      this.spawns.put(entry.getKey(), entry.getValue().createSnapshot());
+      this.spawns.put(entry.getKey(), entry.getValue().copy());
   }
 
   public @NonNull World getWorld() {

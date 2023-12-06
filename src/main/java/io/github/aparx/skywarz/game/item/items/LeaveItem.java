@@ -1,17 +1,24 @@
-package io.github.aparx.skywarz.game.items.waiting;
+package io.github.aparx.skywarz.game.item.items;
 
-import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.commands.LeaveCommand;
-import io.github.aparx.skywarz.game.items.GameItem;
+import io.github.aparx.skywarz.game.item.GameItem;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.startup.Main;
+import io.github.aparx.skywarz.utils.item.ItemBuilder;
+import io.github.aparx.skywarz.utils.item.WrappedItemStack;
+import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Map;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -20,13 +27,24 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  */
 public final class LeaveItem extends GameItem {
 
+  public static final int SLOT = 8;
+
+  @ConfigMapping("item.item")
+  private WrappedItemStack item = ItemBuilder
+      .builder(Material.RED_DYE)
+      .lore("§8Click to leave this match")
+      .name("§cLeave")
+      .enchants(Map.of(Enchantment.LUCK, 2))
+      .flags(ItemFlag.HIDE_ENCHANTS)
+      .wrap();
+
   public LeaveItem() {
-    super("leave", MatchState.WAITING);
+    super("leave", new MatchState[]{MatchState.WAITING, MatchState.PLAYING, MatchState.DONE});
   }
 
   @Override
   protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
-    return Skywars.getInstance().getConfigHandler().getItems().getLeave().getStack();
+    return item.getStack();
   }
 
   @Override

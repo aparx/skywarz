@@ -1,10 +1,11 @@
-package io.github.aparx.skywarz.game.items;
+package io.github.aparx.skywarz.game.item;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.items.waiting.LeaveItem;
-import io.github.aparx.skywarz.game.items.waiting.TeamSelectorItem;
+import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
+import io.github.aparx.skywarz.game.item.items.LeaveItem;
+import io.github.aparx.skywarz.game.item.items.waiting.TeamSelectorItem;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import lombok.Getter;
@@ -64,6 +65,7 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
     if (items.isEmpty()) {
       add(new LeaveItem());
       add(new TeamSelectorItem());
+      add(new TeleportItem());
     }
     items.forEach(GameItem::register);
     Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());

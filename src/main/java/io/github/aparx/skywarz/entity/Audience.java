@@ -30,10 +30,6 @@ public interface Audience {
     else sendMessage(message);
   }
 
-  default void sendMessage(Function<Language, Object> message) {
-    sendMessage(message.apply(Language.getInstance()));
-  }
-
   default void sendFormattedMessage(ArrayPath messagePath) {
     sendMessage(Language.getInstance().get(messagePath).substitute());
   }

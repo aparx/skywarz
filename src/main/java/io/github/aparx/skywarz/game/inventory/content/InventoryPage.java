@@ -1,7 +1,10 @@
-package io.github.aparx.skywarz.game.inventory;
+package io.github.aparx.skywarz.game.inventory.content;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
+import io.github.aparx.skywarz.game.inventory.InventoryItem;
+import io.github.aparx.skywarz.game.inventory.InventoryPosition;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.bukkit.inventory.ItemStack;
@@ -18,14 +21,14 @@ import java.util.Optional;
  * @since 1.0
  */
 @Getter
-public class InventoryContent {
+public class InventoryPage implements InventoryContentView {
 
   private final @NonNull InventoryDimensions dimensions;
 
   @Getter(AccessLevel.NONE)
   private final @Nullable InventoryItem @NonNull [] items;
 
-  public InventoryContent(
+  public InventoryPage(
       @NonNull InventoryDimensions dimensions,
       @Nullable InventoryItem @NonNull [] items) {
     Preconditions.checkNotNull(dimensions, "Dimensions must not be null");
@@ -36,25 +39,14 @@ public class InventoryContent {
     this.dimensions = dimensions;
   }
 
-  public InventoryContent(@NonNull InventoryDimensions dimensions) {
+  public InventoryPage(@NonNull InventoryDimensions dimensions) {
     this(dimensions, new InventoryItem[dimensions.size()]);
   }
 
+  @Override
   public Optional<InventoryItem> find(@NonNegative int index) {
     Preconditions.checkElementIndex(index, items.length);
     return Optional.ofNullable(items[index]);
-  }
-
-  public Optional<InventoryItem> find(InventoryPosition pos) {
-    return find(pos.toIndex(getDimensions().getWidth()));
-  }
-
-  public @NonNull InventoryItem get(@NonNegative int index) {
-    return find(index).orElseThrow();
-  }
-
-  public @NonNull InventoryItem get(InventoryPosition pos) {
-    return get(pos.toIndex(getDimensions().getWidth()));
   }
 
   @CanIgnoreReturnValue
@@ -94,6 +86,12 @@ public class InventoryContent {
       Arrays.fill(items,
           InventoryPosition.toIndex(0, rowLength - 1, columnLength),
           items.length - 1, item);
+    fillSides(item);
+  }
+
+  public void fillSides(InventoryItem item) {
+    int columnLength = dimensions.getWidth();
+    int rowLength = dimensions.getHeight();
     // Fill left and right
     for (int rowIndex = 0; rowIndex < rowLength; ++rowIndex) {
       items[InventoryPosition.toIndex(0, rowIndex, columnLength)] = item;

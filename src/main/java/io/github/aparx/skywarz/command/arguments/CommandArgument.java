@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.command.arguments;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.MessageKeys;
 import lombok.AccessLevel;
@@ -11,7 +11,6 @@ import lombok.Getter;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -69,9 +68,9 @@ public final class CommandArgument {
   }
 
   public int getInt() {
-    return CommandError.supplyAndRethrowOnError(
+    return LocalizableError.localizeThrow(
         () -> Preconditions.checkNotNull(Ints.tryParse(argument)),
-        (lang) -> lang.substitute(MessageKeys.Errors.INTEGER, Map.of("value", argument)));
+        (lang) -> lang.substitute(MessageKeys.Errors.INTEGER, argument));
   }
 
   public double getDouble(double defaultValue) {
@@ -79,9 +78,9 @@ public final class CommandArgument {
   }
 
   public double getDouble() {
-    return CommandError.supplyAndRethrowOnError(
+    return LocalizableError.localizeThrow(
         () -> Preconditions.checkNotNull(Doubles.tryParse(argument)),
-        (lang) -> lang.substitute(MessageKeys.Errors.NUMBER, Map.of("value", argument)));
+        (lang) -> lang.substitute(MessageKeys.Errors.NUMBER, argument));
   }
 
   public TeamEnum getTeam(TeamEnum defaultValue) {

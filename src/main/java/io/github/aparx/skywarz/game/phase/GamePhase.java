@@ -70,7 +70,10 @@ public abstract class GamePhase implements Listener {
   protected abstract void updateTick();
 
   /** Event method called when a player joins while this phase is ongoing. */
-  public abstract void join(SkywarsPlayer player);
+  public abstract void handleJoin(SkywarsPlayer player);
+
+  /** Event method called when a player leaves while this phase is ongoing. */
+  public void handleLeave(SkywarsPlayer player) {}
 
   protected void onStart() {
     Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
@@ -134,9 +137,11 @@ public abstract class GamePhase implements Listener {
   }
 
   protected Optional<Match> filterMatchFromPlayer(Player player) {
-    return findMatch()
-        .filter((match) -> match.isState(getState()))
-        .filter((match) -> SkywarsPlayer.getPlayer(player).getPlayerData()
+    Optional<Match> matchOpt = findMatch();
+    // extracted for less overhead (avoid unnecessary function allocations)
+    if (matchOpt.isEmpty()) return Optional.empty();
+    return matchOpt.filter((match) ->
+        SkywarsPlayer.getPlayer(player).getPlayerData()
             .find(PlayerMatchData.class)
             .filter((data) -> Objects.equals(data.getMatch(), match))
             .isPresent());

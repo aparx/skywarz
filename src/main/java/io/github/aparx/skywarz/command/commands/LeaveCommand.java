@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.exceptions.CommandError;
+import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
@@ -20,7 +20,6 @@ public class LeaveCommand extends CommandNode {
 
   public LeaveCommand() {
     super(CommandInfo.builder("leave")
-        .permission("skywarz.play")
         .description("Leave the arena you are in")
         .build());
   }
@@ -30,7 +29,7 @@ public class LeaveCommand extends CommandNode {
     SkywarsPlayer player = SkywarsPlayer.getPlayer(context.getPlayer());
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
-      throw new CommandError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
+      throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
     Match match = data.getMatch();
     Preconditions.checkNotNull(match, "Already left the match");
     Preconditions.checkState(match.leave(player), "Cannot leave match");

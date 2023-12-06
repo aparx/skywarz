@@ -5,6 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
+import io.github.aparx.skywarz.permission.Permission;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -73,7 +74,7 @@ public final class CommandBuilder {
   }
 
   @CanIgnoreReturnValue
-  public CommandBuilder permission(String permission) {
+  public CommandBuilder permission(Permission permission) {
     infoBuilder.permission(permission);
     return this;
   }

@@ -2,7 +2,9 @@ package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;
-import lombok.experimental.UtilityClass;
+import lombok.RequiredArgsConstructor;
+import lombok.With;
+import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.util.NumberConversions;
@@ -20,15 +22,18 @@ import java.util.Map;
 @SerializableAs("Skywarz.GameSettings")
 public final class GameSettings implements ConfigurationSerializable {
 
-  private static final GameSettings DEFAULT_SETTINGS = of(1, Flags.PROTECTION_PHASE);
+  private static final GameSettings DEFAULT_SETTINGS = of(1, Flag.of(
+      Flag.PROTECTION_PHASE, Flag.CHEST_RESET));
 
+  @With
   private final int teamSize;
 
+  @With
   private final int flags;
 
   private GameSettings(int teamSize, int flags) {
     Preconditions.checkArgument(teamSize >= 1, "Team size must be more than zero");
-    Preconditions.checkArgument((flags & ~Flags.FLAGS) == 0, "Flags contain unknown flag(s)");
+    Preconditions.checkArgument((flags & ~Flag.FLAGS) == 0, "Flags contain unknown flag(s)");
     this.teamSize = teamSize;
     this.flags = flags;
   }
@@ -51,14 +56,27 @@ public final class GameSettings implements ConfigurationSerializable {
     return Map.of("teamSize", teamSize, "flags", getFlags());
   }
 
-  @UtilityClass
-  public static final class Flags {
-    public static final int PROTECTION_PHASE = 1;
+  @Getter
+  @RequiredArgsConstructor
+  public enum Flag {
+    PROTECTION_PHASE(1),
+    CHEST_RESET(2);
 
-    private static final int FLAGS = PROTECTION_PHASE;
+    private static final int FLAGS = of(values());
 
-    public static boolean hasProtectionPhase(int flags) {
-      return (flags & PROTECTION_PHASE) != 0;
+    private final int mask;
+
+    public boolean isFlagged(int flags) {
+      return (flags & getMask()) != 0;
+    }
+
+    public static int of(Flag... flags) {
+      if (ArrayUtils.isEmpty(flags))
+        return 0;
+      int accumulate = 0;
+      for (Flag flag : values())
+        accumulate |= flag.mask;
+      return accumulate;
     }
   }
 

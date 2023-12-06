@@ -4,19 +4,23 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.game.SpawnMap;
 import io.github.aparx.skywarz.game.arena.*;
-import io.github.aparx.skywarz.game.items.GameItemManager;
+import io.github.aparx.skywarz.game.chest.ChestConfig;
+import io.github.aparx.skywarz.game.chest.ChestItem;
+import io.github.aparx.skywarz.game.item.GameItemManager;
+import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
 import io.github.aparx.skywarz.game.match.MatchManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
+import io.github.aparx.skywarz.utils.item.WrappedItemStack;
+import io.github.aparx.skywarz.utils.item.SkullItem;
 import lombok.Getter;
 import lombok.Synchronized;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
 import java.util.logging.Level;
@@ -36,6 +40,9 @@ public final class Skywars {
     ConfigurationSerialization.registerClass(SpawnMap.class);
     ConfigurationSerialization.registerClass(GameSettings.class);
     ConfigurationSerialization.registerClass(ArenaData.class);
+    ConfigurationSerialization.registerClass(WrappedItemStack.class);
+    ConfigurationSerialization.registerClass(ChestItem.class);
+    ConfigurationSerialization.registerClass(SkullItem.class);
   }
 
   @Getter
@@ -76,8 +83,8 @@ public final class Skywars {
       this.logger = plugin.getLogger();
       logger.info("Loading plugin");
       configHandler = new SkywarsConfigHandler(plugin);
-      configHandler.getMain().load(); // TODO handle in handler?
-      configHandler.getItems().load(); // TODO handle in handler?
+      MainConfig.getInstance().load();
+      ChestConfig.getInstance().load();
       Language.getInstance().load();
       getHandlers().forEach(SkywarsHandler::load);
       this.isLoaded = true;

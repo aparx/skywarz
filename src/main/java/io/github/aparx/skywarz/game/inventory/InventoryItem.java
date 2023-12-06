@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.game.inventory;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -17,6 +18,15 @@ import java.util.function.LongFunction;
 public interface InventoryItem extends ItemClickAction {
 
   ItemStack get(long ticks);
+
+  static InventoryItem of(@NonNull WrappedItemStack stack, @Nullable ItemClickAction action) {
+    Preconditions.checkNotNull(stack, "Stack must not be null");
+    return of((ticks) -> stack.getStack(), action);
+  }
+
+  static InventoryItem of(@NonNull WrappedItemStack stack) {
+    return of(stack, null);
+  }
 
   static InventoryItem of(@NonNull ItemStack stack, @Nullable ItemClickAction action) {
     Preconditions.checkNotNull(stack, "Stack must not be null");

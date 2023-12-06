@@ -36,7 +36,7 @@ public class Team extends WeakPlayerGroup {
 
   /** Returns true if players can still join this team. */
   public boolean hasSpace() {
-    return size() < getMatch().getArena().getData().getSettings().getTeamSize();
+    return size() < getMatch().getTeamSize();
   }
 
   @Override
