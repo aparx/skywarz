@@ -43,7 +43,7 @@ public abstract class GamePhase implements Listener {
   @Getter(AccessLevel.NONE)
   private volatile BukkitTask task;
 
-  private final @NonNull Ticker ticker;
+  private final @NonNull TimeTicker ticker;
 
   public GamePhase(@NonNull MatchState state,
                    @NonNull GamePhaseCycler cycler,

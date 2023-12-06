@@ -43,7 +43,9 @@ import java.util.Set;
 public class DonePhase extends GamePhase {
 
   public DonePhase(@NonNull GamePhaseCycler cycler) {
-    super(MatchState.DONE, cycler, TickDuration.of(TimeUnit.SECONDS, 15));
+    super(MatchState.DONE, cycler,
+        TickDuration.of(TimeUnit.SECONDS, 15),
+        TickDuration.of(TimeUnit.TICKS, 2));
   }
 
   @Override

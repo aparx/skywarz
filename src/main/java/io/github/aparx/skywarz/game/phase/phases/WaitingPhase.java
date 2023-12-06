@@ -48,7 +48,7 @@ public class WaitingPhase extends GamePhase {
 
   public WaitingPhase(@NonNull GamePhaseCycler cycler) {
     super(MatchState.WAITING, cycler,
-        TickDuration.of(TimeUnit.SECONDS, 3),
+        TickDuration.of(TimeUnit.SECONDS, 30),
         /* Update all two ticks to save performance */
         TickDuration.of(TimeUnit.TICKS, 2));
     trigger = new TimeTicker(getInterval());

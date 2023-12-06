@@ -41,7 +41,10 @@ public class PaginatableInventoryContent implements InventoryContentView {
   private final InventoryPosition lastPagePos;
 
   private final InventoryItem nextPageItem = InventoryItem.of(
-      SkullItem.of(ItemBuilder.builder().name(ChatColor.GRAY + "Next page").build(),
+      SkullItem.of(ItemBuilder.builder()
+              .material(Material.PLAYER_HEAD)
+              .name(ChatColor.GRAY + "Next page")
+              .build(),
           Bukkit.getOfflinePlayer("MHF_ArrowRight")),
       (player, event) -> {
         paginateNext();
@@ -49,7 +52,10 @@ public class PaginatableInventoryContent implements InventoryContentView {
       });
 
   private final InventoryItem lastPageItem = InventoryItem.of(
-      SkullItem.of(ItemBuilder.builder().name(ChatColor.GRAY + "Previous page").build(),
+      SkullItem.of(ItemBuilder.builder()
+              .material(Material.PLAYER_HEAD)
+              .name(ChatColor.GRAY + "Previous page")
+              .build(),
           Bukkit.getOfflinePlayer("MHF_ArrowLeft")),
       (player, event) -> {
         paginatePrevious();

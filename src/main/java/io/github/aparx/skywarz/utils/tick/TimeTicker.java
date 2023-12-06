@@ -51,6 +51,10 @@ public class TimeTicker implements Ticker {
     this.ticks.set(ticks);
   }
 
+  public void set(TickDuration duration) {
+    this.ticks.set(duration.getAmount(getInterval().getUnit()) / getInterval().getAmount());
+  }
+
   @Override
   @CanIgnoreReturnValue
   public long update(LongUnaryOperator updater) {
@@ -65,7 +69,7 @@ public class TimeTicker implements Ticker {
   @Override
   public long getElapsed(TimeUnit time) {
     return TickDuration.of(interval.getUnit(),
-        ticks.get() * Math.max(interval.getAmount(), 1))
+            ticks.get() * Math.max(interval.getAmount(), 1))
         .getAmount(time);
   }
 

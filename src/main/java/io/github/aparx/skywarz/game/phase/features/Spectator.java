@@ -3,6 +3,7 @@ package io.github.aparx.skywarz.game.phase.features;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
 import io.github.aparx.skywarz.game.match.Match;
@@ -28,6 +29,7 @@ public final class Spectator {
   /** Modifies and teleports {@code entity} to be a spectator. */
   public static void spawnAsSpectator(Match match, Player entity) {
     markAsSpectator(entity); // ensure the marking
+    PlayerSnapshot.ofSpectator(match, entity).restore(entity);
     match.getAudience().alive()
         .map(SkywarsPlayer::getOnline)
         .forEach((other) -> other.hidePlayer(Skywars.plugin(), entity));

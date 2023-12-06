@@ -59,6 +59,9 @@ public final class MessageKeys {
 
     public final ArrayPath KILLED = ArrayPath.of("match.killed");
     public final ArrayPath DIED = ArrayPath.of("match.death");
+
+    public final ArrayPath QUICKSTART_SUCCESS = ArrayPath.of("match.quickstart.success");
+    public final ArrayPath QUICKSTART_ERROR = ArrayPath.of("match.quickstart.error");
   }
 
   static final LinkedHashMap<ArrayPath, String> defaultMessages;
@@ -94,6 +97,9 @@ public final class MessageKeys {
     map.put(Match.BROADCAST_START, "{prefix}§7 The game starts in §b{time}§7 seconds!");
     map.put(Match.BROADCAST_REQUIRE, "{prefix}§7 Require §c{missing}§7 more players to start!");
     map.put(Match.BROADCAST_CLOSING, "{prefix}§7 The match closes in {time} seconds!");
+
+    map.put(Match.QUICKSTART_SUCCESS, "{successPrefix} The game will start shortly.");
+    map.put(Match.QUICKSTART_ERROR, "{warningPrefix} Cannot quickstart your match.");
 
     map.put(Match.KILLED, "{prefix}§7 Player {player.team.color}{player.name}§7 was slained by {killer.team.color}{killer.name}§7!");
     map.put(Match.DIED, "{prefix}§7 Player {player.team.color}{player.name}§7 died!");

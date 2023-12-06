@@ -6,6 +6,7 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.HelpCommand;
 import io.github.aparx.skywarz.command.commands.JoinCommand;
 import io.github.aparx.skywarz.command.commands.LeaveCommand;
+import io.github.aparx.skywarz.command.commands.StartCommand;
 import io.github.aparx.skywarz.command.commands.arena.ArenaCreateCommand;
 import io.github.aparx.skywarz.command.commands.arena.ArenaDeleteCommand;
 import io.github.aparx.skywarz.command.commands.arena.ArenaListCommand;
@@ -77,9 +78,9 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
         .build()
         .add(ArenaRemoveSpawnCommand::new));
 
-    // /skywars join <...>
     roots.add(new JoinCommand());
     roots.add(new LeaveCommand());
+    roots.add(new StartCommand());
 
     return tree;
   }

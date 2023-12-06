@@ -23,6 +23,9 @@ public final class Permission {
   /** Users with this permission are able to create, delete and generally manage Skywarz */
   public static final Permission SETUP = of("setup");
 
+  /** Users with this permission are able to skip the waiting phase */
+  public static final Permission QUICKSTART = of("quickstart");
+
   private final @NonNull ArrayPath permission;
 
   private Permission(@NonNull ArrayPath permission) {

@@ -26,21 +26,22 @@ import io.github.aparx.skywarz.language.ValueMapPopulators;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.io.CharConversionException;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -69,7 +70,14 @@ public class PlayingPhase extends GamePhase {
 
   @Override
   public void handleLeave(SkywarsPlayer player) {
-    player.findOnline().ifPresent((e) -> Spectator.removeSpectator(getMatch(), e));
+    player.findOnline().ifPresent((e) -> {
+      Spectator.removeSpectator(getMatch(), e);
+      findMatch().ifPresent((match) -> match.getAudience().dead()
+          .map(SkywarsPlayer::findOnline)
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .forEach((other) -> e.showPlayer(Skywars.plugin(), other)));
+    });
   }
 
   @Override
@@ -117,12 +125,22 @@ public class PlayingPhase extends GamePhase {
       // no player existing anymore, thus cancel
       stop(StopReason.UNKNOWN);
       Skywars.getInstance().getMatchManager().remove(match);
-      Bukkit.broadcastMessage("No team one (draw?)");
-    } else if (aliveCount == 1 && !Magics.isDevelopment() /* TODO temporarily */) {
+      Bukkit.broadcastMessage("No team won!");
+    } else if (aliveCount == 1) {
       getCycler().cycleNext();
-      Team team = alive.get(0);
-      // TODO
-      Bukkit.broadcastMessage("§eTeam " + Language.getInstance().getTeamName(team.getTeamEnum()) + " won!");
+      Team teamWon = alive.get(0);
+      ChatColor chatColor = teamWon.getTeamEnum().getChatColor();
+      String teamName = Language.getInstance().getTeamName(teamWon.getTeamEnum());
+      match.getAudience().forEach((player) -> {
+        PlayerMatchData matchData = player.getMatchData();
+        Team selfTeam = matchData.getTeam();
+        boolean hasWon = teamWon.equals(selfTeam);
+        // TODO
+        player.playTitle(hasWon ? "§aYou won!" : matchData.isInTeam() ? "§cYou lost" : "",
+            "§rTeam " + chatColor + teamName + "§r won!", 5, 4 * 20, 15);
+        player.sendMessage(" \n".repeat(5));
+        player.sendMessage("§rTeam " + chatColor + teamName + "§r won!");
+      });
     }
   }
 
@@ -207,6 +225,8 @@ public class PlayingPhase extends GamePhase {
     if (target.getBlockX() != origin.getBlockX()
         || target.getBlockZ() != origin.getBlockZ())
       filterMatchFromPlayer(event.getPlayer()).ifPresent((match) -> {
+        if (SkywarsPlayer.getPlayer(event.getPlayer()).getMatchData().isSpectator())
+          return;
         Arena source = match.getArena().getSource();
         if (source != null && !source.getData().getBox().isWithin(target)) {
           Location newLocation = origin.clone();
@@ -243,6 +263,15 @@ public class PlayingPhase extends GamePhase {
       filterMatchFromPlayer((Player) damager).ifPresent((match) -> {
         PlayerMatchData data = SkywarsPlayer.getPlayer((Player) damager).getMatchData();
         event.setCancelled(isProtectionPhase() || data.isSpectator());
+      });
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  void onPickup(EntityPickupItemEvent event) {
+    LivingEntity entity = event.getEntity();
+    if (!event.isCancelled() && entity instanceof Player)
+      filterMatchFromPlayer((Player) entity).ifPresent((match) -> {
+        event.setCancelled(SkywarsPlayer.getPlayer((Player) entity).getMatchData().isSpectator());
       });
   }
 

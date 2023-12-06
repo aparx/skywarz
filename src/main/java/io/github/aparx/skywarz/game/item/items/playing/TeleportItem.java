@@ -8,8 +8,10 @@ import io.github.aparx.skywarz.game.item.StaticGameItem;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
+import io.github.aparx.skywarz.utils.item.SkullItem;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -58,16 +60,18 @@ public final class TeleportItem extends StaticGameItem {
       public void updateInventory(long ticks) {
         items.clear();
         match.getAudience().alive().forEach((alive) -> {
-          items.add(InventoryItem.of(ItemBuilder.builder()
-              .material(Material.SKELETON_SKULL)
-              .name(alive.getDisplayName())
-              .build(), (p, e) -> {
-            alive.findOnline()
-                .filter((x) -> alive.getMatchData().isInMatch()
-                    && !alive.getMatchData().isSpectator())
-                .ifPresent(player::teleport);
-            e.setCancelled(true);
-          }));
+          items.add(InventoryItem.of(SkullItem.of(ItemBuilder.builder()
+                      .material(Material.PLAYER_HEAD)
+                      .name(alive.getDisplayName())
+                      .build(),
+                  Bukkit.getOfflinePlayer(alive.getId())),
+              (p, e) -> {
+                alive.findOnline()
+                    .filter((x) -> alive.getMatchData().isInMatch()
+                        && !alive.getMatchData().isSpectator())
+                    .ifPresent(player::teleport);
+                e.setCancelled(true);
+              }));
         });
         super.updateInventory(ticks);
       }

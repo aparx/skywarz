@@ -49,7 +49,9 @@ public abstract class CommandNode implements CommandNodeExecutor {
   @Getter(AccessLevel.NONE)
   private final Supplier<String> usageProcessed = Suppliers.memoize(() -> {
     // substitutes string variables within the usage for further "usage"
-    return Language.getInstance().substitute(getInfo().getUsage(), createValueMapForNode(this));
+    String usage = getInfo().getUsage();
+    if (usage == null) return "null";
+    return Language.getInstance().substitute(usage, createValueMapForNode(this));
   });
 
   public CommandNode(@NonNull CommandInfo info) {

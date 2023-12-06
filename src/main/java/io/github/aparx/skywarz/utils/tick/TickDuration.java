@@ -49,6 +49,17 @@ public final class TickDuration {
     return new TickDuration(unit, amount);
   }
 
+  public TickDuration add(long amount) {
+    return new TickDuration(getUnit(), getAmount() + amount);
+  }
+
+  public TickDuration add(TickDuration duration) {
+    return add(duration.getAmount(getUnit()));
+  }
+
+  public TickDuration multiply(long amount) {
+    return new TickDuration(getUnit(), getAmount() * amount);
+  }
 
   public TickDuration convertTo(@NonNull TimeUnit target) {
     Preconditions.checkNotNull(target, "Target unit must not be null");
