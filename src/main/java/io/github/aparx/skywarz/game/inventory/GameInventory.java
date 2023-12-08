@@ -6,12 +6,13 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.inventory.content.InventoryContentView;
 import io.github.aparx.skywarz.utils.collection.WeakHashSet;
-import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import lombok.Getter;
 import lombok.Synchronized;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
@@ -22,10 +23,12 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -51,6 +54,9 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
   private final TimeTicker updateTicker = new TimeTicker();
 
   private final WeakHashSet<HumanEntity> viewers = new WeakHashSet<>();
+
+  /** WeakHashSet of inventories that should be closed when this inventory closes. */
+  private final WeakHashSet<GameInventory<?>> openConnected = new WeakHashSet<>();
 
   public GameInventory(
       @Nullable InventoryHolder holder,
@@ -91,6 +97,32 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
     return createInventory(updateInterval, contentFactory, (x) -> title);
   }
 
+  private static boolean shouldPersist(ItemStack a, ItemStack b) {
+    if (Objects.equals(a, b)) return true;
+    if (a == null || b == null) return false;
+    if (!a.getType().equals(Material.PLAYER_HEAD)
+        || !b.getType().equals(a.getType()))
+      return false;
+    // special matching to ignore textures
+    if (!a.hasItemMeta() || !b.hasItemMeta())
+      return false;
+    SkullMeta aMeta = (SkullMeta) a.getItemMeta();
+    SkullMeta bMeta = (SkullMeta) b.getItemMeta();
+    if (aMeta == null || bMeta == null)
+      return false; // should be unreachable
+    OfflinePlayer aOwner = aMeta.getOwningPlayer();
+    OfflinePlayer bOwner = bMeta.getOwningPlayer();
+    return (Objects.equals(aOwner, bOwner)
+        || (aOwner != null && bOwner != null &&
+        ((aOwner.getName() == null) != (bOwner.getName() == null))))
+        && a.getAmount() == b.getAmount()
+        && Objects.equals(aMeta.getDisplayName(), bMeta.getDisplayName())
+        && aMeta.getEnchants().equals(bMeta.getEnchants())
+        && Objects.equals(aMeta.getLore(), bMeta.getLore())
+        && Objects.equals(aMeta.getItemFlags(), bMeta.getItemFlags())
+        && aMeta.isUnbreakable() == bMeta.isUnbreakable();
+  }
+
   @Synchronized
   public final InventoryDimensions getDimensions() {
     Preconditions.checkNotNull(content, "Content is not defined");
@@ -99,10 +131,9 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
 
   @Synchronized
   public void setContent(@NonNull T content) {
-    Preconditions.checkNotNull(content, "Content must not be null");
+    boolean isEquals = Objects.equals(content, this.content);
     this.content = content;
-    if (!content.getDimensions().equals(getDimensions()))
-      recreateInventory();
+    if (!isEquals) recreateInventory();
   }
 
   @Synchronized
@@ -111,24 +142,31 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
     this.inventory = Bukkit.createInventory(holder,
         getDimensions().size(),
         titleFactory.apply(this));
+    updateInventory();
     if (!viewers.isEmpty())
-      viewers.forEach((viewer) -> viewer.openInventory(inventory));
+      viewers.forEach((viewer) -> {
+        viewer.openInventory(inventory);
+        viewers.add(viewer); // enforce viewer
+      });
   }
 
   @Synchronized
   public void open(Player player) {
     if (inventory == null)
       recreateInventory();
-    player.openInventory(inventory);
     if (!viewers.add(player)) return;
     start(getUpdateInterval());
     updateInventory();
+    player.openInventory(inventory);
   }
 
   @Synchronized
   @CanIgnoreReturnValue
   public boolean close(Player player) {
     if (!viewers.remove(player)) return false;
+    for (GameInventory<?> subInventory : openConnected)
+      subInventory.close(player);
+    openConnected.clear();
     player.closeInventory();
     return true;
   }
@@ -146,7 +184,7 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
       ItemStack newItem = content.find(index)
           .map((item) -> item.get(ticks))
           .orElse(null);
-      if (!WrappedItemStack.isSimilar(newItem, inventory.getItem(index)))
+      if (!shouldPersist(newItem, inventory.getItem(index)))
         inventory.setItem(index, newItem);
     });
   }
@@ -178,7 +216,15 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
 
     Bukkit.getPluginManager().registerEvent(
         InventoryCloseEvent.class, this, EventPriority.NORMAL,
-        (listener, event) -> close((Player) ((InventoryCloseEvent) event).getPlayer()),
+        (listener, e) -> {
+          InventoryCloseEvent event = (InventoryCloseEvent) e;
+          for (GameInventory<?> subInventory : openConnected)
+            if (event.getInventory().equals(subInventory.getInventory()))
+              subInventory.close((Player) event.getPlayer());
+          openConnected.clear();
+          if (event.getInventory().equals(inventory))
+            close((Player) event.getPlayer());
+        },
         Skywars.plugin());
     return true;
   }

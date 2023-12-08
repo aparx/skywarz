@@ -17,6 +17,8 @@ import java.util.function.LongFunction;
  */
 public interface InventoryItem extends ItemClickAction {
 
+  ItemClickAction CLOSING_ACTION = (p, e) -> e.setCancelled(true);
+
   ItemStack get(long ticks);
 
   static InventoryItem of(@NonNull WrappedItemStack stack, @Nullable ItemClickAction action) {
@@ -26,6 +28,10 @@ public interface InventoryItem extends ItemClickAction {
 
   static InventoryItem of(@NonNull WrappedItemStack stack) {
     return of(stack, null);
+  }
+
+  static InventoryItem ofCancelling(@NonNull WrappedItemStack stack) {
+    return of(stack, CLOSING_ACTION);
   }
 
   static InventoryItem of(@NonNull ItemStack stack, @Nullable ItemClickAction action) {

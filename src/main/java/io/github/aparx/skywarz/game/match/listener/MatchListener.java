@@ -1,10 +1,12 @@
 package io.github.aparx.skywarz.game.match.listener;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
+import io.github.aparx.skywarz.game.match.MatchManager;
 import io.github.aparx.skywarz.utils.material.ConnectedMaterial;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
 import io.github.aparx.skywarz.game.match.Match;
@@ -22,12 +24,12 @@ import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -113,38 +115,39 @@ public class MatchListener implements Listener {
     Block clickedBlock = event.getClickedBlock();
     if (clickedBlock == null) return;
     handle(event.getPlayer(), (source, reset) -> {
-      if (!ConnectedMaterial.isStructure(event.getMaterial())
-          && event.getMaterial().isSolid())
-        return;
-      Block relative = clickedBlock.getRelative(event.getBlockFace());
-      reset.addStructure(new ArenaReset.LocationSnapshot(
-          relative.getLocation(), relative.getBlockData().clone()
-      ));
+      if (!source.getData().getBox().isWithin(clickedBlock.getBoundingBox()))
+        event.setCancelled(true);
     });
   }
 
   @EventHandler(priority = EventPriority.MONITOR)
-  void onFromTo(BlockFromToEvent event) {
+  void onBlockTravel(BlockFromToEvent event) {
     if (!event.isCancelled())
-      addResetHandle(event.getToBlock());
+      event.setCancelled(addResetHandle(event.getBlock())
+          != addResetHandle(event.getToBlock()));
   }
 
-  void addResetHandle(Block block) {
-    handle(block, (reset) -> reset.addStructure(
-        new ArenaReset.LocationSnapshot(block.getLocation(), block.getBlockData().clone())
-    ));
+  @CanIgnoreReturnValue
+  boolean addResetHandle(Block block) {
+    AtomicBoolean contained = new AtomicBoolean();
+    handle(block, (reset) -> {
+      contained.set(true);
+      reset.addStructure(new ArenaReset.LocationSnapshot(
+          block.getLocation(), block.getBlockData().clone()
+      ));
+    });
+    return contained.get();
   }
 
   void handle(World world, List<Block> blocks, BiConsumer<Block, Arena> callback) {
-    Skywars.getInstance().getMatchManager().forEach((match) -> {
-      ArenaSnapshot arena = match.getArena();
-      World arenaWorld = arena.getData().getWorld();
-      Arena source = arena.getSource();
-      blocks.forEach((block) -> {
+    MatchManager matchManager = Skywars.getInstance().getMatchManager();
+    blocks.forEach((block) -> {
+      matchManager.find(world).ifPresent((match) -> {
+        ArenaSnapshot arena = match.getArena();
+        Arena source = arena.getSource();
         if (block.getWorld() != world) return;
         Location location = block.getLocation();
-        if (world.equals(arenaWorld) && source != null
-            && source.getData().getBox().isWithin(location))
+        if (source != null && source.getData().getBox().isWithin(location))
           callback.accept(block, source);
       });
     });

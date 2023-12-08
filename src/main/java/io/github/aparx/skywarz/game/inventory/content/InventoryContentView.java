@@ -22,8 +22,6 @@ public interface InventoryContentView {
 
   Optional<InventoryItem> find(@NonNegative int index);
 
-  default void update() {}
-
   default Optional<InventoryItem> find(InventoryPosition pos) {
     return find(pos.toIndex(getDimensions().getWidth()));
   }

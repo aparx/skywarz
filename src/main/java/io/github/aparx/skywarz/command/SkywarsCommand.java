@@ -51,6 +51,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     // /skywars arena <...>
     final CommandNode arena;
     roots.add(arena = CommandBuilder.builder("arena")
+        .args("<{children}>")
         .permission(Permission.SETUP)
         .build());
     List.of(
@@ -62,6 +63,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
 
     arena.add(CommandBuilder.builder(arena, "set")
         .permission(Permission.SETUP)
+        .args("<{children}>")
         .build()
         .add(ArenaSetSpectatorCommand::new)
         .add(ArenaSetLobbyCommand::new)
@@ -70,10 +72,12 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
 
     arena.add(CommandBuilder.builder(arena, "add")
         .permission(Permission.SETUP)
+        .args("<{children}>")
         .build()
         .add(ArenaAddSpawnCommand::new));
 
     arena.add(CommandBuilder.builder(arena, "remove")
+        .args("<{children}>")
         .permission(Permission.SETUP)
         .build()
         .add(ArenaRemoveSpawnCommand::new));

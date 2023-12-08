@@ -8,10 +8,10 @@ import io.github.aparx.skywarz.game.inventory.InventoryPosition;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.SkullItem;
 import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -27,6 +27,7 @@ import java.util.function.Consumer;
  */
 @SuppressWarnings("deprecation")
 @Getter
+@Setter
 public class PaginatableInventoryContent implements InventoryContentView {
 
   private final @NonNull Consumer<PaginatableInventoryContent> updater;
@@ -37,8 +38,8 @@ public class PaginatableInventoryContent implements InventoryContentView {
 
   private int pageIndex;
 
-  private final InventoryPosition nextPagePos;
-  private final InventoryPosition lastPagePos;
+  private @NonNull InventoryPosition nextPagePos;
+  private @NonNull InventoryPosition lastPagePos;
 
   private final InventoryItem nextPageItem = InventoryItem.of(
       SkullItem.of(ItemBuilder.builder()
@@ -49,6 +50,9 @@ public class PaginatableInventoryContent implements InventoryContentView {
       (player, event) -> {
         paginateNext();
         event.setCancelled(true);
+        ((Player) event.getWhoClicked()).playSound(
+            event.getWhoClicked().getLocation(),
+            Sound.ENTITY_ITEM_PICKUP, 1f, .5f);
       });
 
   private final InventoryItem lastPageItem = InventoryItem.of(
@@ -60,6 +64,9 @@ public class PaginatableInventoryContent implements InventoryContentView {
       (player, event) -> {
         paginatePrevious();
         event.setCancelled(true);
+        ((Player) event.getWhoClicked()).playSound(
+            event.getWhoClicked().getLocation(),
+            Sound.ENTITY_ITEM_PICKUP, 1f, .5f);
       });
 
   private final InventoryItem noPageItem = InventoryItem.of(
@@ -123,20 +130,22 @@ public class PaginatableInventoryContent implements InventoryContentView {
     InventoryPage page = getPage();
     if (page == null) return Optional.empty();
     final int columnLength = dimensions.getWidth();
+    Optional<InventoryItem> override = page.find(index);
     // next page pagination item
     if (index == getNextPagePos().toIndex(columnLength))
-      if (!hasNextPage()) return Optional.of(noPageItem);
-      else return Optional.of(nextPageItem);
+      if (hasNextPage()) return Optional.of(nextPageItem);
+      else if (override.isPresent()) return override;
+      else return Optional.of(noPageItem);
     // previous page pagination item
     if (index == getLastPagePos().toIndex(columnLength))
-      if (!hasPreviousPage()) return Optional.of(noPageItem);
-      else return Optional.of(lastPageItem);
-    return page.find(index);
+      if (hasPreviousPage()) return Optional.of(lastPageItem);
+      else if (override.isPresent()) return override;
+      else return Optional.of(noPageItem);
+    return override;
   }
 
-  private InventoryPosition getPaginationPosition(int column) {
-    return InventoryPosition.ofPoint(column,
-        Math.max(NumberConversions.floor(getDimensions().getHeight() / 2.0) - 1, 0));
+  protected InventoryPosition getPaginationPosition(int column) {
+    return InventoryPosition.ofPoint(column, getDimensions().getHeight() - 1);
   }
 
 }

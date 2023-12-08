@@ -41,7 +41,7 @@ public class StartCommand extends CommandNode {
     try {
       Match match = data.getMatch();
       Preconditions.checkNotNull(match);
-      Preconditions.checkState(match.isState(MatchState.WAITING));
+      Preconditions.checkState(match.isState(MatchState.IDLE));
       GamePhase phase = match.getCycler().getPhase().orElseThrow();
       TickDuration passed = phase.getDuration().add(QUICKSTART_TARGET.multiply(-1));
       Preconditions.checkState(!phase.getTicker().hasElapsed(QUICKSTART_TARGET));

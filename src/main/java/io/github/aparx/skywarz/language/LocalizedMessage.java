@@ -3,6 +3,8 @@ package io.github.aparx.skywarz.language;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.game.kit.Kit;
 import io.github.aparx.skywarz.game.team.Team;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.text.StringSubstitutor;
@@ -13,8 +15,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -83,6 +87,7 @@ public final class LocalizedMessage {
     return substitute(defaultSubstitutor);
   }
 
+
   public String substitute(Object @Nullable ... args) {
     if (ArrayUtils.isEmpty(args))
       return substitute();
@@ -90,6 +95,12 @@ public final class LocalizedMessage {
     for (int i = 0; i < args.length; ++i)
       valueMap.put(String.valueOf(i), args[i]);
     return substitute(valueMap);
+  }
+
+  public String substitute(@NonNull SkywarsPlayer player, @NonNull ArrayPath prefix) {
+    Map<String, Object> map = new HashMap<>();
+    player.findOnline().ifPresent((o) -> ValueMapPopulators.populatePlayer(map, o, prefix));
+    return substitute(map);
   }
 
   public String substitute(@NonNull Player player, @NonNull ArrayPath prefix) {
@@ -104,8 +115,18 @@ public final class LocalizedMessage {
     return substitute(map);
   }
 
+  public String substitute(@NonNull Kit kit, @NonNull ArrayPath prefix) {
+    Map<String, Object> map = new HashMap<>();
+    ValueMapPopulators.populateKit(map, kit, prefix);
+    return substitute(map);
+  }
+
   public @NonNull String getRawContent() {
     return rawContent;
+  }
+
+  public @NonNull String[] toLines() {
+    return rawContent.split("\n");
   }
 
   public String get() {

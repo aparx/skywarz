@@ -1,33 +1,30 @@
-package io.github.aparx.skywarz.game.phase.phases;
+package io.github.aparx.skywarz.game.phase.phases.idle;
 
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
+import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
-import io.github.aparx.skywarz.game.item.items.waiting.TeamSelectorItem;
+import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
+import io.github.aparx.skywarz.game.item.items.idle.TeamSelectorItem;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
+import io.github.aparx.skywarz.game.phase.phases.LobbyPhaseListener;
+import io.github.aparx.skywarz.game.team.Team;
+import io.github.aparx.skywarz.game.team.TeamEnum;
+import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import io.github.aparx.skywarz.utils.tick.Ticker;
 import org.bukkit.GameMode;
-import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
@@ -37,7 +34,7 @@ import java.util.Map;
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class WaitingPhase extends GamePhase {
+public class IdlePhase extends GamePhase {
 
   private final Ticker trigger;
 
@@ -46,12 +43,13 @@ public class WaitingPhase extends GamePhase {
 
   private long secsLeft;
 
-  public WaitingPhase(@NonNull GamePhaseCycler cycler) {
-    super(MatchState.WAITING, cycler,
-        TickDuration.of(TimeUnit.SECONDS, 30),
+  public IdlePhase(@NonNull GamePhaseCycler cycler) {
+    super(MatchState.IDLE, cycler,
+        TickDuration.of(TimeUnit.SECONDS, 1),
         /* Update all two ticks to save performance */
         TickDuration.of(TimeUnit.TICKS, 2));
     trigger = new TimeTicker(getInterval());
+    setListener(new LobbyPhaseListener(this));
   }
 
   @Override
@@ -73,20 +71,12 @@ public class WaitingPhase extends GamePhase {
         .getItems()
         .require(TeamSelectorItem.class)
         .give(match, entity);
-  }
 
-  @Override
-  protected void onStart() {
-    super.onStart();
-  }
-
-  @Override
-  protected void onStop(StopReason reason) {
-    super.onStop(reason);
-    if (reason == StopReason.TIME)
-      findMatch()
-          .map(Match::getAudience)
-          .ifPresent((x) -> x.playSound(Sound.ENTITY_PLAYER_LEVELUP, .25f, .75f));
+    Skywars.getInstance()
+        .getGameItemManager()
+        .getItems()
+        .require(KitSelectorItem.class)
+        .give(match, entity);
   }
 
   @Override
@@ -116,50 +106,24 @@ public class WaitingPhase extends GamePhase {
           Map<String, Long> time = Map.of("time", secsLeft);
           players.forEach((player) -> {
             player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, time);
-            player.playSound(Sound.BLOCK_DISPENSER_DISPENSE, .5f, 1.5f);
+            SoundRecord.TIMER_TICK.play(player);
           });
         }
       } else if (playerSize != lastPlayerSize || trigger.isCycling(30, TimeUnit.SECONDS))
         players.sendFormattedMessage(MessageKeys.Match.BROADCAST_REQUIRE,
             Map.of("required", minPlayers, "missing", missingPlayerAmount));
     }
+    if (trigger.isCycling(3, TimeUnit.TICKS))
+      players.forEach((player) -> {
+        PlayerMatchData matchData = player.getMatchData();
+        Team team = matchData.getTeam();
+        if (team != null && matchData.isInTeam()) {
+          TeamEnum e = team.getTeamEnum();
+          player.playActionbar(e.getChatColor() + "Team " + Language.getInstance().getTeamName(e));
+        }
+      });
     if (hasMinimumPlayers) LevelAnimator.animate(this, (int) secsLeft);
     else if (lastMinimumPlayers) LevelAnimator.animate(this, 0);
-  }
-
-  // EVENT HANDLERS
-
-  @EventHandler(priority = EventPriority.HIGH)
-  void onPassiveDamage(EntityDamageEvent event) {
-    Entity damagee = event.getEntity();
-    if (event.isCancelled() || !(damagee instanceof Player)) return;
-    event.setCancelled(filterMatchFromPlayer((Player) damagee).isPresent());
-  }
-
-  @EventHandler(priority = EventPriority.HIGH)
-  void onActiveDamage(EntityDamageByEntityEvent event) {
-    Entity damager = event.getDamager();
-    if (event.isCancelled() || !(damager instanceof Player)) return;
-    event.setCancelled(filterMatchFromPlayer((Player) damager).isPresent());
-  }
-
-  @EventHandler(priority = EventPriority.HIGH)
-  void onHunger(FoodLevelChangeEvent event) {
-    HumanEntity entity = event.getEntity();
-    if (event.isCancelled() || !(entity instanceof Player)) return;
-    event.setCancelled(filterMatchFromPlayer((Player) entity).isPresent());
-  }
-
-  @EventHandler(priority = EventPriority.HIGH)
-  void onBreak(BlockBreakEvent event) {
-    if (event.isCancelled()) return;
-    event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
-  }
-
-  @EventHandler(priority = EventPriority.HIGH)
-  void onPlace(BlockPlaceEvent event) {
-    if (event.isCancelled()) return;
-    event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
   }
 
 }

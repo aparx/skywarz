@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.game.inventory;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;
+import lombok.With;
 import org.bukkit.event.inventory.InventoryType;
 import org.checkerframework.checker.index.qual.NonNegative;
 
@@ -14,6 +15,7 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @Getter
+@With
 public final class InventoryDimensions {
 
   public static final int DEFAULT_COLUMN_COUNT = 9;
@@ -31,6 +33,7 @@ public final class InventoryDimensions {
       ofUnary(InventoryType.BEACON.getDefaultSize());
 
   private final @NonNegative int width;
+
   private final @NonNegative int height;
 
   private InventoryDimensions(int width, int height) {
@@ -75,5 +78,13 @@ public final class InventoryDimensions {
   @Override
   public int hashCode() {
     return Objects.hash(width, height);
+  }
+
+  @Override
+  public String toString() {
+    return "InventoryDimensions{" +
+        "width=" + width +
+        ", height=" + height +
+        '}';
   }
 }

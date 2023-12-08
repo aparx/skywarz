@@ -8,20 +8,22 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.utils.collection.WeakHashSet;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -31,11 +33,14 @@ import java.util.Optional;
 @Getter
 public abstract class GameItem extends ConfigObject {
 
-  private final WeakHashSet<ItemStack> register = new WeakHashSet<>();
+  private static final String ID_LORE_PREFIX =
+      String.valueOf(ChatColor.DARK_GRAY) + ChatColor.ITALIC;
 
   private final @NonNull MatchState[] states;
 
   private final int flags;
+
+  private final String itemID = RandomStringUtils.random(10, "0123456789abcdef");
 
   public GameItem(@NonNull String name, @NonNull MatchState[] states) {
     this(name, states, 0);
@@ -50,21 +55,52 @@ public abstract class GameItem extends ConfigObject {
     this.flags = flags;
   }
 
+  /**
+   * Creates a new itemstack representing this {@code GameItem}.
+   * <p>The returned stack <strong>will</strong> be modified, thus a copy may be required.
+   *
+   * @param match     the match for the itemstack
+   * @param initiator the initiator (user) of this item
+   * @return the itemstack, {@code not null}
+   */
   protected abstract ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator);
 
   @CanIgnoreReturnValue
   public final ItemStack create(@NonNull Match match, @NonNull Player initiator) {
+    ItemStack stack = createDummy(match, initiator);
+    ItemMeta meta = stack.getItemMeta();
+    Preconditions.checkNotNull(meta, "Item has no meta");
+    // mark the item to be a GameItem (use a workaround involving lore instead of NBT tags)
+    List<String> lore = meta.getLore();
+    if (lore == null) lore = new ArrayList<>();
+    lore.add(StringUtils.SPACE);
+    lore.add(ID_LORE_PREFIX + itemID);
+    meta.setLore(lore);
+    stack.setItemMeta(meta);
+    return stack;
+  }
+
+  // TODO find a more fitting name
+  @CanIgnoreReturnValue
+  public final ItemStack createDummy(@NonNull Match match, @NonNull Player initiator) {
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(initiator, "Player must not be null");
     Preconditions.checkState(Arrays.stream(states).anyMatch(match::isState),
         "Cannot create item at state of match");
-    ItemStack stack = createItemStack(match, initiator);
-    register.add(stack);
-    return stack;
+    return createItemStack(match, initiator);
   }
 
   public boolean isItem(ItemStack itemStack) {
-    return register.contains(itemStack);
+    if (itemStack == null) return false;
+    ItemMeta meta = itemStack.getItemMeta();
+    if (meta == null) return false;
+    List<String> lore = meta.getLore();
+    if (lore == null || lore.isEmpty())
+      return false;
+    String s = lore.get(lore.size() - 1);
+    if (StringUtils.length(s) > ID_LORE_PREFIX.length())
+      return itemID.equals(s.substring(ID_LORE_PREFIX.length()));
+    return false;
   }
 
   public void register() {

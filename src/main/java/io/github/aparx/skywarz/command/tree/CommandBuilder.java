@@ -86,8 +86,6 @@ public final class CommandBuilder {
   }
 
   public CommandNode build() {
-    if (executor == null && StringUtils.isEmpty(infoBuilder.usage()))
-      usage("<{children}>"); // default usage if no usage has been applied
     return new CommandNode(infoBuilder.build(), parent) {
       @Override
       public void execute(CommandContext context, CommandArgList args) {

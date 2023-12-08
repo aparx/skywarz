@@ -18,7 +18,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Setter
 public abstract class StaticGameItem extends GameItem {
 
-  @ConfigMapping("item.slot")
+  @ConfigMapping("slot")
   @Document("The position of the item in the inventory (0 through 8)")
   private int slot = 0;
 

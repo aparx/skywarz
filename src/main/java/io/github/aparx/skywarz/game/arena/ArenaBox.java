@@ -11,7 +11,6 @@ import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.management.MonitorInfo;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -72,12 +71,24 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
     Vector max = points[Point.MAX.ordinal()];
     Preconditions.checkNotNull(min);
     Preconditions.checkNotNull(max);
-    return location.getX() >= min.getX()
-        && location.getZ() >= min.getZ()
-        && location.getY() >= min.getY()
-        && location.getX() <= max.getX()
-        && location.getZ() <= max.getZ()
-        && location.getY() <= max.getY();
+    return location.getBlockX() >= min.getBlockX()
+        && location.getBlockZ() >= min.getBlockZ()
+        && location.getBlockY() >= min.getBlockY()
+        && location.getBlockX() <= max.getBlockX()
+        && location.getBlockZ() <= max.getBlockZ()
+        && location.getBlockY() <= max.getBlockY();
+  }
+
+  public boolean isWithinHorizontally(@NonNull Location location) {
+    Preconditions.checkNotNull(location, "Location must not be null");
+    Vector min = points[Point.MIN.ordinal()];
+    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkNotNull(min);
+    Preconditions.checkNotNull(max);
+    return location.getBlockX() >= min.getBlockX()
+        && location.getBlockZ() >= min.getBlockZ()
+        && location.getBlockX() <= max.getBlockX()
+        && location.getBlockZ() <= max.getBlockZ();
   }
 
   public boolean isWithin(@NonNull BoundingBox boundingBox) {
@@ -86,12 +97,12 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
     Vector max = points[Point.MAX.ordinal()];
     Preconditions.checkNotNull(min);
     Preconditions.checkNotNull(max);
-    return boundingBox.getMinX() >= min.getX()
-        && boundingBox.getMinZ() >= min.getZ()
-        && boundingBox.getMinY() >= min.getY()
-        && boundingBox.getMaxX() <= max.getX()
-        && boundingBox.getMaxZ() <= max.getZ()
-        && boundingBox.getMaxZ() <= max.getY();
+    return boundingBox.getMinX() >= min.getBlockX()
+        && boundingBox.getMinZ() >= min.getBlockZ()
+        && boundingBox.getMinY() >= min.getBlockY()
+        && boundingBox.getMaxX() <= max.getBlockX()
+        && boundingBox.getMaxZ() <= max.getBlockZ()
+        && boundingBox.getMaxY() <= max.getBlockY();
   }
 
   public BoundingBox toBoundingBox() {

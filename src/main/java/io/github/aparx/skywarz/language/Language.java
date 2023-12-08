@@ -9,8 +9,8 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -31,7 +31,11 @@ public final class Language implements MessageStorage<ArrayPath> {
   });
 
   public Language() {
-    MessageKeys.defaultMessages.forEach(this::store);
+    MessageKeys.defaultMessages.forEach((path, object) -> {
+      if (object instanceof Collection)
+        store(path, (Collection<?>) object);
+      else store(path, object);
+    });
   }
 
   public void load() {
@@ -42,6 +46,8 @@ public final class Language implements MessageStorage<ArrayPath> {
       Object object = config.get(path);
       if (object instanceof String)
         register.store(path, object);
+      else if (object instanceof Collection<?>)
+        register.store(path, (Collection<?>) object);
     }
     save();
   }
@@ -49,7 +55,8 @@ public final class Language implements MessageStorage<ArrayPath> {
   public void save() {
     // copy over all messages from the register to the config
     register.entrySet().forEach((entry) -> {
-      config.set(entry.getKey(), entry.getValue().getRawContent());
+      String[] split = entry.getValue().toLines();
+      config.set(entry.getKey(), split.length == 1 ? split[0] : split);
     });
     config.save();
   }

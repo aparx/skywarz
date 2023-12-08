@@ -1,6 +1,7 @@
 package io.github.aparx.skywarz.game.item.items.playing;
 
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
+import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
 import io.github.aparx.skywarz.game.inventory.InventoryItem;
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
@@ -29,9 +30,10 @@ import java.util.Map;
  * @version 2023-12-04 06:57
  * @since 1.0
  */
+@Document("Teleporter")
 public final class TeleportItem extends StaticGameItem {
 
-  @ConfigMapping("item.item")
+  @ConfigMapping
   private WrappedItemStack item = ItemBuilder
       .builder(Material.COMPASS)
       .lore("§7Click to teleport to players")

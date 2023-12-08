@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -138,4 +139,16 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
         TextComponent.fromLegacyText(message)));
   }
 
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) return true;
+    if (object == null || getClass() != object.getClass()) return false;
+    SkywarsPlayer player = (SkywarsPlayer) object;
+    return Objects.equals(id, player.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 }

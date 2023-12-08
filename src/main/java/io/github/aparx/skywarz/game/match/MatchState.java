@@ -1,7 +1,5 @@
 package io.github.aparx.skywarz.game.match;
 
-import java.util.Optional;
-
 /**
  * @author aparx (Vinzent Z.)
  * @version 2023-12-03 06:18
@@ -12,7 +10,7 @@ public enum MatchState {
   /** Match is not joinable since it is either resetting or still in setup */
   SETUP,
   /** Players wait for others to join */
-  WAITING,
+  IDLE,
   /** Players are in the midst of playing */
   PLAYING,
   /** Match is done and players are sent back to lobby to celebrate the winner */

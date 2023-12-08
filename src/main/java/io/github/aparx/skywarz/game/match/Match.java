@@ -7,6 +7,9 @@ import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
+import io.github.aparx.skywarz.game.kit.Kit;
+import io.github.aparx.skywarz.game.kit.KitHandler;
+import io.github.aparx.skywarz.game.team.Team;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
@@ -19,12 +22,13 @@ import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.Snowflake;
+import io.github.aparx.skywarz.utils.collection.KeyValueSet;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Synchronized;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -35,16 +39,20 @@ import java.util.function.Predicate;
  * @since 1.0
  */
 @Getter
+@Setter
 public class Match implements Snowflake<UUID> {
 
   private final @NonNull UUID id;
 
   /** Returns a snapshot of an arena, so it is still valid for this match on allocation. */
+  @Setter(AccessLevel.NONE)
   private volatile @NonNull ArenaSnapshot arena;
 
   @Getter(onMethod_ = {@Synchronized})
   @Setter(onMethod_ = {@Synchronized})
   private volatile @NonNull MatchState state = MatchState.SETUP;
+
+  private volatile KeyValueSet<String, Kit> kits = KitHandler.getInstance().getKits();
 
   private final GamePhaseCycler cycler = new GamePhaseCycler(this);
 
@@ -70,6 +78,8 @@ public class Match implements Snowflake<UUID> {
     }
   };
 
+  private Team winner;
+
   public Match(@NonNull UUID id, @NonNull Arena arena) {
     Preconditions.checkNotNull(id, "ID must not be null");
     Preconditions.checkNotNull(arena, "Arena must not be null");
@@ -87,7 +97,8 @@ public class Match implements Snowflake<UUID> {
     Preconditions.checkNotNull(arenaSource, "Arena has become invalid");
     this.arena = new ArenaSnapshot(arenaSource);
     this.teamMap.createTeams();
-    cycler.cycleJump(MatchState.WAITING);
+    this.kits = KitHandler.getInstance().createSnapshot();
+    cycler.cycleJump(MatchState.IDLE);
 
     getWatchTask().start();
   }
@@ -129,7 +140,7 @@ public class Match implements Snowflake<UUID> {
         || data.isInMatch()
         || !getState().isJoinable())
       return false;
-    boolean isExceedingPlayerSize = isState(MatchState.WAITING)
+    boolean isExceedingPlayerSize = isState(MatchState.IDLE)
         && getAudience().size() >= getMaxPlayerSize();
     if (isExceedingPlayerSize && !player.hasPriority())
       throw new LocalizableError("Max players exceeded",

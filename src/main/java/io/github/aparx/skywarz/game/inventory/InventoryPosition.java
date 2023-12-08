@@ -51,6 +51,11 @@ public final class InventoryPosition {
     return shift(offset, DEFAULT_LENGTH_X);
   }
 
+  @CheckReturnValue
+  public InventoryPosition add(@NonNegative int columnOffset, @NonNegative int rowOffset) {
+    return new InventoryPosition(this.column + columnOffset, this.row + rowOffset);
+  }
+
   public int toIndex(@NonNegative int rowLength) {
     return toIndex(column, row, rowLength);
   }

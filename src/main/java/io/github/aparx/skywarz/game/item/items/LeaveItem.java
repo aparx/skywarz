@@ -39,12 +39,12 @@ public final class LeaveItem extends GameItem {
       .wrap();
 
   public LeaveItem() {
-    super("leave", new MatchState[]{MatchState.WAITING, MatchState.PLAYING, MatchState.DONE});
+    super("leave", new MatchState[]{MatchState.IDLE, MatchState.PLAYING, MatchState.DONE});
   }
 
   @Override
   protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
-    return item.getStack();
+    return item.getStack().clone();
   }
 
   @Override

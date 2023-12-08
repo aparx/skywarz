@@ -12,6 +12,7 @@ import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.Ticker;
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.Synchronized;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -44,6 +46,9 @@ public abstract class GamePhase implements Listener {
   private volatile BukkitTask task;
 
   private final @NonNull TimeTicker ticker;
+
+  @Setter(AccessLevel.PROTECTED)
+  private @Nullable GamePhaseListener<?> listener;
 
   public GamePhase(@NonNull MatchState state,
                    @NonNull GamePhaseCycler cycler,
@@ -76,11 +81,11 @@ public abstract class GamePhase implements Listener {
   public void handleLeave(SkywarsPlayer player) {}
 
   protected void onStart() {
-    Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
+    if (listener != null) listener.load();
   }
 
   protected void onStop(StopReason reason) {
-    HandlerList.unregisterAll(this);
+    if (listener != null) listener.unload();
   }
 
   @Synchronized
@@ -134,17 +139,6 @@ public abstract class GamePhase implements Listener {
 
   public Optional<Match> findMatch() {
     return cycler.findMatch();
-  }
-
-  protected Optional<Match> filterMatchFromPlayer(Player player) {
-    Optional<Match> matchOpt = findMatch();
-    // extracted for less overhead (avoid unnecessary function allocations)
-    if (matchOpt.isEmpty()) return Optional.empty();
-    return matchOpt.filter((match) ->
-        SkywarsPlayer.getPlayer(player).getPlayerData()
-            .find(PlayerMatchData.class)
-            .filter((data) -> Objects.equals(data.getMatch(), match))
-            .isPresent());
   }
 
   public enum StopReason {

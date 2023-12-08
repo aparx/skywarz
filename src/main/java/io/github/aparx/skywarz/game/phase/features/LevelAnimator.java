@@ -19,14 +19,10 @@ public final class LevelAnimator {
     long duration = phase.getDuration().toTicks();
     long elapsed = phase.getTicker().getElapsed(TimeUnit.TICKS);
     float exp = calcExp(duration, elapsed);
-    phase.getMatch().getAudience().stream()
-        .map(SkywarsPlayer::findOnline)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .forEach((player) -> {
-          player.setExp(exp);
-          player.setLevel(secondsLeft);
-        });
+    phase.getMatch().getAudience().entity().forEach((player) -> {
+      player.setExp(exp);
+      player.setLevel(secondsLeft);
+    });
   }
 
   static float calcExp(long duration, long elapsed) {

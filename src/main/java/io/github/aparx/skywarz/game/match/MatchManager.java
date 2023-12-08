@@ -10,6 +10,7 @@ import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
 import lombok.Synchronized;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.event.HandlerList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -30,6 +31,7 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
 
   private final KeyValueSet<UUID, Match> internalSet = KeyValueSets.ofSnowflake();
   private final WeakHashMap<Arena, Match> matchByArena = new WeakHashMap<>();
+  private final WeakHashMap<World, Match> matchByWorld = new WeakHashMap<>();
 
   @Override
   protected void onLoad() {
@@ -80,6 +82,7 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
     Preconditions.checkNotNull(match, "Match must not be null");
     if (!internalSet.add(match)) return false;
     matchByArena.put(match.getArena().getSource(), match);
+    matchByWorld.put(match.getArena().getData().getWorld(), match);
     return true;
   }
 
@@ -90,6 +93,8 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
     if (!internalSet.remove(match)) return false;
     matchByArena.remove(match.getArena().getSource());
     match.notifyRemoval();
+    // TODO check if this actually would throw any exceptions long-term
+    matchByWorld.remove(match.getArena().getData().getWorld());
     return true;
   }
 
@@ -106,6 +111,12 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
   }
 
   @Synchronized
+  public Optional<Match> find(@NonNull World world) {
+    Preconditions.checkNotNull(world, "World must not be null");
+    return Optional.ofNullable(matchByWorld.get(world));
+  }
+
+  @Synchronized
   @CanIgnoreReturnValue
   public Match get(@NonNull UUID matchId) {
     return find(matchId).orElseThrow();
@@ -115,6 +126,12 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
   @CanIgnoreReturnValue
   public Match get(@NonNull Arena arena) {
     return find(arena).orElseThrow();
+  }
+
+  @Synchronized
+  @CanIgnoreReturnValue
+  public Match get(@NonNull World world) {
+    return find(world).orElseThrow();
   }
 
   @Synchronized
@@ -130,6 +147,11 @@ public final class MatchManager extends DefaultSkywarsHandler implements Iterabl
   @Synchronized
   public boolean contains(Arena arena) {
     return arena != null && matchByArena.containsKey(arena);
+  }
+
+  @Synchronized
+  public boolean contains(World world) {
+    return world != null && matchByWorld.containsKey(world);
   }
 
   @Override

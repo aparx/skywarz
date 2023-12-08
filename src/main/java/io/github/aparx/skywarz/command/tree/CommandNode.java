@@ -85,7 +85,7 @@ public abstract class CommandNode implements CommandNodeExecutor {
     output.put(keyPrefix + "aliases", info.getAliases());
     output.put(keyPrefix + "children", node.getChildren().stream()
         .map((child) -> child.getInfo().getName())
-        .collect(Collectors.joining(" - ")));
+        .collect(Collectors.joining(":")));
     if (!node.isRoot())
       createValueMapForNode0(output, node.getParent(), keyPrefix + "parent.");
   }

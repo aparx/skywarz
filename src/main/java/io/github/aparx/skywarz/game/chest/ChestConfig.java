@@ -6,6 +6,7 @@ import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 
 import java.util.Set;
 
@@ -50,7 +51,9 @@ public final class ChestConfig extends ConfigObject {
       "  weight: 10.0",
       "  type: diamond chestplate",
       "  enchants:",
-      "    ARROW PROTECTION: 2"
+      "    PROTECTION_FIRE: 2",
+      "Enchantments names are done after Bukkit's enchantment enumeration:",
+      "https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html"
   })
   private ChestItems items = new ChestItems();
 

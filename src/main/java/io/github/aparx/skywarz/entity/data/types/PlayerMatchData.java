@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.entity.data.types;
 
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
+import io.github.aparx.skywarz.game.kit.Kit;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.team.Team;
 import lombok.AccessLevel;
@@ -30,6 +31,8 @@ public final class PlayerMatchData extends SkywarsPlayerData {
 
   private PlayerSnapshot snapshot;
 
+  private Kit kit;
+
   public @Nullable Match getMatch() {
     if (currentMatch == null)
       return null;
@@ -56,6 +59,10 @@ public final class PlayerMatchData extends SkywarsPlayerData {
 
   public boolean isInTeam() {
     return team != null && team.get() != null;
+  }
+
+  public boolean hasKit() {
+    return kit != null;
   }
 
 }

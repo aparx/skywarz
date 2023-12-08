@@ -8,6 +8,8 @@ import io.github.aparx.skywarz.game.inventory.InventoryItem;
 import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
 import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryContent;
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
+import io.github.aparx.skywarz.game.kit.DefaultKits;
+import io.github.aparx.skywarz.game.kit.KitHandler;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.SkullItem;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -42,7 +44,7 @@ public final class Main extends JavaPlugin implements Listener {
     skywars.setExecutor(command);
     skywars.setTabCompleter(command);
 
-    //Bukkit.getPluginManager().registerEvents(this, this);
+    Bukkit.getPluginManager().registerEvents(this, this);
   }
 
   @Override
@@ -50,24 +52,11 @@ public final class Main extends JavaPlugin implements Listener {
     Skywars.getInstance().unload();
   }
 
+  int cycle = 0;
+
   @EventHandler
   void interact(PlayerInteractEvent e) {
-    ArrayList<InventoryItem> items = new ArrayList<>();
-    PaginatingInventory inventory = new PaginatingInventory(null, TickDuration.ofTick(),
-        InventoryDimensions.ofRows(2), items, "Test pagination");
-    fillItems(items);
-    inventory.open(e.getPlayer());
-  }
-
-  private final ItemStack stack = SkullItem.of(ItemBuilder.builder()
-          .material(Material.PLAYER_HEAD)
-          .build(),
-      Bukkit.getOfflinePlayer("Chesthead"))
-      .getStack();
-
-  void fillItems(ArrayList<InventoryItem> list) {
-    for (int i = 0; i <= 16; ++i)
-      list.add(InventoryItem.of(stack));
+    //DefaultKits.values()[(cycle++) % DefaultKits.values().length].getKit().apply(e.getPlayer());
   }
 
 }

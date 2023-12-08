@@ -1,6 +1,5 @@
 package io.github.aparx.skywarz.game.phase.features;
 
-import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
@@ -47,9 +46,10 @@ public final class Spectator {
 
   public static void removeSpectator(Match match, Player entity) {
     SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(false);
-    match.getAudience().alive()
-        .map(SkywarsPlayer::getOnline)
-        .forEach((other) -> other.showPlayer(Skywars.plugin(), entity));
+    match.getAudience().entity().forEach((other) -> {
+      other.showPlayer(Skywars.plugin(), entity);
+      entity.showPlayer(Skywars.plugin(), other);
+    });
   }
 
 }

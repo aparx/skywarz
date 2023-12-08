@@ -1,5 +1,6 @@
 package io.github.aparx.skywarz.utils.item;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import lombok.AccessLevel;
@@ -18,6 +19,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -39,6 +41,9 @@ public final class ItemBuilder {
 
   @Setter(AccessLevel.NONE)
   private @Nullable ItemFlag[] flags;
+
+  @Setter(AccessLevel.NONE)
+  private @NonNull List<Consumer<ItemMeta>> modifiers = new ArrayList<>();
 
   public static ItemBuilder builder() {
     return new ItemBuilder();
@@ -88,6 +93,19 @@ public final class ItemBuilder {
     return this;
   }
 
+  @CanIgnoreReturnValue
+  public ItemBuilder flags(ItemFlag[] flags) {
+    this.flags = flags;
+    return this;
+  }
+
+  @CanIgnoreReturnValue
+  public ItemBuilder modify(@NonNull Consumer<ItemMeta> modifier) {
+    Preconditions.checkNotNull(modifier, "Modifier must not be null");
+    modifiers.add(modifier);
+    return this;
+  }
+
   public WrappedItemStack wrap() {
     return new WrappedItemStack(build());
   }
@@ -102,9 +120,10 @@ public final class ItemBuilder {
       itemMeta.addItemFlags(Arrays.stream(flags)
           .filter(Objects::nonNull)
           .toArray(ItemFlag[]::new));
-    stack.setItemMeta(itemMeta);
     if (enchants != null)
-      stack.addUnsafeEnchantments(enchants);
+      enchants.forEach((type, level) -> itemMeta.addEnchant(type, level, true));
+    modifiers.forEach((modifier) -> modifier.accept(itemMeta));
+    stack.setItemMeta(itemMeta);
     return stack;
   }
 

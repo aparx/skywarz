@@ -5,7 +5,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
-import io.github.aparx.skywarz.game.item.items.waiting.TeamSelectorItem;
+import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
+import io.github.aparx.skywarz.game.item.items.idle.TeamSelectorItem;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import lombok.Getter;
@@ -66,6 +67,7 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
       add(new LeaveItem());
       add(new TeamSelectorItem());
       add(new TeleportItem());
+      add(new KitSelectorItem());
     }
     items.forEach(GameItem::register);
     Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
@@ -77,9 +79,9 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
     HandlerList.unregisterAll(this);
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler
   void onClick(PlayerInteractEvent event) {
-    if (event.getItem() != null)
+    if (event.useItemInHand() != Event.Result.DENY && event.getItem() != null)
       items.stream()
           .filter((item) -> item.isItem(event.getItem()))
           .findFirst()
@@ -89,22 +91,24 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
 
   @EventHandler(priority = EventPriority.HIGH)
   void onDrop(PlayerDropItemEvent event) {
-    if (!event.isCancelled()) items.stream()
-        .filter((item) -> item.isItem(event.getItemDrop().getItemStack()))
-        .findFirst()
-        .ifPresent((item) -> item.filterMatch(event.getPlayer())
-            .ifPresent((match) -> item.handleDrop(match, event)));
+    if (!event.isCancelled())
+      items.stream()
+          .filter((item) -> item.isItem(event.getItemDrop().getItemStack()))
+          .findFirst()
+          .ifPresent((item) -> item.filterMatch(event.getPlayer())
+              .ifPresent((match) -> item.handleDrop(match, event)));
   }
 
   @EventHandler(priority = EventPriority.HIGH)
   void onInventory(InventoryClickEvent event) {
     HumanEntity whoClicked = event.getWhoClicked();
     if (!(whoClicked instanceof Player)) return;
-    if (!event.isCancelled()) items.stream()
-        .filter((item) -> item.isItem(event.getCurrentItem()))
-        .findFirst()
-        .ifPresent((item) -> item.filterMatch((Player) whoClicked)
-            .ifPresent((match) -> item.handleInventory(match, event)));
+    if (!event.isCancelled())
+      items.stream()
+          .filter((item) -> item.isItem(event.getCurrentItem()))
+          .findFirst()
+          .ifPresent((item) -> item.filterMatch((Player) whoClicked)
+              .ifPresent((match) -> item.handleInventory(match, event)));
   }
 
 }

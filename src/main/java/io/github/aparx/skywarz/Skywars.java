@@ -7,6 +7,8 @@ import io.github.aparx.skywarz.game.arena.*;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestItem;
 import io.github.aparx.skywarz.game.item.GameItemManager;
+import io.github.aparx.skywarz.game.kit.Kit;
+import io.github.aparx.skywarz.game.kit.KitHandler;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
@@ -43,6 +45,7 @@ public final class Skywars {
     ConfigurationSerialization.registerClass(WrappedItemStack.class);
     ConfigurationSerialization.registerClass(ChestItem.class);
     ConfigurationSerialization.registerClass(SkullItem.class);
+    ConfigurationSerialization.registerClass(Kit.class);
   }
 
   @Getter
@@ -85,6 +88,7 @@ public final class Skywars {
       configHandler = new SkywarsConfigHandler(plugin);
       MainConfig.getInstance().load();
       ChestConfig.getInstance().load();
+      KitHandler.getInstance().load();
       Language.getInstance().load();
       getHandlers().forEach(SkywarsHandler::load);
       this.isLoaded = true;

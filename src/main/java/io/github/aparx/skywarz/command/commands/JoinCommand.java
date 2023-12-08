@@ -43,7 +43,6 @@ public class JoinCommand extends AbstractArenaCommand {
       if (!match.getState().isJoinable())
         throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Match.JOIN_ERROR));
       Preconditions.checkState(match.join(player), "Cannot join match");
-      player.sendFormattedMessage(MessageKeys.Match.JOIN_SUCCESS);
     }
   }
 }

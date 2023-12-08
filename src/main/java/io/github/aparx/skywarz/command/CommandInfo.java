@@ -67,7 +67,7 @@ public final class CommandInfo {
     private ImmutableSet<String> aliases = ImmutableSet.of();
     private @Nullable String description;
     private @Nullable Permission permission;
-    private String usage = "/{label} {args}";
+    private String usage = DEFAULT_USAGE;
 
     @CanIgnoreReturnValue
     public Builder aliases(@NonNull ImmutableSet<String> aliases) {

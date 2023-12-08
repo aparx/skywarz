@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.DyeColor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,22 +18,23 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 public enum TeamEnum {
 
   /** This team is a special one, whereas this is used for purely solo Skywars arenas */
-  SOLO(ChatColor.WHITE, DyeColor.WHITE),
+  SOLO(Color.TEAL, ChatColor.WHITE, DyeColor.WHITE),
 
-  RED(ChatColor.RED, DyeColor.RED),
-  GREEN(ChatColor.GREEN, DyeColor.GREEN),
-  BLUE(ChatColor.BLUE, DyeColor.LIGHT_BLUE),
-  WHITE(ChatColor.WHITE, DyeColor.WHITE),
-  BLACK(ChatColor.BLACK, DyeColor.BLACK),
-  CYAN(ChatColor.AQUA, DyeColor.CYAN),
-  ORANGE(ChatColor.GOLD, DyeColor.ORANGE),
-  YELLOW(ChatColor.YELLOW, DyeColor.YELLOW),
-  PURPLE(ChatColor.DARK_PURPLE, DyeColor.PURPLE),
-  MAGENTA(ChatColor.LIGHT_PURPLE, DyeColor.MAGENTA),
-  LIME(ChatColor.GREEN, DyeColor.LIME),
-  BROWN(ChatColor.GRAY, DyeColor.BROWN),
-  GRAY(ChatColor.GRAY, DyeColor.LIGHT_GRAY);
+  RED(Color.RED, ChatColor.RED, DyeColor.RED),
+  GREEN(Color.GREEN, ChatColor.GREEN, DyeColor.GREEN),
+  BLUE(Color.BLUE, ChatColor.BLUE, DyeColor.BLUE),
+  WHITE(Color.WHITE, ChatColor.WHITE, DyeColor.WHITE),
+  BLACK(Color.BLACK, ChatColor.BLACK, DyeColor.BLACK),
+  CYAN(Color.AQUA, ChatColor.AQUA, DyeColor.CYAN),
+  ORANGE(Color.ORANGE, ChatColor.GOLD, DyeColor.ORANGE),
+  YELLOW(Color.YELLOW, ChatColor.YELLOW, DyeColor.YELLOW),
+  PURPLE(Color.PURPLE, ChatColor.DARK_PURPLE, DyeColor.PURPLE),
+  MAGENTA(Color.PURPLE, ChatColor.LIGHT_PURPLE, DyeColor.MAGENTA),
+  LIME(Color.LIME, ChatColor.GREEN, DyeColor.LIME),
+  BROWN(Color.GRAY, ChatColor.GRAY, DyeColor.BROWN),
+  GRAY(Color.GRAY, ChatColor.GRAY, DyeColor.LIGHT_GRAY);
 
+  private final @NonNull Color color;
   private final @NonNull ChatColor chatColor;
   private final @NonNull DyeColor dyeColor;
 

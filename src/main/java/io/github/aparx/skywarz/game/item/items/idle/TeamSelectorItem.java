@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.game.item.items.waiting;
+package io.github.aparx.skywarz.game.item.items.idle;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -19,12 +19,12 @@ import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.material.ColoredMaterial;
+import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -50,24 +50,22 @@ public final class TeamSelectorItem extends StaticGameItem {
 
   private final TickDuration INVENTORY_UPDATE_INTERVAL = TickDuration.of(TimeUnit.TICKS, 10);
 
-  @ConfigMapping("item.item")
+  @ConfigMapping
   @Document({
-      "The item configuration with which a player can interact. Use bed, concrete or wool as a " +
-          "type",
+      "The item with which a player can interact. Use bed, concrete or wool as a type",
       "to have it replaced with the color of the team a player has joined (it being the default)."
   })
   private WrappedItemStack item = ItemBuilder
       .builder(Material.WHITE_BED)
       .lore("§8Click to select your team")
       .name("§bTeam selector")
-      .enchants(Map.of(Enchantment.ARROW_KNOCKBACK, 1))
+      .enchants(Map.of(Enchantment.ARROW_KNOCKBACK, 2))
       .flags(ItemFlag.HIDE_ENCHANTS)
       .wrap();
 
-
   @ConfigMapping("menu.title")
   @Document("The title of the team selector inventory")
-  private String menuTitle = "§bTeam Selector";
+  private String menuTitle = "Team Selector";
 
   @ConfigMapping("menu.team.status.joined")
   @Document("Applied to a team item to show a player that they have already joined the team")
@@ -86,8 +84,8 @@ public final class TeamSelectorItem extends StaticGameItem {
   private String teamMemberSlot = "§8• {0}";
 
   public TeamSelectorItem() {
-    super("selector", new MatchState[]{MatchState.WAITING});
-    setSlot(0);
+    super("team selector", new MatchState[]{MatchState.IDLE});
+    setSlot(1);
   }
 
   @Override
@@ -108,7 +106,7 @@ public final class TeamSelectorItem extends StaticGameItem {
   protected void handleClick(@NonNull Match match, PlayerInteractEvent event) {
     Player entity = event.getPlayer();
     SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
-    player.playSound(Sound.BLOCK_LEVER_CLICK, 1.0F, 1.0F);
+    SoundRecord.OPEN_INVENTORY.play(player);
     createInventory(match, player).open(entity);
   }
 
@@ -118,7 +116,7 @@ public final class TeamSelectorItem extends StaticGameItem {
     TeamMap teamMap = match.getTeamMap();
     InventoryDimensions dimensions = InventoryDimensions.ofLengths(
         InventoryDimensions.DEFAULT_COLUMN_COUNT,
-        1 + ((teamMap.size() - 1) / InventoryDimensions.DEFAULT_COLUMN_COUNT));
+        1 + ((teamMap.size() - 1) / (InventoryDimensions.DEFAULT_COLUMN_COUNT - 2)));
     InventoryPage page = new InventoryPage(dimensions);
     GameInventory<?> inventory = new GameInventory<>(
         null, INVENTORY_UPDATE_INTERVAL, menuTitle, page);
@@ -130,9 +128,8 @@ public final class TeamSelectorItem extends StaticGameItem {
     page.fill(glass);
     final int width = dimensions.getWidth();
     Iterator<Team> iterator = match.getTeamMap().iterator();
-    for (int cursor = 0; iterator.hasNext(); ++cursor)
-      page.set(InventoryPosition.toIndex(
-              cursor % width, (cursor / width), width),
+    for (int i = 0; iterator.hasNext(); ++i)
+      page.set(InventoryPosition.toIndex(1 + i % (width - 2), (i / (width - 2)), width),
           new TeamItem(match, player, iterator.next(), maxTeamSize, inventory));
     return inventory;
   }
@@ -143,7 +140,7 @@ public final class TeamSelectorItem extends StaticGameItem {
     private final @NonNull SkywarsPlayer player;
     private final @NonNull Team team;
     private final int maxTeamSize;
-    private final GameInventory inventory;
+    private final GameInventory<?> inventory;
 
     private final ItemBuilder itemBuilder;
 
@@ -152,7 +149,7 @@ public final class TeamSelectorItem extends StaticGameItem {
         @NonNull SkywarsPlayer player,
         @NonNull Team team,
         @NonNegative int maxTeamSize,
-        @NonNull GameInventory inventory) {
+        @NonNull GameInventory<?> inventory) {
       this.match = match;
       this.player = player;
       this.team = team;
@@ -162,7 +159,7 @@ public final class TeamSelectorItem extends StaticGameItem {
           .builder(REPLACEABLE_MATERIAL.getMaterial(team.getTeamEnum().getDyeColor()))
           .name(team.getTeamEnum().getChatColor().toString() + ChatColor.BOLD
               + Language.getInstance().getTeamName(team.getTeamEnum()))
-          .flags(ItemFlag.HIDE_ENCHANTS);
+          .flags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
     }
 
     public boolean isInTeam() {
@@ -204,17 +201,14 @@ public final class TeamSelectorItem extends StaticGameItem {
           Preconditions.checkState(previous.remove(player));
         });
         Preconditions.checkState(team.add(player));
-        player.sendMessage(Language.getInstance()
-            .get(MessageKeys.Match.TEAM_SWITCH_SUCCESS)
-            .substitute(team, ArrayPath.of("team")));
         inventory.updateInventory();
         player.findOnline().ifPresent((p) -> give(match, p));
-        player.playSound(Sound.ENTITY_ITEM_PICKUP, 1f, 1f);
+        SoundRecord.ACTION_SUCCESS.play(player);
       } catch (Exception e) {
         player.sendMessage(Language.getInstance()
             .get(MessageKeys.Match.TEAM_SWITCH_ERROR)
             .substitute(team, ArrayPath.of("team")));
-        player.playSound(Sound.BLOCK_ANVIL_LAND, .33f, .75f);
+        SoundRecord.ACTION_ERROR.play(player);
       }
     }
   }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -34,28 +35,6 @@ public class WrappedItemStack implements ConfigurationSerializable {
     this.stack = item;
   }
 
-  public static boolean isSimilar(ItemStack a, ItemStack b) {
-    if (Objects.equals(a, b)) return true;
-    if (a == null || b == null) return false;
-    if (!a.getType().equals(Material.PLAYER_HEAD)
-        || !b.getType().equals(a.getType()))
-      return false;
-    // special matching to ignore textures
-    if (!a.hasItemMeta() || !b.hasItemMeta())
-      return false;
-    SkullMeta aMeta = (SkullMeta) a.getItemMeta();
-    SkullMeta bMeta = (SkullMeta) b.getItemMeta();
-    if (aMeta == null || bMeta == null)
-      return false; // should be unreachable
-    return Objects.equals(aMeta.getOwningPlayer(), bMeta.getOwningPlayer())
-        && a.getAmount() == b.getAmount()
-        && Objects.equals(aMeta.getDisplayName(), bMeta.getDisplayName())
-        && aMeta.getEnchants().equals(bMeta.getEnchants())
-        && Objects.equals(aMeta.getLore(), bMeta.getLore())
-        && Objects.equals(aMeta.getItemFlags(), bMeta.getItemFlags())
-        && aMeta.isUnbreakable() == bMeta.isUnbreakable();
-  }
-
   public static WrappedItemStack deserialize(Map<String, Object> data) {
     ItemStack item = new ItemStack(
         deserializeType(Objects.toString(data.get("type"))),
@@ -72,10 +51,13 @@ public class WrappedItemStack implements ConfigurationSerializable {
       meta.addItemFlags(deserializeFlags((Collection<?>) data.get("flags")));
     if (data.containsKey("enchants")) {
       Object object = data.get("enchants");
+      Map<Enchantment, Integer> deserialized = null;
       if (object instanceof MemorySection)
-        object = ((MemorySection) object).getValues(false);
-      if (object instanceof Map<?, ?>)
-        item.addUnsafeEnchantments(deserializeEnchantments((Map<?, ?>) object));
+        deserialized = deserializeEnchantments(((MemorySection) object).getValues(false));
+      else if (object instanceof Map<?, ?>)
+        deserialized = deserializeEnchantments((Map<?, ?>) object);
+      if (deserialized != null)
+        deserialized.forEach((type, level) -> meta.addEnchant(type, level, true));
     }
     item.setItemMeta(meta);
     return new WrappedItemStack(item);
@@ -111,6 +93,10 @@ public class WrappedItemStack implements ConfigurationSerializable {
   @Override
   public int hashCode() {
     return Objects.hash(stack);
+  }
+
+  public WrappedItemStack copy() {
+    return new WrappedItemStack(getStack().clone());
   }
 
   // DESERIALIZATION UTILITES

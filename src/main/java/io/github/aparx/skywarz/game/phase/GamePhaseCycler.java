@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.game.phase.phases.DonePhase;
-import io.github.aparx.skywarz.game.phase.phases.PlayingPhase;
-import io.github.aparx.skywarz.game.phase.phases.WaitingPhase;
+import io.github.aparx.skywarz.game.phase.phases.done.DonePhase;
+import io.github.aparx.skywarz.game.phase.phases.playing.PlayingPhase;
+import io.github.aparx.skywarz.game.phase.phases.idle.IdlePhase;
 import lombok.Getter;
 import lombok.Synchronized;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -25,7 +25,7 @@ import java.util.function.Function;
 public final class GamePhaseCycler {
 
   private static final Function<GamePhaseCycler, Set<GamePhase>> DEFAULT_PHASE_FACTORY =
-      (cycler) -> Set.of(new WaitingPhase(cycler), new PlayingPhase(cycler), new DonePhase(cycler));
+      (cycler) -> Set.of(new IdlePhase(cycler), new PlayingPhase(cycler), new DonePhase(cycler));
 
   private final @NonNull WeakReference<Match> match;
 
