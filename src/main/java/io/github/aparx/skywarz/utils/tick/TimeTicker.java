@@ -73,6 +73,10 @@ public class TimeTicker implements Ticker {
         .getAmount(time);
   }
 
+  public TickDuration toElapsedDuration() {
+    return TickDuration.of(TimeUnit.TICKS, getElapsed(TimeUnit.TICKS));
+  }
+
   @Override
   public boolean hasElapsed(long inclusiveAmount) {
     return getElapsed() >= inclusiveAmount;

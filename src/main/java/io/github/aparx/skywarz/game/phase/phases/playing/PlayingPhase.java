@@ -15,17 +15,23 @@ import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
-import io.github.aparx.skywarz.game.phase.features.Spectator;
+import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.team.Team;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.language.ValueMapPopulators;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
+import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -47,7 +53,7 @@ public class PlayingPhase extends GamePhase {
   private static final TickDuration PROTECTION_PHASE_TIME = TickDuration.of(TimeUnit.SECONDS, 60);
 
   public PlayingPhase(@NonNull GamePhaseCycler cycler) {
-    super(MatchState.PLAYING, cycler, TickDuration.of(TimeUnit.HOURS, 15),
+    super(MatchState.PLAYING, cycler, TickDuration.of(TimeUnit.MINUTES, 1),
         TickDuration.of(TimeUnit.TICKS, 5));
     setListener(new PlayingListener(this));
   }
@@ -68,13 +74,14 @@ public class PlayingPhase extends GamePhase {
     PlayerMatchData data = player.getMatchData();
     data.setSpectator(true);
     // Handle spectator join
-    player.findOnline().ifPresent((e) -> Spectator.spawnAsSpectator(getMatch(), e));
+    player.findOnline().ifPresent((e) -> SkywarsSpectator.spawnAsSpectator(getMatch(), e));
+    updateScoreboard(player);
   }
 
   @Override
   public void handleLeave(SkywarsPlayer player) {
     player.findOnline().ifPresent((e) -> {
-      Spectator.removeSpectator(getMatch(), e);
+      SkywarsSpectator.removeSpectator(getMatch(), e);
       findMatch().ifPresent((match) -> match.getAudience().dead()
           .map(SkywarsPlayer::findOnline)
           .filter(Optional::isPresent)
@@ -92,27 +99,49 @@ public class PlayingPhase extends GamePhase {
       player.findOnline().ifPresent((online) -> {
         PlayerSnapshot.ofReset(online).restore(online);
         if (matchData.isSpectator())
-          Spectator.spawnAsSpectator(match, online);
+          SkywarsSpectator.spawnAsSpectator(match, online);
       });
       if (!matchData.isSpectator() && !matchData.isInTeam())
         // Join player into team since they have not selected one
         Preconditions.checkState(getNextFreeTeam(match.getTeamMap()).add(player));
+      updateScoreboard(player);
     }));
     spawnPlayers();
   }
 
-  @Override
-  protected void updateTick() {
-    Match match = getMatch();
-    // (1) determine all teams that are alive
-    evaluateGameState();
+  protected void updateScoreboard(SkywarsPlayer player) {
+    getMatch().getScoreboardHandlers().getHandler(
+            player.getMatchData().isSpectator()
+                ? MatchScoreboard.PLAYING_DEAD
+                : MatchScoreboard.PLAYING_ALIVE)
+        .getOrCreateScoreboard(player)
+        .show(player);
   }
 
-  protected void evaluateGameState() {
+  @Override
+  protected void updateTick() {
+    // (1) determine all teams that are alive
+    if (evaluateGameEnd()) return;
+    Match match = getMatch();
+    TimeTicker ticker = getTicker();
+    long duration = getDuration().toSeconds();
+    long secsLeft = duration - ticker.getElapsed(TimeUnit.SECONDS);
+    if (ticker.isCycling(TimeUnit.SECONDS) && (ticker.isCycling(5, TimeUnit.MINUTES)
+        || secsLeft % 60 == 0 || (secsLeft <= 60 && (secsLeft % 15 == 0 || secsLeft <= 10)))) {
+      match.getAudience().forEach((member) -> {
+        SoundRecord.TIMER_TICK.play(member);
+        if (secsLeft <= 60)
+          member.playActionbar(ChatColor.RED + String.valueOf(secsLeft));
+      });
+    }
+  }
+
+  @CanIgnoreReturnValue
+  protected boolean evaluateGameEnd() {
     int aliveCount = 0;
     Match match = getMatch();
     if (!match.isState(MatchState.PLAYING))
-      return;
+      return false;
     TeamMap teamMap = match.getTeamMap();
     Iterator<Team> iterator = teamMap.iterator();
     List<Team> alive = new ArrayList<>();
@@ -127,27 +156,13 @@ public class PlayingPhase extends GamePhase {
       // no player existing anymore, thus cancel
       stop(StopReason.UNKNOWN);
       Skywars.getInstance().getMatchManager().remove(match);
-      Bukkit.broadcastMessage("No team won!");
-    } else if (aliveCount == 1 && !Magics.isDevelopment() /* TODO temporarily */) {
+      return true;
+    } else if (aliveCount == 1) {
+      match.setWinner(alive.get(0));
       getCycler().cycleNext();
-      final Team won = alive.get(0);
-      match.setWinner(won);
-      Language language = Language.getInstance();
-      String titleWin = language.substitute(MessageKeys.Match.TITLE_YOU_WON);
-      String titleLost = language.substitute(MessageKeys.Match.TITLE_YOU_LOST);
-      String titleTeam = language.get(MessageKeys.Match.TITLE_TEAM_WON)
-          .substitute(won, ArrayPath.of("team"));
-      String broadcast = language.get(MessageKeys.Match.TEAM_WON)
-          .substitute(won, ArrayPath.of("team"));
-      match.getAudience().forEach((player) -> {
-        PlayerMatchData matchData = player.getMatchData();
-        Team selfTeam = matchData.getTeam();
-        boolean hasWon = won.equals(selfTeam);
-        player.playTitle(hasWon ? titleWin : matchData.isInTeam() ? titleLost : titleTeam,
-            StringUtils.SPACE, 5, (int) TickDuration.of(TimeUnit.SECONDS, 4).toTicks(), 15);
-        player.sendMessage(" \n".repeat(3) + broadcast + " \n".repeat(4));
-      });
+      return true;
     }
+    return false;
   }
 
   /**

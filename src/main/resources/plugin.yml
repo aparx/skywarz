@@ -2,7 +2,7 @@ name: Skywarz
 version: '${project.version}'
 main: io.github.aparx.skywarz.startup.Main
 author: "aparx (@bonedfps)"
-api-version: 1.13
+api-version: 1.14
 description: "An intriguing Skywars minigame plugin"
 
 commands:

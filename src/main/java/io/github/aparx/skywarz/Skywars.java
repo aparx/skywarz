@@ -9,6 +9,7 @@ import io.github.aparx.skywarz.game.chest.ChestItem;
 import io.github.aparx.skywarz.game.item.GameItemManager;
 import io.github.aparx.skywarz.game.kit.Kit;
 import io.github.aparx.skywarz.game.kit.KitHandler;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
@@ -63,7 +64,7 @@ public final class Skywars {
   private SkywarsConfigHandler configHandler;
 
   public static Plugin plugin() {
-    return Preconditions.checkNotNull(instance.plugin, "Plugin not initialized");
+    return Preconditions.checkNotNull(instance.plugin, "Skywarz is not initialized");
   }
 
   public static @NonNull Logger logger() {
@@ -90,6 +91,8 @@ public final class Skywars {
       ChestConfig.getInstance().load();
       KitHandler.getInstance().load();
       Language.getInstance().load();
+      for (MatchScoreboard board : MatchScoreboard.values())
+        board.getScoreboard().load();
       getHandlers().forEach(SkywarsHandler::load);
       this.isLoaded = true;
     } catch (Exception e) {

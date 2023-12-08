@@ -5,10 +5,12 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.kit.Kit;
+import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.team.Team;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookup;
+import org.apache.commons.text.lookup.StringLookupFactory;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -62,16 +64,20 @@ public final class LocalizedMessage {
     return defaultSubstitutor;
   }
 
-  public StringSubstitutor createSubstitutor(@Nullable Map<String, ?> data) {
-    if (data != null && !data.isEmpty())
+  public StringSubstitutor createSubstitutor(@Nullable StringLookup lookup) {
+    if (lookup != null)
       return new StringSubstitutor((variable) -> {
-        Object resolve = data.get(variable);
+        Object resolve = lookup.lookup(variable);
         if (resolve != null) return resolve.toString();
         resolve = defaultSubstitutor.getStringLookup().lookup(variable);
         if (resolve != null) return resolve.toString();
         return null;
       }, VARIABLE_PREFIX, VARIABLE_SUFFIX, VARIABLE_ESCAPE);
     return createSubstitutor();
+  }
+
+  public StringSubstitutor createSubstitutor(@Nullable Map<String, ?> data) {
+    return createSubstitutor(StringLookupFactory.INSTANCE.mapStringLookup(data));
   }
 
   @CheckReturnValue
@@ -83,10 +89,13 @@ public final class LocalizedMessage {
     return substitute(createSubstitutor(valueMap));
   }
 
+  public String substitute(@Nullable StringLookup lookup) {
+    return substitute(createSubstitutor(lookup));
+  }
+
   public String substitute() {
     return substitute(defaultSubstitutor);
   }
-
 
   public String substitute(Object @Nullable ... args) {
     if (ArrayUtils.isEmpty(args))
@@ -98,26 +107,32 @@ public final class LocalizedMessage {
   }
 
   public String substitute(@NonNull SkywarsPlayer player, @NonNull ArrayPath prefix) {
-    Map<String, Object> map = new HashMap<>();
+    LazyVariableLookup map = new LazyVariableLookup();
     player.findOnline().ifPresent((o) -> ValueMapPopulators.populatePlayer(map, o, prefix));
     return substitute(map);
   }
 
   public String substitute(@NonNull Player player, @NonNull ArrayPath prefix) {
-    Map<String, Object> map = new HashMap<>();
+    LazyVariableLookup map = new LazyVariableLookup();
     ValueMapPopulators.populatePlayer(map, player, prefix);
     return substitute(map);
   }
 
   public String substitute(@NonNull Team team, @NonNull ArrayPath prefix) {
-    Map<String, Object> map = new HashMap<>();
+    LazyVariableLookup map = new LazyVariableLookup();
     ValueMapPopulators.populateTeam(map, team, prefix);
     return substitute(map);
   }
 
   public String substitute(@NonNull Kit kit, @NonNull ArrayPath prefix) {
-    Map<String, Object> map = new HashMap<>();
+    LazyVariableLookup map = new LazyVariableLookup();
     ValueMapPopulators.populateKit(map, kit, prefix);
+    return substitute(map);
+  }
+
+  public String substitute(@NonNull Match match, @NonNull ArrayPath prefix) {
+    LazyVariableLookup map = new LazyVariableLookup();
+    ValueMapPopulators.populateMatch(map, match, prefix);
     return substitute(map);
   }
 

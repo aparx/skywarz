@@ -1,10 +1,14 @@
 package io.github.aparx.skywarz.language;
 
+import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.LightningStrike;
 
+import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -75,6 +79,22 @@ public final class MessageKeys {
 
   static final LinkedHashMap<ArrayPath, Object> defaultMessages;
 
+  static final EnumMap<TimeUnit, ArrayPath> pluralTimeUnitKeys = new EnumMap<>(TimeUnit.class);
+  static final EnumMap<TimeUnit, ArrayPath> singularTimeUnitKeys = new EnumMap<>(TimeUnit.class);
+
+  static {
+    Arrays.stream(TimeUnit.values()).forEach((unit) -> {
+      ArrayPath time = ArrayPath.of("time").add(unit.getMessageKey());
+      pluralTimeUnitKeys.put(unit, time.add("plural"));
+      singularTimeUnitKeys.put(unit, time.add("singular"));
+    });
+  }
+
+  public static ArrayPath getTimeUnitKey(@NonNull TimeUnit unit, boolean plural) {
+    Preconditions.checkNotNull(unit, "Unit must not be null");
+    return plural ? pluralTimeUnitKeys.get(unit) : singularTimeUnitKeys.get(unit);
+  }
+
   private static ArrayPath createKey(String path) {
     return ArrayPath.parse(path, ArrayPath.DEFAULT_SEPARATOR);
   }
@@ -101,22 +121,27 @@ public final class MessageKeys {
     map.put(Match.LEAVE_SUCCESS, "{successPrefix} You left the match!");
     map.put(Match.LEAVE_BROADCAST, "§c[-]§7 Player §r{player.name}§7 has left the game.");
     map.put(Match.TEAM_SWITCH_ERROR, "{warningPrefix} You cannot join this team!");
-    map.put(Match.PRIORITY_ERROR, "{warningPrefix} Match is full. Could not find anyone that is kickable!");
+    map.put(Match.PRIORITY_ERROR, "{warningPrefix} Match is full. Could not find anyone that is " +
+        "kickable!");
     map.put(Match.PRIORITY_KICK, "{warningPrefix} You have been kicked for someone that is VIP.");
     map.put(Match.ERROR_DEQUEUED, "{warningPrefix} An error occurred. You have been dequeued.");
 
-    map.put(Match.BROADCAST_START, "{prefix}§7 The game starts in §b{time}§7 seconds!");
-    map.put(Match.BROADCAST_REQUIRE, "{prefix}§7 Require §c{missing}§7 more players to start!");
-    map.put(Match.BROADCAST_CLOSING, "{prefix}§7 The match closes in {time} seconds!");
+    map.put(Match.BROADCAST_START, "{prefix}§7 The game starts in §8{match.time.left.literal}§7!");
+    map.put(Match.BROADCAST_REQUIRE, "{prefix}§7 Require §c{match.missing}§7 more players to " +
+        "start!");
+    map.put(Match.BROADCAST_CLOSING, "{prefix}§7 The match closes in {match.time.left.literal}!");
 
     map.put(Match.QUICKSTART_SUCCESS, "{successPrefix} The game will start shortly.");
     map.put(Match.QUICKSTART_ERROR, "{warningPrefix} Cannot quickstart your match.");
 
-    map.put(Match.KILLED, "{prefix}§7 Player {player.team.color}{player.name}§7 was slained by {killer.team.color}{killer.name}§7!");
+    map.put(Match.KILLED, "{prefix}§7 Player {player.team.color}{player.name}§7 was slained by " +
+        "{killer.team.color}{killer.name}§7!");
     map.put(Match.DIED, "{prefix}§7 Player {player.team.color}{player.name}§7 died!");
 
-    map.put(Match.KIT_SELECTION, "{successPrefix} You selected the Kit {player.kit.displayName}§a!");
-    map.put(Match.KIT_ASSIGN, "{successPrefix} You have been assigned the Kit {player.kit.displayName}§a!");
+    map.put(Match.KIT_SELECTION, "{successPrefix} You selected the Kit {player.kit" +
+        ".displayName}§a!");
+    map.put(Match.KIT_ASSIGN, "{successPrefix} You have been assigned the Kit {player.kit" +
+        ".displayName}§a!");
 
     map.put(Match.TITLE_YOU_WON, "§aYou won!");
     map.put(Match.TITLE_YOU_LOST, "§cYou lost!");
@@ -125,6 +150,12 @@ public final class MessageKeys {
         "{team.color}[Skywarz] Team §l{team.name}{team.color} won!",
         "{team.color}[Skywarz] Thanks for using Skywarz!"
     ));
+
+    for (TimeUnit unit : TimeUnit.values()) {
+      final String name = unit.name().toLowerCase();
+      map.put(getTimeUnitKey(unit, true), name);
+      map.put(getTimeUnitKey(unit, false), name.substring(0, name.length() - 1));
+    }
 
     defaultMessages = map;
   }

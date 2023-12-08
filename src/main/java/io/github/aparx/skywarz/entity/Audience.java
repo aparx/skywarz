@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.entity;
 
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 
@@ -35,7 +36,11 @@ public interface Audience {
   }
 
   default void sendFormattedMessage(ArrayPath messagePath, Map<String, ?> valueMap) {
-    sendMessage(Language.getInstance().get(messagePath).substitute(valueMap), valueMap);
+    sendMessage(Language.getInstance().get(messagePath).substitute(valueMap));
+  }
+
+  default void sendFormattedMessage(ArrayPath messagePath, LazyVariableLookup lookup) {
+    sendMessage(Language.getInstance().get(messagePath).substitute(lookup));
   }
 
 }

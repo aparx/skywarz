@@ -8,10 +8,11 @@ import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.Arena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
-import io.github.aparx.skywarz.game.match.Match;
 import io.github.aparx.skywarz.game.phase.GamePhaseListener;
-import io.github.aparx.skywarz.game.phase.features.Spectator;
+import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.team.Team;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.language.ValueMapPopulators;
 import org.bukkit.*;
@@ -31,10 +32,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -146,25 +144,32 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     Player entity = event.getEntity();
     filterMatchFromPlayer(entity).ifPresent((match) -> {
       Player killer = entity.getKiller();
-      Map<String, Object> valueMap = new HashMap<>();
+      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      LazyVariableLookup map = new LazyVariableLookup();
       if (killer != null)
-        ValueMapPopulators.populatePlayer(valueMap, killer, ArrayPath.of("killer"));
-      ValueMapPopulators.populatePlayer(valueMap, entity, ArrayPath.of("player"));
+        ValueMapPopulators.populatePlayer(map, killer, ArrayPath.of("killer"));
+      ValueMapPopulators.populatePlayer(map, entity, ArrayPath.of("player"));
       event.setDeathMessage(null);
       match.getAudience().sendFormattedMessage(killer != null
               ? MessageKeys.Match.KILLED
               : MessageKeys.Match.DIED,
-          valueMap);
+          map);
       Bukkit.getScheduler().runTask(Skywars.plugin(), () -> {
-        Spectator.markAsSpectator(entity);
+        SkywarsSpectator.markAsSpectator(entity);
         entity.spigot().respawn();
-        getPhase().evaluateGameState();
+        getPhase().evaluateGameEnd();
       });
 
-      Team eliminated = SkywarsPlayer.getPlayer(entity).getMatchData().getTeam();
+      Team eliminated = player.getMatchData().getTeam();
       if (eliminated != null && eliminated.alive().count() > 1)
         eliminated = null;
       playDeathEffects(entity.getLocation(), eliminated);
+
+      // Update the scoreboard to the dead one
+      match.getScoreboardHandlers()
+          .getHandler(MatchScoreboard.PLAYING_DEAD)
+          .getOrCreateScoreboard(player)
+          .show(player);
     });
   }
 
@@ -190,7 +195,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     Player entity = event.getPlayer();
     filterMatchFromPlayer(entity).ifPresent((match) -> {
       event.setRespawnLocation(match.getArena().getData().getSpectator());
-      Spectator.spawnAsSpectator(match, entity);
+      SkywarsSpectator.spawnAsSpectator(match, entity);
     });
   }
 

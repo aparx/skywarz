@@ -58,7 +58,7 @@ public class ArenaReset {
     snapshots.clear();
     Arena arena = getArena();
     World world = arena.getData().getWorld();
-    world.getNearbyEntities(arena.getData().getBox().toBoundingBox()).stream()
+    world.getNearbyEntities(arena.getData().getBox().toBoundingBox().expand(2.0)).stream()
         .filter((e) -> e instanceof Item)
         .forEach(Entity::remove);
     Skywars.plugin().getLogger().info("Reset complete");

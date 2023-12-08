@@ -1,5 +1,7 @@
 package io.github.aparx.skywarz.utils.tick;
 
+import io.github.aparx.bufig.ArrayPath;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -10,13 +12,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum TimeUnit {
 
-  TICKS(1),
-  SECONDS(20),
-  MINUTES(60 * SECONDS.ticks),
-  HOURS(60 * MINUTES.ticks),
-  DAYS(24 * HOURS.ticks);
+  TICKS(1, ArrayPath.of("ticks")),
+  SECONDS(20, ArrayPath.of("seconds")),
+  MINUTES(60 * SECONDS.ticks, ArrayPath.of("minutes")),
+  HOURS(60 * MINUTES.ticks, ArrayPath.of("hours")),
+  DAYS(24 * HOURS.ticks, ArrayPath.of("days"));
 
   private final long ticks;
+
+  @Getter
+  private final ArrayPath messageKey;
 
   public long toTicks() {
     return ticks;

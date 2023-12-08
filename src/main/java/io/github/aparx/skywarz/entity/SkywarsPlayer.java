@@ -2,6 +2,7 @@ package io.github.aparx.skywarz.entity;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.data.PlayerDataSet;
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
@@ -16,6 +17,9 @@ import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Map;
@@ -38,6 +42,8 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
 
   private static final Map<UUID, SkywarsPlayer> playerMap = new ConcurrentHashMap<>();
 
+  private static Listener quitListener = null;
+
   private final @NonNull UUID id;
 
   private final PlayerDataSet<SkywarsPlayerData> playerData = new PlayerDataSet<>(this);
@@ -49,6 +55,7 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
 
   public static @NonNull SkywarsPlayer getPlayer(@NonNull UUID uniqueId) {
     Preconditions.checkNotNull(uniqueId, "ID must not be null");
+    loadListenerIfNeeded();
     return playerMap.computeIfAbsent(uniqueId, SkywarsPlayer::new);
   }
 
@@ -59,6 +66,7 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
 
   public static Optional<SkywarsPlayer> findPlayer(@NonNull UUID uniqueId) {
     Preconditions.checkNotNull(uniqueId, "ID must not be null");
+    loadListenerIfNeeded();
     return Optional.ofNullable(playerMap.get(uniqueId));
   }
 
@@ -76,6 +84,16 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
   public static boolean removePlayer(@NonNull SkywarsPlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     return playerMap.remove(player.getId(), player);
+  }
+
+  private static synchronized void loadListenerIfNeeded() {
+    if (quitListener != null) return;
+    Bukkit.getPluginManager().registerEvents(quitListener = new Listener() {
+      @EventHandler
+      void onQuit(PlayerQuitEvent event) {
+        removePlayer(event.getPlayer().getUniqueId());
+      }
+    }, Skywars.plugin());
   }
 
   public Optional<Player> findOnline() {

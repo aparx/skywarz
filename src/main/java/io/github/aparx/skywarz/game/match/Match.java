@@ -9,6 +9,7 @@ import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
 import io.github.aparx.skywarz.game.kit.Kit;
 import io.github.aparx.skywarz.game.kit.KitHandler;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboardHandlers;
 import io.github.aparx.skywarz.game.team.Team;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
@@ -27,6 +28,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Synchronized;
+import org.bukkit.Bukkit;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
@@ -61,6 +64,8 @@ public class Match implements Snowflake<UUID> {
   private final TeamMap teamMap = new TeamMap(this);
 
   private final ChestHandler chestHandler;
+
+  private final MatchScoreboardHandlers scoreboardHandlers = new MatchScoreboardHandlers(this);
 
   private final WeakPlayerGroup audience = new WeakPlayerGroup() {
     @Override
@@ -184,6 +189,11 @@ public class Match implements Snowflake<UUID> {
       PlayerSnapshot snapshot = data.getSnapshot();
       Preconditions.checkNotNull(snapshot, "Cannot restore entity (snapshot removed)");
       snapshot.restore(entity);
+      // we do not store the scoreboard of an entity in a snapshot to avoid errors,
+      // since scoreboards are held by their plugin's reference and can be invalid any time
+      ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+      if (scoreboardManager != null)
+        entity.setScoreboard(scoreboardManager.getMainScoreboard());
     });
     return true;
   }

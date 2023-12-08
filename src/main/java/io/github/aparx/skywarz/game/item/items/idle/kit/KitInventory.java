@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
-import io.github.aparx.skywarz.game.inventory.GameInventory;
+import io.github.aparx.skywarz.game.inventory.SpecialInventory;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
 import io.github.aparx.skywarz.game.inventory.InventoryItem;
 import io.github.aparx.skywarz.game.inventory.InventoryPosition;
@@ -13,6 +13,8 @@ import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryConten
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
 import io.github.aparx.skywarz.game.kit.Kit;
 import io.github.aparx.skywarz.game.match.Match;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
+import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
@@ -49,14 +51,11 @@ public class KitInventory extends PaginatingInventory {
 
   private static final InventoryDimensions KIT_DIMENSION = InventoryDimensions.ofRows(4);
 
-  private static final InventoryDimensions MAX_DIMENSION = InventoryDimensions.ofRows(4);
-
   private static final InventoryPosition PREVIOUS_PAGE = InventoryPosition.ofPoint(3, 3);
   private static final InventoryPosition NEXT_PAGE = InventoryPosition.ofPoint(4, 3);
 
   private static final InventoryPosition KIT_BUTTON_EQUIP = InventoryPosition.ofPoint(7, 0);
   private static final InventoryPosition KIT_BUTTON_CANCEL = InventoryPosition.ofPoint(7, 2);
-
 
   private final @NonNull Match match;
   private final @NonNull SkywarsPlayer viewer;
@@ -106,6 +105,11 @@ public class KitInventory extends PaginatingInventory {
                   .substitute(whoClicked, ArrayPath.of("player")));
               close(viewer.getOnline());
               SoundRecord.ACTION_SUCCESS.play(whoClicked);
+              // force scoreboard update
+              match.getScoreboardHandlers()
+                  .getHandler(MatchScoreboard.IDLE)
+                  .findScoreboard(viewer)
+                  .ifPresent(SpecialScoreboard::render);
             }));
 
     private final Supplier<InventoryItem> cancelFactory =
@@ -143,8 +147,8 @@ public class KitInventory extends PaginatingInventory {
     public void click(SkywarsPlayer player, InventoryClickEvent event) {
       Preconditions.checkState(player.equals(viewer));
       event.setCancelled(true);
-      GameInventory<PaginatableInventoryContent> kitInventory =
-          GameInventory.createInventory(TickDuration.ofSecond(), (inv) -> {
+      SpecialInventory<PaginatableInventoryContent> kitInventory =
+          SpecialInventory.createInventory(TickDuration.ofSecond(), (inv) -> {
             // new paginatable inventory content will be modified further down
             return new PaginatableInventoryContent((x) -> inv.updateInventory(), KIT_DIMENSION);
           }, "Kit " + kit.getDisplayName());

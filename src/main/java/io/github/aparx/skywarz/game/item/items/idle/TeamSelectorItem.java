@@ -111,14 +111,14 @@ public final class TeamSelectorItem extends StaticGameItem {
   }
 
   @CheckReturnValue
-  private GameInventory<?> createInventory(@NonNull Match match, @NonNull SkywarsPlayer player) {
+  private SpecialInventory<?> createInventory(@NonNull Match match, @NonNull SkywarsPlayer player) {
     int maxTeamSize = match.getTeamSize();
     TeamMap teamMap = match.getTeamMap();
     InventoryDimensions dimensions = InventoryDimensions.ofLengths(
         InventoryDimensions.DEFAULT_COLUMN_COUNT,
         1 + ((teamMap.size() - 1) / (InventoryDimensions.DEFAULT_COLUMN_COUNT - 2)));
     InventoryPage page = new InventoryPage(dimensions);
-    GameInventory<?> inventory = new GameInventory<>(
+    SpecialInventory<?> inventory = new SpecialInventory<>(
         null, INVENTORY_UPDATE_INTERVAL, menuTitle, page);
     InventoryItem glass = InventoryItem.of(
         ItemBuilder.builder(Material.GRAY_STAINED_GLASS_PANE)
@@ -140,7 +140,7 @@ public final class TeamSelectorItem extends StaticGameItem {
     private final @NonNull SkywarsPlayer player;
     private final @NonNull Team team;
     private final int maxTeamSize;
-    private final GameInventory<?> inventory;
+    private final SpecialInventory<?> inventory;
 
     private final ItemBuilder itemBuilder;
 
@@ -149,7 +149,7 @@ public final class TeamSelectorItem extends StaticGameItem {
         @NonNull SkywarsPlayer player,
         @NonNull Team team,
         @NonNegative int maxTeamSize,
-        @NonNull GameInventory<?> inventory) {
+        @NonNull SpecialInventory<?> inventory) {
       this.match = match;
       this.player = player;
       this.team = team;

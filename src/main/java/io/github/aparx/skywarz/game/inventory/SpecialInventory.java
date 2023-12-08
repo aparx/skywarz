@@ -37,13 +37,13 @@ import java.util.function.Function;
  * @since 1.0
  */
 @Getter
-public class GameInventory<T extends InventoryContentView> implements Listener {
+public class SpecialInventory<T extends InventoryContentView> implements Listener {
 
   private final @Nullable InventoryHolder holder;
 
   private final @NonNull TickDuration updateInterval;
 
-  private final Function<GameInventory<T>, String> titleFactory;
+  private final Function<SpecialInventory<T>, String> titleFactory;
 
   private T content;
 
@@ -56,9 +56,9 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
   private final WeakHashSet<HumanEntity> viewers = new WeakHashSet<>();
 
   /** WeakHashSet of inventories that should be closed when this inventory closes. */
-  private final WeakHashSet<GameInventory<?>> openConnected = new WeakHashSet<>();
+  private final WeakHashSet<SpecialInventory<?>> openConnected = new WeakHashSet<>();
 
-  public GameInventory(
+  public SpecialInventory(
       @Nullable InventoryHolder holder,
       @NonNull TickDuration updateInterval,
       @NonNull String title,
@@ -66,10 +66,10 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
     this(holder, updateInterval, (that) -> title, content);
   }
 
-  public GameInventory(
+  public SpecialInventory(
       @Nullable InventoryHolder holder,
       @NonNull TickDuration updateInterval,
-      @NonNull Function<GameInventory<T>, String> titleFactory,
+      @NonNull Function<SpecialInventory<T>, String> titleFactory,
       @Nullable T content) {
     Preconditions.checkNotNull(updateInterval, "Interval must not be null");
     Preconditions.checkNotNull(titleFactory, "Title factory must not be null");
@@ -81,18 +81,18 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
       recreateInventory();
   }
 
-  public static <T extends InventoryContentView> GameInventory<T> createInventory(
+  public static <T extends InventoryContentView> SpecialInventory<T> createInventory(
       @NonNull TickDuration updateInterval,
-      @NonNull Function<GameInventory<T>, T> contentFactory,
-      @NonNull Function<GameInventory<T>, String> titleFactory) {
-    GameInventory<T> inventory = new GameInventory<>(null, updateInterval, titleFactory, null);
+      @NonNull Function<SpecialInventory<T>, T> contentFactory,
+      @NonNull Function<SpecialInventory<T>, String> titleFactory) {
+    SpecialInventory<T> inventory = new SpecialInventory<>(null, updateInterval, titleFactory, null);
     inventory.setContent(contentFactory.apply(inventory));
     return inventory;
   }
 
-  public static <T extends InventoryContentView> GameInventory<T> createInventory(
+  public static <T extends InventoryContentView> SpecialInventory<T> createInventory(
       @NonNull TickDuration updateInterval,
-      @NonNull Function<GameInventory<T>, T> contentFactory,
+      @NonNull Function<SpecialInventory<T>, T> contentFactory,
       @NonNull String title) {
     return createInventory(updateInterval, contentFactory, (x) -> title);
   }
@@ -164,7 +164,7 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
   @CanIgnoreReturnValue
   public boolean close(Player player) {
     if (!viewers.remove(player)) return false;
-    for (GameInventory<?> subInventory : openConnected)
+    for (SpecialInventory<?> subInventory : openConnected)
       subInventory.close(player);
     openConnected.clear();
     player.closeInventory();
@@ -218,7 +218,7 @@ public class GameInventory<T extends InventoryContentView> implements Listener {
         InventoryCloseEvent.class, this, EventPriority.NORMAL,
         (listener, e) -> {
           InventoryCloseEvent event = (InventoryCloseEvent) e;
-          for (GameInventory<?> subInventory : openConnected)
+          for (SpecialInventory<?> subInventory : openConnected)
             if (event.getInventory().equals(subInventory.getInventory()))
               subInventory.close((Player) event.getPlayer());
           openConnected.clear();

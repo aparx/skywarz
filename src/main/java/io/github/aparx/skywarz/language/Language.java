@@ -77,6 +77,11 @@ public final class Language implements MessageStorage<ArrayPath> {
   }
 
   @CheckReturnValue
+  public String substitute(String content, LazyVariableLookup lookup) {
+    return localize(content).substitute(lookup);
+  }
+
+  @CheckReturnValue
   public String substitute(String content, Object... args) {
     return localize(content).substitute(args);
   }
@@ -89,6 +94,11 @@ public final class Language implements MessageStorage<ArrayPath> {
   @CheckReturnValue
   public String substitute(ArrayPath path, Map<String, ?> data) {
     return find(path).map((msg) -> msg.substitute(data)).orElseGet(path::join);
+  }
+
+  @CheckReturnValue
+  public String substitute(ArrayPath path, LazyVariableLookup lookup) {
+    return find(path).map((msg) -> msg.substitute(lookup)).orElseGet(path::join);
   }
 
   @CheckReturnValue

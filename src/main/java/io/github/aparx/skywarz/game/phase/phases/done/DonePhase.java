@@ -1,8 +1,10 @@
 package io.github.aparx.skywarz.game.phase.phases.done;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.match.Match;
@@ -10,11 +12,16 @@ import io.github.aparx.skywarz.game.match.MatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
-import io.github.aparx.skywarz.game.phase.features.Spectator;
+import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.team.Team;
 import io.github.aparx.skywarz.handler.MainConfig;
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.language.ValueMapPopulators;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -46,16 +53,35 @@ public class DonePhase extends GamePhase {
   protected void onStart() {
     super.onStart();
     Match match = getMatch();
-    match.getAudience().entity().forEach((player) -> {
-      Spectator.removeSpectator(match, player);
-      PlayerSnapshot.ofReset(player, GameMode.ADVENTURE).restore(player);
-      player.teleport(match.getArena().getData().getLobby());
-      player.getInventory().setItem(LeaveItem.SLOT,
+    Team won = match.getWinner();
+    final boolean hasWinner = won != null;
+    Language language = Language.getInstance();
+    String titleWin = language.substitute(MessageKeys.Match.TITLE_YOU_WON);
+    String titleLost = language.substitute(MessageKeys.Match.TITLE_YOU_LOST);
+    String titleTeam = !hasWinner ? null : language
+        .get(MessageKeys.Match.TITLE_TEAM_WON)
+        .substitute(won, ArrayPath.of("team"));
+    String broadcast = !hasWinner ? null : language
+        .get(MessageKeys.Match.TEAM_WON)
+        .substitute(won, ArrayPath.of("team"));
+    match.getAudience().entity().forEach((entity) -> {
+      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      SkywarsSpectator.removeSpectator(match, entity);
+      PlayerSnapshot.ofReset(entity, GameMode.ADVENTURE).restore(entity);
+      entity.teleport(match.getArena().getData().getLobby());
+      entity.getInventory().setItem(LeaveItem.SLOT,
           Skywars.getInstance()
               .getGameItemManager()
               .getItems()
               .require(LeaveItem.class)
-              .create(match, player));
+              .create(match, entity));
+      PlayerMatchData matchData = player.getMatchData();
+      boolean hasWon = hasWinner && won.equals(matchData.getTeam());
+      entity.sendTitle(hasWon ? titleWin : matchData.isInTeam() ? titleLost :
+              hasWinner ? titleTeam : titleLost,
+          StringUtils.SPACE, 5, (int) TickDuration.of(TimeUnit.SECONDS, 4).toTicks(), 15);
+      if (hasWinner)
+        entity.sendMessage(" \n".repeat(3) + broadcast + " \n".repeat(4));
     });
   }
 
@@ -71,10 +97,11 @@ public class DonePhase extends GamePhase {
     long duration = getDuration().toSeconds();
     long secsLeft = duration - getTicker().getElapsed(TimeUnit.SECONDS);
     if (getTicker().isCycling(TimeUnit.SECONDS)) {
-      if (secsLeft != duration && (secsLeft % 5 == 0 || secsLeft <= 3))
-        match.getAudience().sendFormattedMessage(
-            MessageKeys.Match.BROADCAST_CLOSING,
-            Map.of("time", secsLeft));
+      if (secsLeft != duration && (secsLeft % 5 == 0 || secsLeft <= 3)) {
+        LazyVariableLookup lookup = new LazyVariableLookup();
+        ValueMapPopulators.populateMatch(lookup, match, ArrayPath.of("match"));
+        match.getAudience().sendFormattedMessage(MessageKeys.Match.BROADCAST_CLOSING, lookup);
+      }
     }
     LevelAnimator.animate(this, (int) secsLeft);
     if (match.getAudience().isEmpty())

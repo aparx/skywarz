@@ -1,5 +1,6 @@
 package io.github.aparx.skywarz.game.phase.phases.idle;
 
+import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
@@ -14,10 +15,13 @@ import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
 import io.github.aparx.skywarz.game.phase.phases.LobbyPhaseListener;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.team.Team;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.language.ValueMapPopulators;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -45,7 +49,7 @@ public class IdlePhase extends GamePhase {
 
   public IdlePhase(@NonNull GamePhaseCycler cycler) {
     super(MatchState.IDLE, cycler,
-        TickDuration.of(TimeUnit.SECONDS, 1),
+        TickDuration.of(TimeUnit.SECONDS, 3),
         /* Update all two ticks to save performance */
         TickDuration.of(TimeUnit.TICKS, 2));
     trigger = new TimeTicker(getInterval());
@@ -57,6 +61,11 @@ public class IdlePhase extends GamePhase {
     // Manage entity
     Player entity = player.getOnline();
     Match match = getMatch();
+    // show IDLE scoreboard
+    match.getScoreboardHandlers()
+        .getHandler(MatchScoreboard.IDLE)
+        .getOrCreateScoreboard(player)
+        .show(player);
     PlayerSnapshot.ofReset(entity,
         match.getArena().getData().getLobby(),
         GameMode.ADVENTURE).restore(entity);
@@ -90,9 +99,10 @@ public class IdlePhase extends GamePhase {
     boolean lastMinimumPlayers = this.lastMinimumPlayers;
     boolean hasMinimumPlayers = missingPlayerAmount <= 0;
     this.lastMinimumPlayers = hasMinimumPlayers;
-    if (!hasMinimumPlayers) ticker.set(0);
+    if (!hasMinimumPlayers) ticker.set(-1);
     trigger.tick();
-    if (trigger.isCycling(TimeUnit.SECONDS)) {
+    if ((ticker.getElapsed() <= 0 && trigger.isCycling(TimeUnit.SECONDS))
+        || getTicker().isCycling(TimeUnit.SECONDS)) {
       int lastPlayerSize = this.lastPlayerSize;
       this.lastPlayerSize = playerSize;
       if (hasMinimumPlayers) {
@@ -103,27 +113,28 @@ public class IdlePhase extends GamePhase {
             || (secsLeft <= 20 && secsLeft % 5 == 0)
             || (secsLeft <= 60 && secsLeft % 15 == 0)
             || secsLeft % 30 == 0)) {
-          Map<String, Long> time = Map.of("time", secsLeft);
+          LazyVariableLookup lookup = new LazyVariableLookup();
+          ValueMapPopulators.populateMatch(lookup, match, ArrayPath.of("match"));
           players.forEach((player) -> {
-            player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, time);
+            player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, lookup);
             SoundRecord.TIMER_TICK.play(player);
           });
         }
       } else if (playerSize != lastPlayerSize || trigger.isCycling(30, TimeUnit.SECONDS))
-        players.sendFormattedMessage(MessageKeys.Match.BROADCAST_REQUIRE,
-            Map.of("required", minPlayers, "missing", missingPlayerAmount));
+        players.sendMessage(Language.getInstance()
+            .get(MessageKeys.Match.BROADCAST_REQUIRE)
+            .substitute(match, ArrayPath.of("match")));
+      if (trigger.isCycling(3, TimeUnit.TICKS))
+        players.forEach((player) -> {
+          PlayerMatchData matchData = player.getMatchData();
+          Team team = matchData.getTeam();
+          if (team != null && matchData.isInTeam()) {
+            TeamEnum e = team.getTeamEnum();
+            player.playActionbar(e.getChatColor() + "Team " + Language.getInstance().getTeamName(e));
+          }
+        });
     }
-    if (trigger.isCycling(3, TimeUnit.TICKS))
-      players.forEach((player) -> {
-        PlayerMatchData matchData = player.getMatchData();
-        Team team = matchData.getTeam();
-        if (team != null && matchData.isInTeam()) {
-          TeamEnum e = team.getTeamEnum();
-          player.playActionbar(e.getChatColor() + "Team " + Language.getInstance().getTeamName(e));
-        }
-      });
     if (hasMinimumPlayers) LevelAnimator.animate(this, (int) secsLeft);
     else if (lastMinimumPlayers) LevelAnimator.animate(this, 0);
   }
-
 }

@@ -18,6 +18,8 @@ public final class TickDuration {
 
   private static final TickDuration SINGLE_SECOND_DURATION = new TickDuration(TimeUnit.SECONDS, 1);
 
+  private static final TickDuration NEVER_DURATION = new TickDuration(TimeUnit.HOURS, Integer.MAX_VALUE);
+
   private final @NonNull TimeUnit unit;
   private final long amount;
 
@@ -37,6 +39,10 @@ public final class TickDuration {
 
   public static TickDuration ofSecond() {
     return SINGLE_SECOND_DURATION;
+  }
+
+  public static TickDuration eternity() {
+    return NEVER_DURATION;
   }
 
   public static TickDuration of(@NonNull TimeUnit unit, long amount) {

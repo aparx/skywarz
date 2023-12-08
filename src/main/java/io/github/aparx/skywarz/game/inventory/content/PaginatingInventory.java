@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.inventory.content;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.inventory.GameInventory;
+import io.github.aparx.skywarz.game.inventory.SpecialInventory;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
 import io.github.aparx.skywarz.game.inventory.InventoryItem;
 import io.github.aparx.skywarz.game.inventory.InventoryPosition;
@@ -22,7 +22,7 @@ import java.util.List;
  */
 @Getter
 @Setter
-public class PaginatingInventory extends GameInventory<PaginatableInventoryContent> {
+public class PaginatingInventory extends SpecialInventory<PaginatableInventoryContent> {
 
   private final List<InventoryItem> elements;
 

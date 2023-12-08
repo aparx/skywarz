@@ -1,30 +1,17 @@
 package io.github.aparx.skywarz.startup;
 
+import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.SkywarsCommand;
-import io.github.aparx.skywarz.game.inventory.GameInventory;
-import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
-import io.github.aparx.skywarz.game.inventory.InventoryItem;
-import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
-import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryContent;
-import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
-import io.github.aparx.skywarz.game.kit.DefaultKits;
-import io.github.aparx.skywarz.game.kit.KitHandler;
-import io.github.aparx.skywarz.utils.item.ItemBuilder;
-import io.github.aparx.skywarz.utils.item.SkullItem;
-import io.github.aparx.skywarz.utils.tick.TickDuration;
-import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -41,6 +28,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     SkywarsCommand command = new SkywarsCommand();
     PluginCommand skywars = getCommand(COMMAND_NAME);
+    Preconditions.checkNotNull(skywars);
     skywars.setExecutor(command);
     skywars.setTabCompleter(command);
 

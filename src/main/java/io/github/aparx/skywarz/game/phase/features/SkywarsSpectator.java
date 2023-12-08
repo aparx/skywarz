@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
  * @since 1.0
  */
 @UtilityClass
-public final class Spectator {
+public final class SkywarsSpectator {
 
   public static void markAsSpectator(Player entity) {
     SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(true);
