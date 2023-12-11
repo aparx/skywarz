@@ -1,10 +1,11 @@
 package io.github.aparx.skywarz.game.match;
 
+import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -26,6 +27,10 @@ public enum SkywarsMatchState {
   DONE(TickDuration.of(TimeUnit.SECONDS, 15));
 
   private final @Nullable TickDuration defaultDuration;
+
+  public String getTranslatedName() {
+    return Language.getInstance().get(MessageKeys.getMatchStateKey(this)).get();
+  }
 
   public boolean isJoinable() {
     return this != SETUP && this != DONE;

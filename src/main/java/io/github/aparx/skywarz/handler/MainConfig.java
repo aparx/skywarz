@@ -7,10 +7,10 @@ import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.match.SkywarsMatchState;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
+import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,6 +43,13 @@ public class MainConfig extends ConfigObject {
   })
   private String dedicatedArena = "<ArenaName>";
 
+  @ConfigMapping("bungeecord.motd")
+  @Document("The Motd when the Bungeecord mode is enabled (can be used for external analysis)")
+  private List<String> dedicatedMotd = List.of(
+      "{name}",
+      "{state.color}{state.name}"
+  );
+
   @ConfigMapping("celebration.enabled")
   @Document({
       "If enabled, effects will spawn to celebrate a winner at the lobby when a match is done"
@@ -70,12 +77,14 @@ public class MainConfig extends ConfigObject {
   );
 
   @Getter(AccessLevel.NONE)
-  @ConfigMapping("phase duration")
-  @Document({
-      "The different durations of all valid game phases.",
-      "Valid units: 'ticks', 'seconds', 'minutes', 'hours' and 'days'"
-  })
+  @ConfigMapping("duration.phases")
+  @Document("The different durations of all running game phases")
+  // Note: we use a Map with string keys over an EnumMap due to serialization
   private Map<String, TickDuration> phaseDurationMap = new HashMap<>();
+
+  @ConfigMapping("duration.protection")
+  @Document("How long players cannot take damage (protection time)")
+  private TickDuration protectionDuration = TickDuration.of(TimeUnit.SECONDS, 30);
 
   private MainConfig() {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("main"));
@@ -92,6 +101,7 @@ public class MainConfig extends ConfigObject {
         "The main configuration of Skywarz (by @bonedfps)",
         "Here contained are general purpose settings"
     ));
+    setDocsIfAbsent("duration", "Valid units: 'ticks', 'seconds', 'minutes', 'hours' and 'days'");
     super.save();
   }
 

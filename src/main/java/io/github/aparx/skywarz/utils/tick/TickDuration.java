@@ -4,10 +4,12 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.utils.ConversionUtils;
 import lombok.Getter;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.configuration.serialization.SerializableAs;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -64,13 +66,21 @@ public final class TickDuration implements ConfigurationSerializable {
   }
 
   public static TickDuration deserialize(Map<?, ?> args) {
-    return new TickDuration(ConversionUtils.toEnum(args.get("unit"), TimeUnit.class),
+    return new TickDuration(
+        ConversionUtils.toEnum(args.get("unit"), TimeUnit.class),
         NumberConversions.toInt(args.get("amount")));
   }
 
   @Override
   public @NonNull Map<String, Object> serialize() {
-    return Map.of("amount", amount, "unit", unit.name().toLowerCase());
+    LinkedHashMap<String, Object> map = new LinkedHashMap<>();
+    // we ensure the alias is present, even for config fields (for future reference)
+    // TODO this isn't necessarily needed, but kept in for future changes for now
+    map.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY,
+        ConfigurationSerialization.getAlias(TickDuration.class));
+    map.put("unit", unit.name().toLowerCase());
+    map.put("amount", amount);
+    return map;
   }
 
   public TickDuration add(long amount) {

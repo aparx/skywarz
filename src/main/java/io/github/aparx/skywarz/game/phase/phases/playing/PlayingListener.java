@@ -101,7 +101,6 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
   void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
     filterMatchFromPlayer(player).ifPresent((match) -> {
-      // TODO maybe move this to the MatchListener?
       PlayerMatchData data = SkywarsPlayer.getPlayer(player).getMatchData();
       event.setCancelled(data.isSpectator());
     });

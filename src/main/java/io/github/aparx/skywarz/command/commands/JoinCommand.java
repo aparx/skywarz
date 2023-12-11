@@ -1,21 +1,15 @@
 package io.github.aparx.skywarz.command.commands;
 
-import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
-import io.github.aparx.skywarz.events.match.MatchCreateEvent;
-import io.github.aparx.skywarz.events.match.MatchJoinEvent;
-import io.github.aparx.skywarz.game.match.SkywarsMatchManager;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
 import io.github.aparx.skywarz.language.MessageKeys;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 /**
@@ -45,20 +39,7 @@ public class JoinCommand extends AbstractArenaCommand {
       if (data.isInMatch())
         throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.IN_A_MATCH));
       LocalizableError.localizeThrow(() -> {
-        SkywarsMatchManager matchManager = Skywars.getInstance().getMatchManager();
-        SkywarsMatch match = matchManager.find(arena).orElseGet(() -> {
-          SkywarsMatch newMatch = SkywarsMatchManager.DEFAULT_MATCH_FACTORY.apply(arena);
-          Preconditions.checkState(matchManager.register(newMatch), "Could not register match");
-          MatchCreateEvent createEvent = new MatchCreateEvent(newMatch);
-          Bukkit.getPluginManager().callEvent(createEvent);
-          Preconditions.checkState(!createEvent.isCancelled(), "Match creation was cancelled");
-          return newMatch;
-        });
-        MatchJoinEvent joinEvent = new MatchJoinEvent(match, entity);
-        Bukkit.getPluginManager().callEvent(joinEvent);
-        Preconditions.checkState(!joinEvent.isCancelled(), "Join was cancelled");
-        Preconditions.checkState(match.getState().isJoinable(), "Match is not joinable");
-        Preconditions.checkState(match.join(player));
+        Skywars.getInstance().getMatchManager().join(player, arena);
       }, (lang) -> lang.substitute(MessageKeys.Match.JOIN_ERROR));
     }
   }

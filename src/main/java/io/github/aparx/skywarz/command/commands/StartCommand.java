@@ -42,6 +42,7 @@ public class StartCommand extends CommandNode {
       SkywarsMatch match = data.getMatch();
       Preconditions.checkNotNull(match);
       Preconditions.checkState(match.isState(SkywarsMatchState.IDLE));
+      Preconditions.checkState(match.getAudience().size() >= match.getMinPlayerCount());
       SkywarsPhase phase = match.getCycler().getPhase().orElseThrow();
       TickDuration passed = phase.getDuration().add(QUICKSTART_TARGET.multiply(-1));
       Preconditions.checkState(!phase.getTicker().hasElapsed(passed));

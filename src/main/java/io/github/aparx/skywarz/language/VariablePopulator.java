@@ -171,7 +171,6 @@ public final class VariablePopulator {
       LazyVariableLookup lookup, SkywarsArena arena, ArrayPath prefix) {
     SkywarsMatchManager matches = Skywars.getInstance().getMatchManager();
     lookup.setIfAbsent(prefix.add("name"), arena.getName());
-    // TODO max, min & current players
     matches.find(arena).ifPresentOrElse((match) -> {
       addMatch(lookup, match, ArrayPath.of(), null);
     }, () -> {
@@ -200,9 +199,7 @@ public final class VariablePopulator {
 
   public static void addState(
       LazyVariableLookup lookup, SkywarsMatchState state, ArrayPath prefix) {
-    lookup.set(prefix.add("name"), Language.getInstance()
-        .get(MessageKeys.getMatchStateKey(state))
-        .substitute());
+    lookup.set(prefix.add("name"), state.getTranslatedName());
     lookup.set(prefix.add("color"), state.isJoinable() ? ChatColor.GREEN : ChatColor.RED);
   }
 

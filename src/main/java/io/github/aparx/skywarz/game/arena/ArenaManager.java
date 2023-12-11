@@ -110,7 +110,8 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
   public @NonNull SkywarsArena get(@NonNull String name) {
     Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
-      return internalSet.require(transformKey(name));
+      return find(name).orElseThrow(() -> new IllegalArgumentException(
+          String.format("Arena %s not found", name)));
     }
   }
 

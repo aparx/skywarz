@@ -108,17 +108,17 @@ public final class PlayerSnapshot {
       player.setPlayerListName(playerListName);
     player.setExp(exp);
     player.setLevel(level);
-    restoreWorldDependant0(player);
+    restoreWorldDependant(player);
     if (location != null
         && !Objects.equals(thisWorld, location.getWorld())
         && Skywars.plugin().isEnabled())
       // ensure the player gets the attributes required, even on world change
       Bukkit.getScheduler().runTaskLater(Skywars.plugin(), () -> {
-        restoreWorldDependant0(player);
+        restoreWorldDependant(player);
       }, 1);
   }
 
-  private void restoreWorldDependant0(Player player) {
+  private void restoreWorldDependant(Player player) {
     if (gameMode != null)
       player.setGameMode(gameMode);
     player.setAllowFlight(isAllowedFlying);

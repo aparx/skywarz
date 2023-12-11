@@ -15,7 +15,6 @@ public final class Magics {
   /** Boolean that determines whether a match is actually winnable when one team is left */
   public static final boolean GAME_WINNABLE = !isDevelopment();
 
-  // TODO move to game settings or main?
   public static final TickDuration DEV_PLAYING_DURATION = TickDuration.of(TimeUnit.MINUTES, 1);
 
   public static final TickDuration DEV_IDLE_DURATION = TickDuration.of(TimeUnit.SECONDS, 3);

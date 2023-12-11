@@ -5,6 +5,9 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.events.match.MatchCreateEvent;
+import io.github.aparx.skywarz.events.match.MatchJoinEvent;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.match.listener.SkywarsMatchListener;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
@@ -50,6 +53,34 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
     internalSet.clear();
     byArena.clear();
     HandlerList.unregisterAll(LISTENER);
+  }
+
+  // TODO move to a different (more fitting) place
+  @CanIgnoreReturnValue
+  public SkywarsMatch join(@NonNull SkywarsPlayer player, @NonNull SkywarsArena arena) {
+    SkywarsMatchManager matchManager = Skywars.getInstance().getMatchManager();
+    SkywarsMatch match = matchManager.find(arena).orElseGet(() -> {
+      SkywarsMatch newMatch = SkywarsMatchManager.DEFAULT_MATCH_FACTORY.apply(arena);
+      Preconditions.checkState(matchManager.register(newMatch), "Could not register match");
+      MatchCreateEvent createEvent = new MatchCreateEvent(newMatch);
+      Bukkit.getPluginManager().callEvent(createEvent);
+      Preconditions.checkState(!createEvent.isCancelled(), "Match creation was cancelled");
+      return newMatch;
+    });
+    MatchJoinEvent joinEvent = new MatchJoinEvent(match, player.getOnline());
+    Bukkit.getPluginManager().callEvent(joinEvent);
+    Preconditions.checkState(!joinEvent.isCancelled(), "Join was cancelled");
+    Preconditions.checkState(match.getState().isJoinable(), "Match is not joinable");
+    Preconditions.checkState(match.join(player));
+    return match;
+  }
+
+  public int size() {
+    return internalSet.size();
+  }
+
+  public boolean isEmpty() {
+    return internalSet.isEmpty();
   }
 
   @Synchronized

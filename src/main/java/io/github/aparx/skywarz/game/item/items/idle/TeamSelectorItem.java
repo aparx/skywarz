@@ -172,7 +172,6 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
       final boolean isTeam = isInTeam();
 
       List<String> lore = new ArrayList<>();
-      // TODO add translatable
       if (isTeam) lore.add("§7» " + teamStatusJoined);
       else if (!team.hasSpace()) lore.add("§8» " + teamStatusFull);
       else lore.add((ticks % 2 == 0 ? "§8» " : "   ") + ChatColor.GRAY + teamStatusJoinable);

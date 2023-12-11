@@ -12,6 +12,7 @@ import io.github.aparx.skywarz.game.chest.ChestItem;
 import io.github.aparx.skywarz.game.item.SkywarsItemManager;
 import io.github.aparx.skywarz.game.kit.SkywarsKit;
 import io.github.aparx.skywarz.game.kit.SkywarsKitHandler;
+import io.github.aparx.skywarz.game.listener.BungeeListener;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
@@ -84,6 +85,7 @@ public final class Skywars {
         new ArenaManager(),
         new SkywarsMatchManager(),
         new SkywarsItemManager(),
+        new BungeeListener(),
         SkywarsKitHandler.getInstance()
     ));
   }
