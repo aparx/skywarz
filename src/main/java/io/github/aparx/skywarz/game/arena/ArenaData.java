@@ -2,10 +2,9 @@ package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
+import io.github.aparx.bufig.utils.ConversionUtils;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.game.SpawnMap;
-import io.github.aparx.skywarz.game.arena.snapshot.ArenaDataSnapshot;
+import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +19,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -53,20 +51,23 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     setSettings(settings);
   }
 
-  @SuppressWarnings("unchecked")
   public static ArenaData deserialize(@NonNull Map<?, ?> data) {
+    Map<String, SpawnGroup> spawns = ConversionUtils.toStringObjectSpecificMap(data.get("spawns"), SpawnGroup.class::cast);
     ArenaData newData = new ArenaData((ArenaBox) data.get("box"),
-        (Map<String, SpawnGroup>) data.get("spawns"),
+        spawns,
         (GameSettings) data.get("settings"));
-    if (data.containsKey("world"))
-      newData.setWorld(Bukkit.getWorld((String) data.get("world")));
     newData.setLobby((Location) data.get("lobby"));
     newData.setSpectator((Location) data.get("spectator"));
+    if (data.containsKey("world")) {
+      World world = Bukkit.getWorld((String) data.get("world"));
+      Preconditions.checkNotNull(world, "World of arena has become invalid");
+      newData.setWorld(world);
+    }
     return newData;
   }
 
   @Override
-  public Map<String, Object> serialize() {
+  public @NonNull Map<String, Object> serialize() {
     Map<String, Object> map = new HashMap<>();
     map.put("box", getBox());
     map.put("lobby", getLobby());
@@ -104,7 +105,7 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
 
   @CanIgnoreReturnValue
   public SpawnGroup createSpawnsIfAbsent(@NonNull TeamEnum team) {
-    return spawns.computeIfAbsent(team.name(), (key) -> new SpawnMap());
+    return spawns.computeIfAbsent(team.name(), (key) -> new SpawnList());
   }
 
 }

@@ -7,12 +7,12 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.game.phase.GamePhase;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.phase.SkywarsPhase;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.language.MessageKeys;
-import io.github.aparx.skywarz.permission.Permission;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 
@@ -27,7 +27,7 @@ public class StartCommand extends CommandNode {
 
   public StartCommand() {
     super(CommandInfo.builder("start")
-        .permission(Permission.QUICKSTART)
+        .permission(SkywarsPermission.QUICKSTART)
         .description("Quickly start the game you joined")
         .build());
   }
@@ -39,12 +39,12 @@ public class StartCommand extends CommandNode {
     if (!data.isInMatch())
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
     try {
-      Match match = data.getMatch();
+      SkywarsMatch match = data.getMatch();
       Preconditions.checkNotNull(match);
-      Preconditions.checkState(match.isState(MatchState.IDLE));
-      GamePhase phase = match.getCycler().getPhase().orElseThrow();
+      Preconditions.checkState(match.isState(SkywarsMatchState.IDLE));
+      SkywarsPhase phase = match.getCycler().getPhase().orElseThrow();
       TickDuration passed = phase.getDuration().add(QUICKSTART_TARGET.multiply(-1));
-      Preconditions.checkState(!phase.getTicker().hasElapsed(QUICKSTART_TARGET));
+      Preconditions.checkState(!phase.getTicker().hasElapsed(passed));
       phase.getTicker().set(passed);
       player.sendFormattedMessage(MessageKeys.Match.QUICKSTART_SUCCESS);
     } catch (Exception e) {

@@ -6,7 +6,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.PaginationUtils;
@@ -25,11 +25,11 @@ public class ArenaListCommand extends CommandNode {
 
   private static final int MAX_PER_PAGE = 7;
 
-  private static final Comparator<Arena> COMPLETION_COMPARATOR = (a, b) ->
+  private static final Comparator<SkywarsArena> COMPLETION_COMPARATOR = (a, b) ->
       a.isCompleted() == b.isCompleted() ? 0 : a.isCompleted() ? 1 : -1;
 
-  private final PaginationUtils.CommandChatPaginator<Arena> chatPaginator =
-      PaginationUtils.CommandChatPaginator.<Arena>builder()
+  private final PaginationUtils.CommandChatPaginator<SkywarsArena> chatPaginator =
+      PaginationUtils.CommandChatPaginator.<SkywarsArena>builder()
           .node(this)
           .title("Arenas")
           .maxPerPage(MAX_PER_PAGE)
@@ -64,7 +64,7 @@ public class ArenaListCommand extends CommandNode {
 
   @Override
   public void execute(CommandContext context, CommandArgList args) {
-    Collection<Arena> arenas = Skywars.getInstance().getArenaManager().asSet();
+    Collection<SkywarsArena> arenas = Skywars.getInstance().getArenaManager().asSet();
     chatPaginator.sendPage(arenas, context, args.isEmpty() ? 0 : args.get(0).getInt(0));
   }
 

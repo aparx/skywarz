@@ -51,8 +51,9 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   public void setPoint(@NonNull Point point, Vector vector) {
     Preconditions.checkNotNull(point, "Corner must not be null");
-    points[point.ordinal()] = vector;
-    if (isCompleted()) sortMinAndMaxCoordinates();
+    Vector other = points[point.other().ordinal()];
+    points[point.ordinal()] = other != null && vector != null
+        ? minmax(point, vector, other) : vector;
   }
 
   public Optional<Vector> getPoint(@NonNull Point point) {
@@ -115,13 +116,8 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
         max.getX(), max.getY(), max.getZ());
   }
 
-  private void sortMinAndMaxCoordinates() {
-    Vector min = points[Point.MIN.ordinal()];
-    Vector max = points[Point.MAX.ordinal()];
-    Preconditions.checkNotNull(min, "Min point is null");
-    Preconditions.checkNotNull(max, "Max point is null");
-    points[Point.MIN.ordinal()] = Vector.getMinimum(min, max);
-    points[Point.MAX.ordinal()] = Vector.getMaximum(min, max);
+  private Vector minmax(Point point, Vector vec1, Vector vec2) {
+    return point == Point.MAX ? Vector.getMaximum(vec1, vec2) : Vector.getMinimum(vec1, vec2);
   }
 
   @Override
@@ -131,6 +127,11 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   public enum Point {
     MIN, MAX;
+
+    public Point other() {
+      Point[] points = Point.values();
+      return points[ordinal() % points.length];
+    }
 
     public static @NonNull Point ofIndex(int index) {
       final Point[] values = values();

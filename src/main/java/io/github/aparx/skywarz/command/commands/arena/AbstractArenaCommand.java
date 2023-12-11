@@ -6,7 +6,7 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.language.MessageKeys;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -36,7 +36,7 @@ public abstract class AbstractArenaCommand extends CommandNode {
     this.arenaArgumentIndex = arenaArgumentIndex;
   }
 
-  protected abstract void execute(Arena arena, CommandContext context, CommandArgList args);
+  protected abstract void execute(SkywarsArena arena, CommandContext context, CommandArgList args);
 
   @Override
   public final void execute(CommandContext context, CommandArgList args) {
@@ -56,8 +56,8 @@ public abstract class AbstractArenaCommand extends CommandNode {
     if (args.length() <= arenaArgumentIndex) return null;
     String join = args.join(arenaArgumentIndex);
     return Skywars.getInstance().getArenaManager().stream()
-        .map(Arena::getName)
-        .filter(name -> join.isEmpty() || name.startsWith(join))
+        .map(SkywarsArena::getName)
+        .filter(name -> join.isEmpty() || name.toLowerCase().startsWith(join.toLowerCase()))
         .collect(Collectors.toList());
   }
 

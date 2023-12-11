@@ -3,13 +3,14 @@ package io.github.aparx.skywarz.game.item.items.idle;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
-import io.github.aparx.skywarz.game.item.StaticGameItem;
+import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
 import io.github.aparx.skywarz.game.item.items.idle.kit.KitInventory;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -26,13 +27,14 @@ import java.util.Map;
  * @since 1.0
  */
 @Document("Kit Selector")
-public class KitSelectorItem extends StaticGameItem {
+public class KitSelectorItem extends StaticSkywarsItem {
 
   @ConfigMapping
+  @Document("The item with which a player can interact")
   private WrappedItemStack item = ItemBuilder
       .builder(Material.CHEST)
-      .lore("§8Click to select your kit")
-      .name("§bKit selector")
+      .lore(ChatColor.DARK_GRAY + "Click to select your kit")
+      .name(ChatColor.AQUA + "Kit selector")
       .enchants(Map.of(Enchantment.LUCK, 1))
       .flags(ItemFlag.HIDE_ENCHANTS)
       .wrap();
@@ -42,17 +44,17 @@ public class KitSelectorItem extends StaticGameItem {
   private String menuTitle = "Kit Selector";
 
   public KitSelectorItem() {
-    super("kit selector", new MatchState[]{MatchState.IDLE});
+    super("kit selector", new SkywarsMatchState[]{SkywarsMatchState.IDLE});
     setSlot(0);
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
     return item.getStack().clone();
   }
 
   @Override
-  protected void handleClick(@NonNull Match match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
     event.setCancelled(true);
     SkywarsPlayer player = SkywarsPlayer.getPlayer(event.getPlayer());
     KitInventory kitInventory = new KitInventory(match, player, menuTitle);

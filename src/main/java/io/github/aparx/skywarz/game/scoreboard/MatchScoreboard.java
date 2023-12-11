@@ -1,8 +1,8 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
-import io.github.aparx.skywarz.game.match.MatchState;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.scoreboard.playing.PlayingScoreboard;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
-import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +20,7 @@ import java.util.List;
 public enum MatchScoreboard {
 
   IDLE(new GameScoreboard(
-      MatchState.IDLE, TickDuration.ofSecond(), "    §lLobby§r    ",
+      SkywarsMatchState.IDLE, TickDuration.ofSecond(), "    §lLobby§r    ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -30,8 +30,8 @@ public enum MatchScoreboard {
           "{player.kit.displayName}"
       ))),
 
-  PLAYING_ALIVE(new GameScoreboard(
-      MatchState.PLAYING, "alive", TickDuration.ofSecond(), " §b§lSKYWARZ§r ",
+  PLAYING_ALIVE(new PlayingScoreboard(
+      SkywarsMatchState.PLAYING, "alive", TickDuration.ofSecond(), " §b§lSKYWARZ§r ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -44,11 +44,11 @@ public enum MatchScoreboard {
           "§e{match.alive}",
           StringUtils.SPACE,
           "Kills:",
-          "§c-"
+          "§c{player.match.stats.kills}"
       ))),
 
-  PLAYING_DEAD(new GameScoreboard(
-      MatchState.PLAYING, "dead", TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
+  PLAYING_DEAD(new PlayingScoreboard(
+      SkywarsMatchState.PLAYING, "dead", TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -58,10 +58,20 @@ public enum MatchScoreboard {
           "§e{match.time.left.format}",
           StringUtils.SPACE,
           "Alive:",
-          "§e{match.alive}",
+          "§e{match.alive}"
+      ))),
+
+  DONE(new GameScoreboard(
+      SkywarsMatchState.DONE, TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
+      List.of(
           StringUtils.SPACE,
-          "Place:",
-          "§c13th"
+          "Map:",
+          "§b{match.arena}",
+          StringUtils.SPACE,
+          "Winner:",
+          "{match.winner.color}{match.winner.name}",
+          StringUtils.SPACE,
+          "§7~§oby aparx"
       )));
 
   private final @NonNull GameScoreboard scoreboard;

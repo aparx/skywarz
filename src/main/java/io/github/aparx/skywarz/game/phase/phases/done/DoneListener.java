@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.game.phase.phases.done;
 
-import io.github.aparx.skywarz.game.phase.GamePhaseListener;
+import io.github.aparx.skywarz.game.phase.SkywarsPhaseListener;
 import io.github.aparx.skywarz.game.phase.phases.LobbyPhaseListener;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version 2023-12-07 10:42
  * @since 1.0
  */
-public class DoneListener extends GamePhaseListener<DonePhase> {
+public class DoneListener extends SkywarsPhaseListener<DonePhase> {
 
   private final LobbyPhaseListener lobbyPhaseListener;
 

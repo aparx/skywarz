@@ -1,8 +1,14 @@
 package io.github.aparx.skywarz.utils.tick;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.bufig.utils.ConversionUtils;
 import lombok.Getter;
+import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.configuration.serialization.SerializableAs;
+import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Map;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -10,7 +16,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @since 1.0
  */
 @Getter
-public final class TickDuration {
+@SerializableAs("Skywarz.TickDuration")
+public final class TickDuration implements ConfigurationSerializable {
 
   private static final TickDuration ZERO_DURATION = new TickDuration(TimeUnit.TICKS, 0);
 
@@ -18,7 +25,8 @@ public final class TickDuration {
 
   private static final TickDuration SINGLE_SECOND_DURATION = new TickDuration(TimeUnit.SECONDS, 1);
 
-  private static final TickDuration NEVER_DURATION = new TickDuration(TimeUnit.HOURS, Integer.MAX_VALUE);
+  private static final TickDuration NEVER_DURATION = new TickDuration(TimeUnit.HOURS,
+      Integer.MAX_VALUE);
 
   private final @NonNull TimeUnit unit;
   private final long amount;
@@ -53,6 +61,16 @@ public final class TickDuration {
     if (finalAmount == TimeUnit.SECONDS.toTicks(1))
       return SINGLE_SECOND_DURATION;
     return new TickDuration(unit, amount);
+  }
+
+  public static TickDuration deserialize(Map<?, ?> args) {
+    return new TickDuration(ConversionUtils.toEnum(args.get("unit"), TimeUnit.class),
+        NumberConversions.toInt(args.get("amount")));
+  }
+
+  @Override
+  public @NonNull Map<String, Object> serialize() {
+    return Map.of("amount", amount, "unit", unit.name().toLowerCase());
   }
 
   public TickDuration add(long amount) {
@@ -133,4 +151,6 @@ public final class TickDuration {
         ", amount=" + amount +
         '}';
   }
+
+
 }

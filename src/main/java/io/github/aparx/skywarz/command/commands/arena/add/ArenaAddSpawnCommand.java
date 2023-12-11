@@ -1,17 +1,20 @@
 package io.github.aparx.skywarz.command.commands.arena.add;
 
+import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaSpawnCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.ArenaBox;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.Language;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.lang.ref.PhantomReference;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,15 +42,19 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
 
   @Override
   protected void setLocation(
-      Location location, Arena arena, CommandContext context, CommandArgList args) {
+      Location location, SkywarsArena arena, CommandContext context, CommandArgList args) {
     if (args.length() != 1 + TEAM_ARGUMENT_INDEX)
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
+      ArenaBox box = arena.getData().getBox();
+      Preconditions.checkState(box.isCompleted(), "Set the playground points first");
+      Preconditions.checkState(box.isWithin(location), "Spawn is not within the playground");
+
       Player player = context.getPlayer();
       TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
       int spawnId = arena.getData().createSpawnsIfAbsent(team).add(location);
       player.sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Added spawn with ID {0} in arena {1} to team {2}",
+          "{successPrefix} Added spawn with ID {0} in arena {1} to team {2}. (unsaved)",
           spawnId, arena.getName(), team.getChatColor() + team.getDefaultName()
       ));
     }

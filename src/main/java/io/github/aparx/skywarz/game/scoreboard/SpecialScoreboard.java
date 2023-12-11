@@ -29,8 +29,8 @@ import java.util.function.Function;
 @Getter
 public class SpecialScoreboard implements Listener {
 
-  private static final String OBJECTIVE_NAME = "main";
-  private static final String OBJECTIVE_CRITERIA = "dummy";
+  public static final String OBJECTIVE_NAME = "main";
+  public static final String OBJECTIVE_CRITERIA = "dummy";
 
   @Getter(AccessLevel.NONE)
   private final WeakPlayerGroup viewers = new WeakPlayerGroup();

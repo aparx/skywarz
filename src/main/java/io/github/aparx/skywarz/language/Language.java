@@ -4,13 +4,11 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -132,7 +130,4 @@ public final class Language implements MessageStorage<ArrayPath> {
     return register.store(path, message);
   }
 
-  public String getTeamName(TeamEnum teamEnum) {
-    return teamEnum.getDefaultName(); // TODO
-  }
 }

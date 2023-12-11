@@ -1,14 +1,13 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.match.Match;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -20,12 +19,12 @@ import java.util.Optional;
 public final class MatchScoreboardHandlers {
 
   @Getter(AccessLevel.NONE)
-  private final @NonNull WeakReference<Match> match;
+  private final @NonNull WeakReference<SkywarsMatch> match;
 
   private final EnumMap<MatchScoreboard, MatchScoreboardHandler> handlers =
       new EnumMap<>(MatchScoreboard.class);
 
-  public MatchScoreboardHandlers(@NonNull Match match) {
+  public MatchScoreboardHandlers(@NonNull SkywarsMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     this.match = new WeakReference<>(match);
   }
@@ -39,11 +38,11 @@ public final class MatchScoreboardHandlers {
     handlers.clear();
   }
 
-  public Optional<Match> findMatch() {
+  public Optional<SkywarsMatch> findMatch() {
     return Optional.ofNullable(match.get());
   }
 
-  public Match getMatch() {
+  public SkywarsMatch getMatch() {
     return findMatch().orElseThrow();
   }
 

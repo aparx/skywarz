@@ -65,6 +65,11 @@ public final class CommandArgList implements Iterable<CommandArgument> {
     return delegate(args);
   }
 
+  public static CommandArgList parse(@NonNull String commandLine) {
+    Preconditions.checkNotNull(commandLine, "Line must not be null");
+    return of(commandLine.split(StringUtils.SPACE));
+  }
+
   @CheckReturnValue
   public static CommandArgList copyOf(@NonNull Iterable<String> iterable) {
     Preconditions.checkNotNull(iterable, "Iterable must not be null");
@@ -80,6 +85,7 @@ public final class CommandArgList implements Iterable<CommandArgument> {
     Validate.noNullElements(collection, "Collection must not contain null elements");
     return delegate(collection.toArray(String[]::new));
   }
+
 
   private static CommandArgList delegate(String[] args) {
     return args.length == 0 ? EMPTY : new CommandArgList(args);

@@ -21,6 +21,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Getter
 public final class SoundRecord {
 
+  public static final SoundRecord ACTION_PERFORMED = of(Sound.BLOCK_LEVER_CLICK);
   public static final SoundRecord ACTION_SUCCESS = of(Sound.ENTITY_ITEM_PICKUP);
   public static final SoundRecord ACTION_ERROR = of(Sound.BLOCK_ANVIL_LAND, .33f, .75f);
   public static final SoundRecord OPEN_INVENTORY = of(Sound.BLOCK_LEVER_CLICK);

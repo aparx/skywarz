@@ -26,7 +26,7 @@ public class LazyVariableLookup implements StringLookup {
     this(new HashMap<>());
   }
 
-  public LazyVariableLookup(@NonNull Map<String, Object> objectMap) {
+  private LazyVariableLookup(@NonNull Map<String, Object> objectMap) {
     Preconditions.checkNotNull(objectMap, "Map must not be null");
     this.dataMap = objectMap;
   }
@@ -50,6 +50,12 @@ public class LazyVariableLookup implements StringLookup {
   }
 
   @CanIgnoreReturnValue
+  public @NonNull LazyVariableLookup setIfAbsent(ArrayPath key, Object object) {
+    dataMap.putIfAbsent(key.join(), object);
+    return this;
+  }
+
+  @CanIgnoreReturnValue
   public @NonNull LazyVariableLookup set(ArrayPath key, Supplier<?> supplier) {
     dataMap.put(key.join(), supplier);
     return this;
@@ -57,6 +63,6 @@ public class LazyVariableLookup implements StringLookup {
 
   @CanIgnoreReturnValue
   public @NonNull LazyVariableLookup set(String key, Supplier<?> supplier) {
-    return set(ArrayPath.parse(key, ArrayPath.DEFAULT_SEPARATOR), supplier);
+    return set(ArrayPath.parse(key), supplier);
   }
 }

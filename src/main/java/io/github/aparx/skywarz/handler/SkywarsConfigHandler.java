@@ -18,9 +18,7 @@ import java.io.File;
 @Getter
 public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
-  public static final String ARENA_CONFIG_ID = "arenas";
-
-  public static final String GAME_CONFIG_ID = "games";
+  public static final String ARENA_CONFIG_ID = ".storage/arenas";
 
   public SkywarsConfigHandler(@NonNull Plugin plugin) {
     super((id) -> new YamlConfig(id, new File(plugin.getDataFolder(), id + ".yml")));
@@ -49,10 +47,6 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
 
   public @NonNull Config getArenas() {
     return getOrCreate(ARENA_CONFIG_ID);
-  }
-
-  public @NonNull Config getGames() {
-    return getOrCreate(GAME_CONFIG_ID);
   }
 
 }

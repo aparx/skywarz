@@ -1,12 +1,15 @@
 package io.github.aparx.skywarz.language;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.Magics;
+import io.github.aparx.skywarz.Skywars;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.logging.Level;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -54,6 +57,19 @@ public final class LocalizableError extends RuntimeException {
     try {
       return executor.get();
     } catch (Throwable throwable) {
+      throw new LocalizableError(throwable, errorMessageFactory);
+    }
+  }
+
+  @CanIgnoreReturnValue
+  public static void localizeThrow(
+      @NonNull Runnable executor,
+      @NonNull Function<Language, ?> errorMessageFactory) {
+    try {
+      executor.run();
+    } catch (Throwable throwable) {
+      if (Magics.isDevelopment())
+        Skywars.logger().log(Level.WARNING, throwable.getMessage(), throwable);
       throw new LocalizableError(throwable, errorMessageFactory);
     }
   }

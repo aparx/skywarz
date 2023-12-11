@@ -6,12 +6,12 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.ArenaManager;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.language.Language;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -21,8 +21,6 @@ import java.util.regex.Pattern;
 public class ArenaCreateCommand extends CommandNode {
 
   private static final int MAX_NAME_LENGTH = 20;
-
-  private static final Pattern NAME_PATTERN = Pattern.compile("[A-z0-9_]+");
 
   public ArenaCreateCommand(@NonNull CommandNode parent) {
     super(CommandInfo.builder()
@@ -39,9 +37,9 @@ public class ArenaCreateCommand extends CommandNode {
       String name = args.last().get();
       Preconditions.checkState(!name.isEmpty() && name.length() <= MAX_NAME_LENGTH,
           String.format("Name must be less than %s characters", MAX_NAME_LENGTH));
-      Matcher matcher = NAME_PATTERN.matcher(name);
+      Matcher matcher = ArenaManager.NAME_PATTERN.matcher(name);
       Preconditions.checkState(matcher.matches(), "Name must not contain special characters");
-      Skywars.getInstance().getArenaManager().register(new Arena(name));
+      Skywars.getInstance().getArenaManager().register(new SkywarsArena(name));
       context.getSender().sendMessage(Language.getInstance().substitute(
           "{successPrefix} Created arena {0}!", name));
     }

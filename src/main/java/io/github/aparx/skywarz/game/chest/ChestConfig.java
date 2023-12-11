@@ -58,7 +58,7 @@ public final class ChestConfig extends ConfigObject {
   private ChestItems items = new ChestItems();
 
   private ChestConfig() {
-    super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("chests"));
+    super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("chest"));
     items.addAll(getTiers());
     items.addAll(getBlocks());
     items.addAll(getFood());
@@ -69,6 +69,12 @@ public final class ChestConfig extends ConfigObject {
         new ChestItem(Material.STICK, COMMON),
         new ChestItem(Material.FLINT_AND_STEEL, UNCOMMON)
     ));
+  }
+
+  @Override
+  public void load() {
+    super.load();
+    save(); // force update
   }
 
   private Set<ChestItem> getTiers() {

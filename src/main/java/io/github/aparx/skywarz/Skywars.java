@@ -2,22 +2,26 @@ package io.github.aparx.skywarz;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.game.SpawnMap;
+import io.github.aparx.bufig.configurable.object.ConfigObject;
+import io.github.aparx.skywarz.database.SkywarsDatabase;
+import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.arena.*;
+import io.github.aparx.skywarz.game.arena.sign.SkywarsSign;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestItem;
-import io.github.aparx.skywarz.game.item.GameItemManager;
-import io.github.aparx.skywarz.game.kit.Kit;
-import io.github.aparx.skywarz.game.kit.KitHandler;
+import io.github.aparx.skywarz.game.item.SkywarsItemManager;
+import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.game.kit.SkywarsKitHandler;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
-import io.github.aparx.skywarz.game.match.MatchManager;
+import io.github.aparx.skywarz.game.match.SkywarsMatchManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.item.SkullItem;
+import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.Getter;
 import lombok.Synchronized;
 import org.bukkit.Bukkit;
@@ -25,6 +29,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,19 +43,22 @@ import java.util.logging.Logger;
 public final class Skywars {
 
   static {
-    ConfigurationSerialization.registerClass(Arena.class);
+    ConfigurationSerialization.registerClass(TickDuration.class);
     ConfigurationSerialization.registerClass(ArenaBox.class);
-    ConfigurationSerialization.registerClass(SpawnMap.class);
+    ConfigurationSerialization.registerClass(SpawnList.class);
     ConfigurationSerialization.registerClass(GameSettings.class);
     ConfigurationSerialization.registerClass(ArenaData.class);
     ConfigurationSerialization.registerClass(WrappedItemStack.class);
     ConfigurationSerialization.registerClass(ChestItem.class);
     ConfigurationSerialization.registerClass(SkullItem.class);
-    ConfigurationSerialization.registerClass(Kit.class);
+    ConfigurationSerialization.registerClass(SkywarsKit.class);
+    ConfigurationSerialization.registerClass(SkywarsSign.class);
   }
 
   @Getter
   private static final Skywars instance = new Skywars();
+
+  private final SkywarsDatabase database = new SkywarsDatabase();
 
   private final KeyedByClassSet<SkywarsHandler> handlers = new HandlerSet();
 
@@ -74,8 +82,9 @@ public final class Skywars {
   private Skywars() {
     handlers.addAll(Set.of(
         new ArenaManager(),
-        new MatchManager(),
-        new GameItemManager()
+        new SkywarsMatchManager(),
+        new SkywarsItemManager(),
+        SkywarsKitHandler.getInstance()
     ));
   }
 
@@ -87,13 +96,22 @@ public final class Skywars {
       this.logger = plugin.getLogger();
       logger.info("Loading plugin");
       configHandler = new SkywarsConfigHandler(plugin);
-      MainConfig.getInstance().load();
-      ChestConfig.getInstance().load();
-      KitHandler.getInstance().load();
       Language.getInstance().load();
+      List.of(
+          MainConfig.getInstance(),
+          ChestConfig.getInstance()
+      ).forEach(ConfigObject::load);
       for (MatchScoreboard board : MatchScoreboard.values())
         board.getScoreboard().load();
       getHandlers().forEach(SkywarsHandler::load);
+      database.connect()
+          .thenAccept((nil) -> Skywars.logger().info("Finished loading database"))
+          .exceptionally((error) -> {
+            Skywars.logger().log(Level.SEVERE, "Severe error on database loading", error);
+            Bukkit.getScheduler().runTask(Skywars.plugin(),
+                () -> Bukkit.getPluginManager().disablePlugin(plugin));
+            return null;
+          });
       this.isLoaded = true;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Severe error on load", e);
@@ -108,6 +126,7 @@ public final class Skywars {
     try {
       logger.info("Unloading plugin");
       getHandlers().forEach(SkywarsHandler::unload);
+      database.disconnect();
       return true;
     } catch (Exception e) {
       logger.log(Level.SEVERE, "Could not finalize plugin unload", e);
@@ -131,12 +150,12 @@ public final class Skywars {
     return getHandlers().require(ArenaManager.class);
   }
 
-  public @NonNull MatchManager getMatchManager() {
-    return getHandlers().require(MatchManager.class);
+  public @NonNull SkywarsMatchManager getMatchManager() {
+    return getHandlers().require(SkywarsMatchManager.class);
   }
 
-  public @NonNull GameItemManager getGameItemManager() {
-    return getHandlers().require(GameItemManager.class);
+  public @NonNull SkywarsItemManager getGameItemManager() {
+    return getHandlers().require(SkywarsItemManager.class);
   }
 
   private final class HandlerSet extends KeyedByClassSet<SkywarsHandler> {

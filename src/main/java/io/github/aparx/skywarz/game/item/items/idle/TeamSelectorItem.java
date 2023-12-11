@@ -9,10 +9,10 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.inventory.*;
 import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
-import io.github.aparx.skywarz.game.item.StaticGameItem;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.game.team.Team;
+import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -44,7 +44,7 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @Document("Team Selector")
-public final class TeamSelectorItem extends StaticGameItem {
+public final class TeamSelectorItem extends StaticSkywarsItem {
 
   private static final ColoredMaterial REPLACEABLE_MATERIAL = ColoredMaterial.CONCRETE;
 
@@ -57,8 +57,8 @@ public final class TeamSelectorItem extends StaticGameItem {
   })
   private WrappedItemStack item = ItemBuilder
       .builder(Material.WHITE_BED)
-      .lore("§8Click to select your team")
-      .name("§bTeam selector")
+      .lore(ChatColor.DARK_GRAY + "Click to select your team")
+      .name(ChatColor.AQUA + "Team selector")
       .enchants(Map.of(Enchantment.ARROW_KNOCKBACK, 2))
       .flags(ItemFlag.HIDE_ENCHANTS)
       .wrap();
@@ -84,12 +84,12 @@ public final class TeamSelectorItem extends StaticGameItem {
   private String teamMemberSlot = "§8• {0}";
 
   public TeamSelectorItem() {
-    super("team selector", new MatchState[]{MatchState.IDLE});
+    super("team selector", new SkywarsMatchState[]{SkywarsMatchState.IDLE});
     setSlot(1);
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
     ItemStack stack = item.getStack().clone();
     Optional.ofNullable(ColoredMaterial.getColored(stack.getType()))
         .ifPresent((colored) -> SkywarsPlayer.findPlayer(initiator)
@@ -103,7 +103,7 @@ public final class TeamSelectorItem extends StaticGameItem {
   }
 
   @Override
-  protected void handleClick(@NonNull Match match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
     Player entity = event.getPlayer();
     SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
     SoundRecord.OPEN_INVENTORY.play(player);
@@ -111,7 +111,8 @@ public final class TeamSelectorItem extends StaticGameItem {
   }
 
   @CheckReturnValue
-  private SpecialInventory<?> createInventory(@NonNull Match match, @NonNull SkywarsPlayer player) {
+  private SpecialInventory<?> createInventory(@NonNull SkywarsMatch match,
+                                              @NonNull SkywarsPlayer player) {
     int maxTeamSize = match.getTeamSize();
     TeamMap teamMap = match.getTeamMap();
     InventoryDimensions dimensions = InventoryDimensions.ofLengths(
@@ -127,7 +128,7 @@ public final class TeamSelectorItem extends StaticGameItem {
         (ignored, event) -> event.setCancelled(true));
     page.fill(glass);
     final int width = dimensions.getWidth();
-    Iterator<Team> iterator = match.getTeamMap().iterator();
+    Iterator<GameTeam> iterator = match.getTeamMap().iterator();
     for (int i = 0; iterator.hasNext(); ++i)
       page.set(InventoryPosition.toIndex(1 + i % (width - 2), (i / (width - 2)), width),
           new TeamItem(match, player, iterator.next(), maxTeamSize, inventory));
@@ -136,18 +137,18 @@ public final class TeamSelectorItem extends StaticGameItem {
 
   private final class TeamItem implements InventoryItem {
 
-    private final @NonNull Match match;
+    private final @NonNull SkywarsMatch match;
     private final @NonNull SkywarsPlayer player;
-    private final @NonNull Team team;
+    private final @NonNull GameTeam team;
     private final int maxTeamSize;
     private final SpecialInventory<?> inventory;
 
     private final ItemBuilder itemBuilder;
 
     public TeamItem(
-        @NonNull Match match,
+        @NonNull SkywarsMatch match,
         @NonNull SkywarsPlayer player,
-        @NonNull Team team,
+        @NonNull GameTeam team,
         @NonNegative int maxTeamSize,
         @NonNull SpecialInventory<?> inventory) {
       this.match = match;
@@ -158,7 +159,7 @@ public final class TeamSelectorItem extends StaticGameItem {
       this.itemBuilder = ItemBuilder
           .builder(REPLACEABLE_MATERIAL.getMaterial(team.getTeamEnum().getDyeColor()))
           .name(team.getTeamEnum().getChatColor().toString() + ChatColor.BOLD
-              + Language.getInstance().getTeamName(team.getTeamEnum()))
+              + team.getTeamEnum().getTranslatedName())
           .flags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES);
     }
 

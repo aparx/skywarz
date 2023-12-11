@@ -6,7 +6,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.arena.ArenaManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -39,7 +39,7 @@ public class ArenaDeleteCommand extends AbstractArenaCommand {
   }
 
   @Override
-  protected void execute(Arena arena, CommandContext context, CommandArgList args) {
+  protected void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
     Language language = Language.getInstance();
     CommandSender sender = context.getSender();
     ArenaManager arenaManager = Skywars.getInstance().getArenaManager();

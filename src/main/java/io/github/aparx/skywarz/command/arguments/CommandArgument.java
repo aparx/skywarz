@@ -8,6 +8,9 @@ import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.MessageKeys;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -81,6 +84,17 @@ public final class CommandArgument {
     return LocalizableError.localizeThrow(
         () -> Preconditions.checkNotNull(Doubles.tryParse(argument)),
         (lang) -> lang.substitute(MessageKeys.Errors.NUMBER, argument));
+  }
+
+  public Player getPlayer() {
+    return Optional.ofNullable(Bukkit.getPlayer(get())).orElseThrow(() -> {
+      return new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.PLAYER));
+    });
+  }
+
+  @SuppressWarnings("deprecation")
+  public OfflinePlayer getOfflinePlayer() {
+    return Bukkit.getOfflinePlayer(get());
   }
 
   public TeamEnum getTeam(TeamEnum defaultValue) {

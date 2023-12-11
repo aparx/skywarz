@@ -23,8 +23,7 @@ public class MessageRegister implements MessageStorage<ArrayPath> {
   private final Map<ArrayPath, LocalizedMessage> messages = new LinkedHashMap<>();
 
   private final StringLookup messagesLookup = (variable) -> {
-    LocalizedMessage localizedMessage = messages.get(
-        ArrayPath.parse(variable, ArrayPath.DEFAULT_SEPARATOR));
+    LocalizedMessage localizedMessage = messages.get(ArrayPath.parse(variable));
     if (localizedMessage != null)
       return localizedMessage.getRawContent();
     return null;

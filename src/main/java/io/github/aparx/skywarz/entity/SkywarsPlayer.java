@@ -3,11 +3,13 @@ package io.github.aparx.skywarz.entity;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.entity.data.PlayerDataSet;
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
+import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
-import io.github.aparx.skywarz.permission.Permission;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatMessageType;
@@ -129,7 +131,12 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
   }
 
   public boolean hasPriority() {
-    return findOnline().filter(Permission.PRIORITY::has).isPresent();
+    return findOnline().filter(SkywarsPermission.PRIORITY::has).isPresent();
+  }
+
+  public CachableLazyObject<PlayerStatsAccumulator> getTotalStats() {
+    return Skywars.getInstance().getDatabase().getStatsManager()
+        .getRegistry().getOrCreate(getId());
   }
 
   public void sendMessage(Object message) {

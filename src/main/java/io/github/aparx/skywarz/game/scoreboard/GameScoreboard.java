@@ -1,18 +1,17 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
-import io.github.aparx.skywarz.language.ValueMapPopulators;
+import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.Getter;
 import org.bukkit.entity.Player;
@@ -20,9 +19,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -32,7 +29,7 @@ import java.util.Map;
 @Getter
 public class GameScoreboard extends ConfigObject {
 
-  private final @NonNull MatchState state;
+  private final @NonNull SkywarsMatchState state;
 
   private final @NonNull TickDuration updateInterval;
 
@@ -49,7 +46,7 @@ public class GameScoreboard extends ConfigObject {
   private @NonNull List<String> templateLines;
 
   public GameScoreboard(
-      @NonNull MatchState state,
+      @NonNull SkywarsMatchState state,
       @Nullable String name,
       @NonNull TickDuration intervalUpdate,
       @Nullable String initialTitle) {
@@ -57,7 +54,7 @@ public class GameScoreboard extends ConfigObject {
   }
 
   public GameScoreboard(
-      @NonNull MatchState state,
+      @NonNull SkywarsMatchState state,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
       @NonNull List<String> initialTemplateLines) {
@@ -65,7 +62,7 @@ public class GameScoreboard extends ConfigObject {
   }
 
   public GameScoreboard(
-      @NonNull MatchState state,
+      @NonNull SkywarsMatchState state,
       @Nullable String name,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
@@ -86,17 +83,19 @@ public class GameScoreboard extends ConfigObject {
     this.templateLines = templateLines;
   }
 
-  public SpecialScoreboard createScoreboard(@NonNull Match match, @Nullable Player holder) {
-    return new SpecialScoreboard(updateInterval, (sb) -> createContent(sb, match, holder));
+  public SpecialScoreboard createScoreboard(@NonNull SkywarsMatch match, @Nullable Player viewer) {
+    return new SpecialScoreboard(updateInterval, (sb) -> createContent(sb, match, viewer));
   }
 
   @CheckReturnValue
   protected ScoreboardContent createContent(
-      @NonNull SpecialScoreboard scoreboard, @NonNull Match match, @Nullable Player holder) {
+      @NonNull SpecialScoreboard scoreboard, @NonNull SkywarsMatch match, @Nullable Player viewer) {
     LazyVariableLookup lookup = new LazyVariableLookup();
-      ValueMapPopulators.populateMatch(lookup, match, ArrayPath.of("match"));
-    if (holder != null)
-      ValueMapPopulators.populatePlayer(lookup, holder, ArrayPath.of("player"), "-");
+    final String nullValue = "-";
+    // this should be moved out of a player's individual scoreboard, to save resources
+    VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"), nullValue);
+    if (viewer != null)
+      VariablePopulator.addPlayer(lookup, viewer, ArrayPath.of("player"), nullValue);
     String[] array = new String[templateLines.size()];
     for (int i = 0; i < array.length; ++i)
       array[i] = Language.getInstance().substitute(templateLines.get(i), lookup);
@@ -110,4 +109,5 @@ public class GameScoreboard extends ConfigObject {
   public @NonNull ArrayPath getOffsetPath() {
     return ArrayPath.of(getState().name().toLowerCase(), getName());
   }
+
 }

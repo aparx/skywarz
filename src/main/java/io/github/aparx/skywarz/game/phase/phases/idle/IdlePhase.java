@@ -1,27 +1,32 @@
 package io.github.aparx.skywarz.game.phase.phases.idle;
 
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
+import io.github.aparx.skywarz.game.item.SkywarsItem;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
+import io.github.aparx.skywarz.game.item.items.idle.QuickstartItem;
 import io.github.aparx.skywarz.game.item.items.idle.TeamSelectorItem;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.game.phase.GamePhase;
-import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
 import io.github.aparx.skywarz.game.phase.phases.LobbyPhaseListener;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
-import io.github.aparx.skywarz.game.team.Team;
-import io.github.aparx.skywarz.game.team.TeamEnum;
+import io.github.aparx.skywarz.game.team.GameTeam;
+import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
-import io.github.aparx.skywarz.language.ValueMapPopulators;
+import io.github.aparx.skywarz.language.VariablePopulator;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
+import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -31,14 +36,12 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Map;
-
 /**
  * @author aparx (Vinzent Z.)
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class IdlePhase extends GamePhase {
+public class IdlePhase extends SkywarsPhase {
 
   private final Ticker trigger;
 
@@ -47,9 +50,11 @@ public class IdlePhase extends GamePhase {
 
   private long secsLeft;
 
-  public IdlePhase(@NonNull GamePhaseCycler cycler) {
-    super(MatchState.IDLE, cycler,
-        TickDuration.of(TimeUnit.SECONDS, 3),
+  public IdlePhase(@NonNull SkywarsPhaseCycler cycler) {
+    super(SkywarsMatchState.IDLE, cycler,
+        !Magics.isDevelopment()
+            ? MainConfig.getInstance().getPhaseDuration(SkywarsMatchState.IDLE)
+            : Magics.DEV_IDLE_DURATION,
         /* Update all two ticks to save performance */
         TickDuration.of(TimeUnit.TICKS, 2));
     trigger = new TimeTicker(getInterval());
@@ -60,7 +65,7 @@ public class IdlePhase extends GamePhase {
   public void handleJoin(SkywarsPlayer player) {
     // Manage entity
     Player entity = player.getOnline();
-    Match match = getMatch();
+    SkywarsMatch match = getMatch();
     // show IDLE scoreboard
     match.getScoreboardHandlers()
         .getHandler(MatchScoreboard.IDLE)
@@ -69,31 +74,21 @@ public class IdlePhase extends GamePhase {
     PlayerSnapshot.ofReset(entity,
         match.getArena().getData().getLobby(),
         GameMode.ADVENTURE).restore(entity);
-    entity.getInventory().setItem(LeaveItem.SLOT, Skywars.getInstance()
-        .getGameItemManager()
-        .getItems()
-        .require(LeaveItem.class)
-        .create(match, entity));
-
-    Skywars.getInstance()
-        .getGameItemManager()
-        .getItems()
-        .require(TeamSelectorItem.class)
-        .give(match, entity);
-
-    Skywars.getInstance()
-        .getGameItemManager()
-        .getItems()
-        .require(KitSelectorItem.class)
-        .give(match, entity);
+    KeyedByClassSet<SkywarsItem> items = Skywars.getInstance().getGameItemManager().getItems();
+    entity.getInventory().setItem(LeaveItem.SLOT, items
+        .require(LeaveItem.class).create(match, entity));
+    items.require(TeamSelectorItem.class).give(match, entity);
+    items.require(KitSelectorItem.class).give(match, entity);
+    if (SkywarsPermission.QUICKSTART.has(entity))
+      items.require(QuickstartItem.class).give(match, entity);
   }
 
   @Override
   protected void updateTick() {
     Ticker ticker = getTicker();
-    Match match = getMatch();
+    SkywarsMatch match = getMatch();
     WeakGroupAudience<SkywarsPlayer> players = match.getAudience();
-    final int minPlayers = match.getMinPlayerSize();
+    final int minPlayers = match.getMinPlayerCount();
     final int playerSize = players.size();
     int missingPlayerAmount = minPlayers - playerSize;
     boolean lastMinimumPlayers = this.lastMinimumPlayers;
@@ -114,7 +109,7 @@ public class IdlePhase extends GamePhase {
             || (secsLeft <= 60 && secsLeft % 15 == 0)
             || secsLeft % 30 == 0)) {
           LazyVariableLookup lookup = new LazyVariableLookup();
-          ValueMapPopulators.populateMatch(lookup, match, ArrayPath.of("match"));
+          VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
           players.forEach((player) -> {
             player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, lookup);
             SoundRecord.TIMER_TICK.play(player);
@@ -124,17 +119,17 @@ public class IdlePhase extends GamePhase {
         players.sendMessage(Language.getInstance()
             .get(MessageKeys.Match.BROADCAST_REQUIRE)
             .substitute(match, ArrayPath.of("match")));
-      if (trigger.isCycling(3, TimeUnit.TICKS))
-        players.forEach((player) -> {
-          PlayerMatchData matchData = player.getMatchData();
-          Team team = matchData.getTeam();
-          if (team != null && matchData.isInTeam()) {
-            TeamEnum e = team.getTeamEnum();
-            player.playActionbar(e.getChatColor() + "Team " + Language.getInstance().getTeamName(e));
-          }
-        });
     }
     if (hasMinimumPlayers) LevelAnimator.animate(this, (int) secsLeft);
     else if (lastMinimumPlayers) LevelAnimator.animate(this, 0);
+    if (trigger.isCycling(3, TimeUnit.TICKS))
+      players.forEach((player) -> {
+        PlayerMatchData matchData = player.getMatchData();
+        GameTeam team = matchData.getTeam();
+        if (team != null && matchData.isInTeam()) {
+          player.playActionbar(team.getTeamEnum().getChatColor() + "Team "
+              + team.getTeamEnum().getTranslatedName());
+        }
+      });
   }
 }

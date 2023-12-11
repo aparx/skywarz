@@ -3,10 +3,7 @@ package io.github.aparx.skywarz.command;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.commands.HelpCommand;
-import io.github.aparx.skywarz.command.commands.JoinCommand;
-import io.github.aparx.skywarz.command.commands.LeaveCommand;
-import io.github.aparx.skywarz.command.commands.StartCommand;
+import io.github.aparx.skywarz.command.commands.*;
 import io.github.aparx.skywarz.command.commands.arena.ArenaCreateCommand;
 import io.github.aparx.skywarz.command.commands.arena.ArenaDeleteCommand;
 import io.github.aparx.skywarz.command.commands.arena.ArenaListCommand;
@@ -17,13 +14,14 @@ import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetLobbyComman
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetPointCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetSpectatorCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetTeamSize;
+import io.github.aparx.skywarz.command.commands.stats.StatsResetCommand;
 import io.github.aparx.skywarz.command.tree.CommandBuilder;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.command.tree.CommandNodeSet;
 import io.github.aparx.skywarz.command.tree.CommandTree;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
-import io.github.aparx.skywarz.permission.Permission;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -52,7 +50,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     final CommandNode arena;
     roots.add(arena = CommandBuilder.builder("arena")
         .args("<{children}>")
-        .permission(Permission.SETUP)
+        .permission(SkywarsPermission.SETUP)
         .build());
     List.of(
         new ArenaCreateCommand(arena),
@@ -62,7 +60,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     ).forEach(arena::add);
 
     arena.add(CommandBuilder.builder(arena, "set")
-        .permission(Permission.SETUP)
+        .permission(SkywarsPermission.SETUP)
         .args("<{children}>")
         .build()
         .add(ArenaSetSpectatorCommand::new)
@@ -71,20 +69,24 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
         .add(ArenaSetTeamSize::new));
 
     arena.add(CommandBuilder.builder(arena, "add")
-        .permission(Permission.SETUP)
+        .permission(SkywarsPermission.SETUP)
         .args("<{children}>")
         .build()
         .add(ArenaAddSpawnCommand::new));
 
     arena.add(CommandBuilder.builder(arena, "remove")
         .args("<{children}>")
-        .permission(Permission.SETUP)
+        .permission(SkywarsPermission.SETUP)
         .build()
         .add(ArenaRemoveSpawnCommand::new));
 
     roots.add(new JoinCommand());
     roots.add(new LeaveCommand());
     roots.add(new StartCommand());
+
+    StatsCommand stats = new StatsCommand();
+    stats.add(new StatsResetCommand(stats));
+    roots.add(stats);
 
     return tree;
   }

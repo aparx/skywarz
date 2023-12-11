@@ -3,19 +3,17 @@ package io.github.aparx.skywarz.game.arena;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.github.aparx.bufig.Config;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
+import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Set;
+import java.io.File;
+import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -23,26 +21,49 @@ import java.util.stream.Stream;
  * @version 2023-12-01 02:51
  * @since 1.0
  */
-public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<Arena> {
+public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<SkywarsArena> {
 
-  private final KeyValueSet<String, Arena> internalSet =
-      KeyValueSets.of((arena) -> arena.getName().toLowerCase());
+  public static final File STORAGE_DIRECTORY_OFFSET = new File(".arenas");
 
-  private static @NonNull Config getConfig() {
-    return Skywars.getInstance().getConfigHandler().getArenas();
+  public static final Pattern NAME_PATTERN = Pattern.compile("[A-z0-9_]+");
+
+  private static final Set<String> FILE_EXTENSIONS = Set.of("yaml", "yml");
+
+  private static String transformKey(String key) {
+    return Objects.toString(key).toLowerCase();
+  }
+
+  private final KeyValueSet<String, SkywarsArena> internalSet =
+      KeyValueSets.of((arena) -> transformKey(arena.getName()));
+
+  public @NonNull File getDirectory() {
+    return new File(Skywars.plugin().getDataFolder(), STORAGE_DIRECTORY_OFFSET.getName());
   }
 
   @Override
   protected void onLoad() {
-    Config config = getConfig();
-    config.setHeader(SkywarsConfigHandler.createHeader("All saved arenas (Do not touch!)"));
-    config.load();
-    final Logger logger = Skywars.logger();
-    config.getKeys(false).stream()
-        .map((key) -> (Arena) config.get(key))
-        .filter(internalSet::add)
-        .map(Arena::getName)
-        .forEach((arena) -> logger.log(Level.INFO, "Located arena: {0}", arena));
+    File directory = getDirectory();
+    if (!directory.exists())
+      Preconditions.checkState(directory.mkdirs(), "Could not create directory");
+    final File[] files;
+    if ((files = directory.listFiles()) != null)
+      Arrays.stream(files)
+          .filter((file) -> getFileExtension(file).filter(FILE_EXTENSIONS::contains).isPresent())
+          .peek((file) -> Skywars.logger().log(Level.INFO, "Found arena file: {0}", file))
+          .filter((file) -> NAME_PATTERN.matcher(getFileNameWithoutExtension(file)).matches())
+          .forEach((file) -> register(new SkywarsArena(getFileNameWithoutExtension(file), file)));
+  }
+
+  private static Optional<String> getFileExtension(File file) {
+    int lastIndexOf = file.getName().lastIndexOf('.');
+    if (lastIndexOf == -1) return Optional.empty();
+    return Optional.of(file.getName().substring(1 + lastIndexOf));
+  }
+
+  private static String getFileNameWithoutExtension(File file) {
+    int lastIndexOf = file.getName().lastIndexOf('.');
+    if (lastIndexOf == -1) return file.getName();
+    return file.getName().substring(0, lastIndexOf);
   }
 
   @Override
@@ -50,83 +71,72 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
     internalSet.clear();
   }
 
-  public void register(@NonNull Arena arena) {
+  public void register(@NonNull SkywarsArena arena) {
+    Preconditions.checkNotNull(arena, "Arena must not be null");
     synchronized (handlerLock) {
-      Preconditions.checkNotNull(arena, "Arena must not be null");
       Preconditions.checkState(internalSet.add(arena), "Could not add arena (duplicate?)");
       Skywars.logger().log(Level.INFO, "Registered arena: {0}", arena.getName());
-      saveArena(arena);
     }
   }
 
   @CanIgnoreReturnValue
-  public boolean delete(@NonNull Arena arena) {
+  public boolean delete(@NonNull SkywarsArena arena) {
+    Preconditions.checkNotNull(arena, "Arena must not be null");
     synchronized (handlerLock) {
-      Preconditions.checkNotNull(arena, "Arena must not be null");
       if (!internalSet.remove(arena)) return false;
+      Preconditions.checkState(arena.getFile().delete(), "Could not delete arena (used)");
       Skywars.logger().log(Level.INFO, "Deleted arena: {0}", arena.getName());
-      setInConfigAtArena(arena, null).save();
       return true;
     }
   }
 
   @CanIgnoreReturnValue
   public boolean delete(@NonNull String name) {
+    Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
-      Preconditions.checkNotNull(name, "Name must not be null");
       return find(name).filter(this::delete).isPresent();
     }
   }
 
-  public void saveArena(@NonNull Arena arena) {
-    setInConfigAtArena(arena, arena).save();
-  }
-
   @CheckReturnValue
-  public Optional<Arena> find(@NonNull String name) {
+  public Optional<SkywarsArena> find(@NonNull String name) {
     Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
-      return internalSet.find(name);
+      return internalSet.find(transformKey(name));
     }
   }
 
   @CanIgnoreReturnValue
-  public @NonNull Arena get(@NonNull String name) {
+  public @NonNull SkywarsArena get(@NonNull String name) {
     Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
-      return internalSet.require(name);
+      return internalSet.require(transformKey(name));
     }
   }
 
   public boolean contains(String name) {
     synchronized (handlerLock) {
-      return internalSet.containsKey(name);
+      return internalSet.containsKey(transformKey(name));
     }
   }
 
-  public boolean contains(Arena arena) {
+  public boolean contains(SkywarsArena arena) {
     synchronized (handlerLock) {
       return internalSet.contains(arena);
     }
   }
 
-  public @NonNull Stream<Arena> stream() {
+  public @NonNull Stream<SkywarsArena> stream() {
     return internalSet.stream();
   }
 
   @Override
-  public @NonNull Iterator<Arena> iterator() {
+  public @NonNull Iterator<SkywarsArena> iterator() {
     return internalSet.iterator();
   }
 
-  public Set<Arena> asSet() {
+  public Set<SkywarsArena> asSet() {
     return internalSet;
   }
 
-  @CanIgnoreReturnValue
-  private Config setInConfigAtArena(Arena arena, Object value) {
-    Config config = getConfig();
-    config.set(internalSet.getKey(arena), value);
-    return config;
-  }
 }

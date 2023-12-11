@@ -5,7 +5,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
-import io.github.aparx.skywarz.game.match.Match;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
 import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -19,14 +19,15 @@ import org.bukkit.entity.Player;
 public final class SkywarsSpectator {
 
   public static void markAsSpectator(Player entity) {
-    SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(true);
+    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+    player.getMatchData().setSpectator(true);
     String displayName = String.valueOf(ChatColor.GRAY) + ChatColor.ITALIC + entity.getName();
     entity.setDisplayName(displayName);
     entity.setPlayerListName(displayName);
   }
 
   /** Modifies and teleports {@code entity} to be a spectator. */
-  public static void spawnAsSpectator(Match match, Player entity) {
+  public static void spawnAsSpectator(SkywarsMatch match, Player entity) {
     markAsSpectator(entity); // ensure the marking
     PlayerSnapshot.ofSpectator(match, entity).restore(entity);
     match.getAudience().alive()
@@ -44,7 +45,7 @@ public final class SkywarsSpectator {
         .create(match, entity));
   }
 
-  public static void removeSpectator(Match match, Player entity) {
+  public static void removeSpectator(SkywarsMatch match, Player entity) {
     SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(false);
     match.getAudience().entity().forEach((other) -> {
       other.showPlayer(Skywars.plugin(), entity);

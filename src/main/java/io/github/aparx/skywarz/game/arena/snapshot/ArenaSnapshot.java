@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.arena.snapshot;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -17,18 +17,18 @@ import java.lang.ref.WeakReference;
 @Getter
 public class ArenaSnapshot implements CompletableSetup {
 
-  private final @NonNull WeakReference<Arena> source;
+  private final @NonNull WeakReference<SkywarsArena> source;
   private final @NonNull String name;
   private final @NonNull ArenaDataSnapshot data;
 
-  public ArenaSnapshot(@NonNull Arena source) {
+  public ArenaSnapshot(@NonNull SkywarsArena source) {
     Preconditions.checkNotNull(source, "Source must not be null");
     this.source = new WeakReference<>(source);
     this.name = source.getName();
     this.data = new ArenaDataSnapshot(source.getData());
   }
 
-  public @Nullable Arena getSource() {
+  public @Nullable SkywarsArena getSource() {
     return source.get();
   }
 

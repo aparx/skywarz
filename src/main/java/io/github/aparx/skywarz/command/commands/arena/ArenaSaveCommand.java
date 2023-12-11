@@ -1,11 +1,10 @@
 package io.github.aparx.skywarz.command.commands.arena;
 
-import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.language.Language;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -29,13 +28,13 @@ public class ArenaSaveCommand extends AbstractArenaCommand {
   }
 
   @Override
-  public void execute(Arena arena, CommandContext context, CommandArgList args) {
-    Skywars.getInstance().getArenaManager().saveArena(arena);
+  public void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
+    arena.save();
     Language language = Language.getInstance();
-    context.getSender().sendMessage(language.substitute(
-        "{successPrefix} Saved arena {0}!", arena.getName()));
+    StringBuilder builder = new StringBuilder("{successPrefix} Saved arena '{0}'");
     if (arena.isCompleted())
-      context.getSender().sendMessage(language.substitute(
-          "{prefix} The setup has been completed for this arena."));
+      builder.append(" and completed the setup");
+    builder.append('!');
+    context.getSender().sendMessage(language.substitute(builder.toString(), arena.getName()));
   }
 }

@@ -1,0 +1,156 @@
+package io.github.aparx.skywarz.game.phase;
+
+import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.events.match.phase.MatchPhaseStartEvent;
+import io.github.aparx.skywarz.events.match.phase.MatchPhaseStopEvent;
+import io.github.aparx.skywarz.events.match.phase.MatchPhaseTickEvent;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.utils.tick.TimeTicker;
+import io.github.aparx.skywarz.utils.tick.TickDuration;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Synchronized;
+import org.bukkit.Bukkit;
+import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
+import java.util.logging.Level;
+
+/**
+ * @author aparx (Vinzent Z.)
+ * @version 2023-12-04 01:45
+ * @since 1.0
+ */
+@Getter
+public abstract class SkywarsPhase implements Listener {
+
+  private final @NonNull TickDuration interval;
+
+  private final @NonNull SkywarsPhaseCycler cycler;
+
+  private final @NonNull TickDuration duration;
+
+  private final @NonNull SkywarsMatchState state;
+
+  @Getter(AccessLevel.NONE)
+  private volatile BukkitTask task;
+
+  private final @NonNull TimeTicker ticker;
+
+  @Setter(AccessLevel.PROTECTED)
+  private @Nullable SkywarsPhaseListener<?> listener;
+
+  public SkywarsPhase(@NonNull SkywarsMatchState state,
+                      @NonNull SkywarsPhaseCycler cycler,
+                      @NonNull TickDuration duration) {
+    this(state, cycler, duration, TickDuration.ofTick());
+  }
+
+  public SkywarsPhase(
+      @NonNull SkywarsMatchState state,
+      @NonNull SkywarsPhaseCycler cycler,
+      @NonNull TickDuration duration,
+      @NonNull TickDuration interval) {
+    Preconditions.checkNotNull(state, "State must not be null");
+    Preconditions.checkNotNull(cycler, "Cycler must not be null");
+    Preconditions.checkNotNull(interval, "Interval must not be null");
+    Preconditions.checkNotNull(duration, "Duration must not be null");
+    this.state = state;
+    this.cycler = cycler;
+    this.interval = interval;
+    this.duration = duration;
+    this.ticker = new TimeTicker(interval);
+  }
+
+  protected abstract void updateTick();
+
+  /** Event method called when a player joins while this phase is ongoing. */
+  public abstract void handleJoin(SkywarsPlayer player);
+
+  /** Event method called when a player leaves while this phase is ongoing. */
+  public void handleLeave(SkywarsPlayer player) {}
+
+  protected void onStart() {
+    if (listener != null) listener.load();
+  }
+
+  protected void onStop(StopReason reason) {
+    if (listener != null) listener.unload();
+  }
+
+  @Synchronized
+  @CanIgnoreReturnValue
+  public final boolean start() {
+    if (task != null) return false;
+    onStart();
+    ticker.reset();
+    task = Bukkit.getScheduler().runTaskTimer(Skywars.plugin(), this::tick, 0L, interval.toTicks());
+    Bukkit.getPluginManager().callEvent(
+        new MatchPhaseStartEvent(findMatch().orElseThrow(), this));
+    return true;
+  }
+
+  @Synchronized
+  @CanIgnoreReturnValue
+  public final boolean stop(StopReason reason) {
+    if (task == null) return false;
+    try {
+      onStop(reason);
+      Bukkit.getPluginManager().callEvent(
+          new MatchPhaseStopEvent(findMatch().orElse(null), reason, this));
+      return true;
+    } finally {
+      if (task != null) task.cancel();
+      task = null;
+    }
+  }
+
+  @Synchronized
+  public final void tick() {
+    try {
+      Optional<SkywarsMatch> matchOptional = findMatch();
+      if (matchOptional.isEmpty()) {
+        Skywars.logger().fine("[GamePhaseCycler] Match became invalid (enforce stop)");
+        stop(StopReason.UNKNOWN);
+        return;
+      }
+      if (ticker.hasElapsed(duration)) {
+        stop(StopReason.TIME);
+        getCycler().cycleNext();
+      } else {
+        Bukkit.getPluginManager().callEvent(new MatchPhaseTickEvent(matchOptional.get(), this));
+        updateTick();
+        ticker.tick();
+      }
+    } catch (Exception e) {
+      Skywars.logger().log(Level.WARNING, "[GamePhaseCycler] Error in game phase", e);
+      stop(StopReason.ERROR);
+      getCycler().cycleNext();
+    }
+  }
+
+  public @NonNull SkywarsMatch getMatch() {
+    return cycler.getMatch();
+  }
+
+  public Optional<SkywarsMatch> findMatch() {
+    return cycler.findMatch();
+  }
+
+  public enum StopReason {
+    /** Phase has been stopped manually for a for this phase possibly unknown reason. */
+    UNKNOWN,
+    /** Phase has been stopped manually due to an error. */
+    ERROR,
+    /** Phase has reached end of its duration, thus stopped due to time */
+    TIME
+  }
+}

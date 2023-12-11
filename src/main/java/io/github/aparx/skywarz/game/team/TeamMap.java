@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.team;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.match.Match;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,19 +17,19 @@ import java.util.stream.Stream;
  * @since 1.0
  */
 @Getter
-public final class TeamMap implements Iterable<Team> {
+public final class TeamMap implements Iterable<GameTeam> {
 
-  private final WeakReference<Match> match;
+  private final WeakReference<SkywarsMatch> match;
 
-  private @NonNull Map<TeamEnum, Team> teams = new HashMap<>();
+  private @NonNull Map<TeamEnum, GameTeam> teams = new HashMap<>();
 
-  public TeamMap(@NonNull Match match) {
+  public TeamMap(@NonNull SkywarsMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     this.match = new WeakReference<>(match);
   }
 
-  public @NonNull Match getMatch() {
-    Match match = this.match.get();
+  public @NonNull SkywarsMatch getMatch() {
+    SkywarsMatch match = this.match.get();
     Preconditions.checkState(match != null, "Match has become invalid");
     return match;
   }
@@ -39,25 +39,25 @@ public final class TeamMap implements Iterable<Team> {
   }
 
   public void createTeams() {
-    final Match match = getMatch();
+    final SkywarsMatch match = getMatch();
     this.teams = match.getArena().getData().getSpawns().entrySet().stream()
         .filter((entry) -> !entry.getValue().isEmpty())
         .map((entry) -> TeamEnum.valueOf(entry.getKey()))
-        .map((teamEnum) -> new Team(match, teamEnum))
-        .collect(Collectors.toMap(Team::getTeamEnum, Function.identity()));
+        .map((teamEnum) -> new GameTeam(match, teamEnum))
+        .collect(Collectors.toMap(GameTeam::getTeamEnum, Function.identity()));
   }
 
-  public Optional<Team> findTeam(@NonNull TeamEnum team) {
+  public Optional<GameTeam> findTeam(@NonNull TeamEnum team) {
     Preconditions.checkNotNull(team, "TeamEnum must not be null");
     return Optional.ofNullable(teams.get(team));
   }
 
-  public @NonNull Team getTeam(@NonNull TeamEnum team) {
+  public @NonNull GameTeam getTeam(@NonNull TeamEnum team) {
     Preconditions.checkNotNull(team, "TeamEnum must not be null");
     return findTeam(team).orElseThrow();
   }
 
-  public @NonNull Collection<@NonNull Team> getTeams() {
+  public @NonNull Collection<@NonNull GameTeam> getTeams() {
     return teams.values();
   }
 
@@ -66,11 +66,11 @@ public final class TeamMap implements Iterable<Team> {
   }
 
   @Override
-  public @NonNull Iterator<Team> iterator() {
+  public @NonNull Iterator<GameTeam> iterator() {
     return teams.values().iterator();
   }
 
-  public @NonNull Stream<@NonNull Team> stream() {
+  public @NonNull Stream<@NonNull GameTeam> stream() {
     return teams.values().stream();
   }
 }

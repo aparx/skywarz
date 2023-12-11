@@ -7,7 +7,6 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author aparx (Vinzent Z.)

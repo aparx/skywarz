@@ -3,12 +3,13 @@ package io.github.aparx.skywarz.game.item.items;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.commands.LeaveCommand;
-import io.github.aparx.skywarz.game.item.GameItem;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
+import io.github.aparx.skywarz.game.item.SkywarsItem;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
 import io.github.aparx.skywarz.startup.Main;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
+import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -25,7 +26,7 @@ import java.util.Map;
  * @version 2023-12-04 06:57
  * @since 1.0
  */
-public final class LeaveItem extends GameItem {
+public final class LeaveItem extends SkywarsItem {
 
   public static final int SLOT = 8;
 
@@ -39,23 +40,23 @@ public final class LeaveItem extends GameItem {
       .wrap();
 
   public LeaveItem() {
-    super("leave", new MatchState[]{MatchState.IDLE, MatchState.PLAYING, MatchState.DONE});
+    super("leave", new SkywarsMatchState[]{SkywarsMatchState.IDLE, SkywarsMatchState.PLAYING, SkywarsMatchState.DONE});
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull Match match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
     return item.getStack().clone();
   }
 
   @Override
-  protected void handleClick(@NonNull Match match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
     Player player = event.getPlayer();
     SkywarsCommand.tree.getRoots().stream()
         .filter((node) -> node instanceof LeaveCommand)
-        .map((node) -> node.createCommand(Main.COMMAND_NAME))
+        .map((node) -> node.createCommand(Main.ROOT_COMMAND_NAME))
         .findFirst()
         .ifPresent(player::performCommand);
-    player.playSound(player.getLocation(), Sound.BLOCK_LEVER_CLICK, 1.0F, 1F);
+    SoundRecord.ACTION_SUCCESS.play(player);
   }
 
 }

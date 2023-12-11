@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import io.github.aparx.skywarz.permission.Permission;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.Validate;
@@ -26,7 +26,7 @@ public final class CommandInfo {
   final @NonNull String name;
   final @NonNull ImmutableSet<String> aliases;
   final @Nullable String description;
-  final @Nullable Permission permission;
+  final @Nullable SkywarsPermission permission;
   final @Nullable String usage;
 
   public static Builder builder() {
@@ -66,7 +66,7 @@ public final class CommandInfo {
     private @NonNull String name;
     private ImmutableSet<String> aliases = ImmutableSet.of();
     private @Nullable String description;
-    private @Nullable Permission permission;
+    private @Nullable SkywarsPermission permission;
     private String usage = DEFAULT_USAGE;
 
     @CanIgnoreReturnValue

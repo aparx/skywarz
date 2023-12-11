@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.phase.phases;
 
-import io.github.aparx.skywarz.game.phase.GamePhase;
-import io.github.aparx.skywarz.game.phase.GamePhaseListener;
+import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.phase.SkywarsPhaseListener;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -12,6 +12,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -21,9 +22,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version 2023-12-07 10:49
  * @since 1.0
  */
-public class LobbyPhaseListener extends GamePhaseListener<GamePhase> {
+public class LobbyPhaseListener extends SkywarsPhaseListener<SkywarsPhase> {
 
-  public LobbyPhaseListener(@NonNull GamePhase phase) {
+  public LobbyPhaseListener(@NonNull SkywarsPhase phase) {
     super(phase);
   }
 
@@ -64,5 +65,12 @@ public class LobbyPhaseListener extends GamePhaseListener<GamePhase> {
   void onPlace(BlockPlaceEvent event) {
     if (event.isCancelled()) return;
     event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  void onPickup(EntityPickupItemEvent event) {
+    if (event.isCancelled()) return;
+    if (event.getEntity() instanceof Player)
+      event.setCancelled(filterMatchFromPlayer((Player) event.getEntity()).isPresent());
   }
 }

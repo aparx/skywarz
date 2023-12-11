@@ -1,23 +1,22 @@
 package io.github.aparx.skywarz.entity.snapshot;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
-import io.github.aparx.skywarz.game.match.Match;
+import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
 import lombok.*;
-import lombok.experimental.Accessors;
-import lombok.experimental.SuperBuilder;
 import org.apache.commons.lang.ArrayUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scoreboard.Scoreboard;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.lang.ref.WeakReference;
+import java.util.*;
 
 /**
  * A data object representing data of a player at a certain point in time. The data object may
@@ -47,6 +46,8 @@ public final class PlayerSnapshot {
   private final float exp;
   private final int level;
 
+  private final WeakReference<Scoreboard> scoreboard;
+
   public static PlayerSnapshot ofReset(@NonNull Player player) {
     return ofReset(player, null, GameMode.SURVIVAL);
   }
@@ -57,13 +58,14 @@ public final class PlayerSnapshot {
 
   public static PlayerSnapshot ofReset(@NonNull Player player, Location location, GameMode mode) {
     return new PlayerSnapshot(new ItemStack[player.getInventory().getContents().length],
-        List.of(), location, 20, 20, 20, player.getName(), null, mode, false, false, 0.1F, 0.0F, 0);
+        List.of(), location, 20, 20, 20, player.getName(), null, mode, false, false, 0.1F, 0.0F, 0,
+        new WeakReference<>(player.getScoreboard()));
   }
 
-  public static PlayerSnapshot ofSpectator(@NonNull Match match, @NonNull Player player) {
+  public static PlayerSnapshot ofSpectator(@NonNull SkywarsMatch match, @NonNull Player player) {
     return new PlayerSnapshot(new ItemStack[player.getInventory().getContents().length],
         List.of(), match.getArena().getData().getSpectator(), 2, 2, 20, player.getDisplayName(),
-        player.getPlayerListName(), GameMode.ADVENTURE, true, true, 0.1F, 0F, 0);
+        player.getPlayerListName(), GameMode.ADVENTURE, true, true, 0.1F, 0F, 0, null);
   }
 
   public static PlayerSnapshot of(@NonNull Player player) {
@@ -81,31 +83,51 @@ public final class PlayerSnapshot {
         player.isFlying(),
         player.getFlySpeed(),
         player.getExp(),
-        player.getLevel()
+        player.getLevel(),
+        new WeakReference<>(player.getScoreboard())
     );
   }
 
   public void restore(@NonNull Player player) {
-    if (items != null)
-      player.getInventory().setContents(items);
-    if (potionEffects != null)
-      player.addPotionEffects(potionEffects);
+    World thisWorld = player.getWorld();
     if (location != null)
       player.teleport(location);
-    player.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(maxHealth);
+    if (items != null)
+      player.getInventory().setContents((ItemStack[]) ArrayUtils.clone(items));
+    player.getActivePotionEffects().stream()
+        .map(PotionEffect::getType)
+        .forEach(player::removePotionEffect);
+    if (potionEffects != null)
+      player.addPotionEffects(potionEffects);
+    Optional.ofNullable(player.getAttribute(Attribute.GENERIC_MAX_HEALTH))
+        .ifPresent((attribute) -> attribute.setBaseValue(maxHealth));
     player.setHealth(health);
     player.setFoodLevel(foodLevel);
     player.setDisplayName(displayName);
     if (playerListName != null)
       player.setPlayerListName(playerListName);
+    player.setExp(exp);
+    player.setLevel(level);
+    restoreWorldDependant0(player);
+    if (location != null
+        && !Objects.equals(thisWorld, location.getWorld())
+        && Skywars.plugin().isEnabled())
+      // ensure the player gets the attributes required, even on world change
+      Bukkit.getScheduler().runTaskLater(Skywars.plugin(), () -> {
+        restoreWorldDependant0(player);
+      }, 1);
+  }
+
+  private void restoreWorldDependant0(Player player) {
     if (gameMode != null)
       player.setGameMode(gameMode);
     player.setAllowFlight(isAllowedFlying);
     player.setFlying(isFlying);
     if (flySpeed != null)
       player.setFlySpeed(flySpeed);
-    player.setExp(exp);
-    player.setLevel(level);
+    if (scoreboard != null && Bukkit.getScoreboardManager() != null)
+      player.setScoreboard(Optional.ofNullable(scoreboard.get())
+          .orElse(Bukkit.getScoreboardManager().getMainScoreboard()));
   }
 
 }

@@ -8,7 +8,7 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.tree.CommandNode;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.game.arena.Arena;
+import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.Language;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,7 +39,7 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
   }
 
   @Override
-  protected void execute(Arena arena, CommandContext context, CommandArgList args) {
+  protected void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
     if (args.length() < 1 + TEAM_ARGUMENT_INDEX
         || args.length() > 1 + SPAWN_ARGUMENT_INDEX) {
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
@@ -54,14 +54,14 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
       int size = spawns.size();
       spawns.clear();
       context.getSender().sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Removed all {0} spawns in arena {1} from team {2}",
+          "{successPrefix} Removed all {0} spawns in arena {1} from team {2}! (unsaved)",
           size, arena.getName(), team.getChatColor() + team.getDefaultName()));
     } else if (args.length() == 1 + SPAWN_ARGUMENT_INDEX) {
       int targetId = args.get(SPAWN_ARGUMENT_INDEX).getInt();
       Preconditions.checkState(spawns.remove(targetId) != null, String.format(
           "There is no spawn %s added for team %s", targetId, team.getDefaultName()));
       context.getSender().sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Removed spawn {0} in arena {1} from team {2}",
+          "{successPrefix} Removed spawn {0} in arena {1} from team {2}. (unsaved)",
           targetId, arena.getName(), team.getChatColor() + team.getDefaultName()
       ));
     }

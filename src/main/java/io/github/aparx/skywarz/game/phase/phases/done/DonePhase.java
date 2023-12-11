@@ -2,23 +2,25 @@ package io.github.aparx.skywarz.game.phase.phases.done;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
-import io.github.aparx.skywarz.game.match.Match;
-import io.github.aparx.skywarz.game.match.MatchState;
-import io.github.aparx.skywarz.game.phase.GamePhase;
-import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
+import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
 import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
-import io.github.aparx.skywarz.game.team.Team;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
+import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
-import io.github.aparx.skywarz.language.ValueMapPopulators;
+import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -35,25 +37,25 @@ import java.util.concurrent.ThreadLocalRandom;
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class DonePhase extends GamePhase {
+public class DonePhase extends SkywarsPhase {
 
-  public DonePhase(@NonNull GamePhaseCycler cycler) {
-    super(MatchState.DONE, cycler,
-        TickDuration.of(TimeUnit.SECONDS, 15),
+  public DonePhase(@NonNull SkywarsPhaseCycler cycler) {
+    super(SkywarsMatchState.DONE, cycler,
+        MainConfig.getInstance().getPhaseDuration(SkywarsMatchState.DONE),
         TickDuration.of(TimeUnit.TICKS, 2));
     setListener(new DoneListener(this));
   }
 
   @Override
   public void handleJoin(SkywarsPlayer player) {
-    throw new UnsupportedOperationException();
+    throw new IllegalStateException("Cannot join during DONE state");
   }
 
   @Override
   protected void onStart() {
     super.onStart();
-    Match match = getMatch();
-    Team won = match.getWinner();
+    SkywarsMatch match = getMatch();
+    GameTeam won = match.getWinner();
     final boolean hasWinner = won != null;
     Language language = Language.getInstance();
     String titleWin = language.substitute(MessageKeys.Match.TITLE_YOU_WON);
@@ -66,6 +68,8 @@ public class DonePhase extends GamePhase {
         .substitute(won, ArrayPath.of("team"));
     match.getAudience().entity().forEach((entity) -> {
       SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      if (!player.getMatchData().isSpectator())
+        match.applyStats(player); // apply stats since player is not dead already
       SkywarsSpectator.removeSpectator(match, entity);
       PlayerSnapshot.ofReset(entity, GameMode.ADVENTURE).restore(entity);
       entity.teleport(match.getArena().getData().getLobby());
@@ -82,6 +86,12 @@ public class DonePhase extends GamePhase {
           StringUtils.SPACE, 5, (int) TickDuration.of(TimeUnit.SECONDS, 4).toTicks(), 15);
       if (hasWinner)
         entity.sendMessage(" \n".repeat(3) + broadcast + " \n".repeat(4));
+
+      match.getScoreboardHandlers()
+          .getHandler(MatchScoreboard.DONE)
+          .getOrCreateScoreboard(player)
+          .show(player);
+
     });
   }
 
@@ -93,13 +103,13 @@ public class DonePhase extends GamePhase {
 
   @Override
   protected void updateTick() {
-    Match match = getMatch();
+    SkywarsMatch match = getMatch();
     long duration = getDuration().toSeconds();
     long secsLeft = duration - getTicker().getElapsed(TimeUnit.SECONDS);
     if (getTicker().isCycling(TimeUnit.SECONDS)) {
       if (secsLeft != duration && (secsLeft % 5 == 0 || secsLeft <= 3)) {
         LazyVariableLookup lookup = new LazyVariableLookup();
-        ValueMapPopulators.populateMatch(lookup, match, ArrayPath.of("match"));
+        VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
         match.getAudience().sendFormattedMessage(MessageKeys.Match.BROADCAST_CLOSING, lookup);
       }
     }
@@ -115,7 +125,7 @@ public class DonePhase extends GamePhase {
   }
 
   private void spawnFireworks(MainConfig mainConfig, Color color) {
-    Match match = getMatch();
+    SkywarsMatch match = getMatch();
     Location location = match.getArena().getData().getLobby();
     Location mutable = location.clone();
     Random random = ThreadLocalRandom.current();
