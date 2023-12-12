@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -33,7 +33,7 @@ public class SkywarsMatchListener implements Listener {
 
   @EventHandler
   void onQuit(PlayerQuitEvent event) {
-    GamePlayer.findPlayer(event.getPlayer()).ifPresent((player) -> {
+    SkywarsPlayer.findPlayer(event.getPlayer()).ifPresent((player) -> {
       PlayerMatchData matchData = player.getMatchData();
       GameMatch match = matchData.getMatch();
       if (matchData.isInMatch() && match != null)
@@ -45,7 +45,7 @@ public class SkywarsMatchListener implements Listener {
   void onGeneralChat(AsyncPlayerChatEvent event) {
     Player entity = event.getPlayer();
     if (event.isCancelled()) return;
-    GamePlayer.findPlayer(entity).ifPresent((player) -> {
+    SkywarsPlayer.findPlayer(entity).ifPresent((player) -> {
       PlayerMatchData matchData = player.getMatchData();
       GameMatch match = matchData.getMatch();
       if (matchData.isInMatch() && match != null) {

@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.inventory;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -50,7 +50,7 @@ public interface InventoryItem extends ItemClickAction {
     return new InventoryItem() {
       public ItemStack get(long ticks) {return factory.apply(ticks);}
 
-      public void click(GamePlayer player, InventoryClickEvent event) {
+      public void click(SkywarsPlayer player, InventoryClickEvent event) {
         if (action != null) action.click(player, event);
       }
     };

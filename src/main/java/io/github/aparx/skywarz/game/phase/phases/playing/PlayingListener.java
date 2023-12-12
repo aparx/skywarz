@@ -3,10 +3,10 @@ package io.github.aparx.skywarz.game.phase.phases.playing;
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
 import io.github.aparx.skywarz.game.phase.GamePhaseListener;
@@ -70,10 +70,10 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
         || target.getBlockZ() != origin.getBlockZ())
         && Objects.equals(target.getWorld(), origin.getWorld()))
       filterMatchFromPlayer(event.getPlayer()).ifPresentOrElse((match) -> {
-        SkywarsArena source = match.getArena().getSource();
+        GameArena source = match.getArena().getSource();
         if (source == null) return;
         ArenaBox box = source.getData().getBox();
-        if (GamePlayer.getPlayer(event.getPlayer()).getMatchData().isSpectator()) {
+        if (SkywarsPlayer.getPlayer(event.getPlayer()).getMatchData().isSpectator()) {
           // disallow spectators that once entered the arena to not leave the arena
           // we only disallow spectators that have been in already, for when the spectator spawn
           // lays outside the arena (which usually is not the case)
@@ -100,7 +100,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
   void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
     filterMatchFromPlayer(player).ifPresent((match) -> {
-      PlayerMatchData data = GamePlayer.getPlayer(player).getMatchData();
+      PlayerMatchData data = SkywarsPlayer.getPlayer(player).getMatchData();
       event.setCancelled(data.isSpectator());
     });
   }
@@ -110,7 +110,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     Entity damagee = event.getEntity();
     if (!event.isCancelled() && damagee instanceof Player)
       filterMatchFromPlayer((Player) damagee).ifPresent((match) -> {
-        PlayerMatchData data = GamePlayer.getPlayer((Player) damagee).getMatchData();
+        PlayerMatchData data = SkywarsPlayer.getPlayer((Player) damagee).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || data.isSpectator());
       });
   }
@@ -121,11 +121,11 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     Entity damagee = event.getEntity();
     if (!event.isCancelled() && damager instanceof Player)
       filterMatchFromPlayer((Player) damager).ifPresent((match) -> {
-        PlayerMatchData damagerData = GamePlayer.getPlayer((Player) damager).getMatchData();
+        PlayerMatchData damagerData = SkywarsPlayer.getPlayer((Player) damager).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || damagerData.isSpectator());
         if (!event.isCancelled() && damagee instanceof Player)
           filterMatchFromPlayer((Player) damagee).ifPresent((__) -> {
-            PlayerMatchData damageeData = GamePlayer.getPlayer((Player) damagee).getMatchData();
+            PlayerMatchData damageeData = SkywarsPlayer.getPlayer((Player) damagee).getMatchData();
             if (damageeData.isInTeam() && damagerData.isInTeam()
                 && Objects.equals(damageeData.getTeam(), damagerData.getTeam()))
               event.setCancelled(true);
@@ -138,7 +138,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     LivingEntity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
       filterMatchFromPlayer((Player) entity).ifPresent((match) -> {
-        event.setCancelled(GamePlayer.getPlayer((Player) entity).getMatchData().isSpectator());
+        event.setCancelled(SkywarsPlayer.getPlayer((Player) entity).getMatchData().isSpectator());
       });
   }
 
@@ -147,7 +147,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     Entity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
       filterMatchFromPlayer((Player) entity).ifPresent((match) -> {
-        PlayerMatchData data = GamePlayer.getPlayer((Player) entity).getMatchData();
+        PlayerMatchData data = SkywarsPlayer.getPlayer((Player) entity).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || data.isSpectator());
       });
   }
@@ -160,13 +160,13 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       if (killer != null && filterMatchFromPlayer(killer).filter((x) -> x.equals(match)).isEmpty())
         killer = null; // killer was not participating in the same match, thus remove killer
 
-      GamePlayer player = GamePlayer.getPlayer(entity);
+      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
       // Stats update: increment player's deaths
       player.getMatchData().getStatistics().increment(PlayerStatsKey.DEATHS);
 
       LazyVariableLookup map = new LazyVariableLookup();
       if (killer != null) {
-        GamePlayer killerPlayer = GamePlayer.getPlayer(killer);
+        SkywarsPlayer killerPlayer = SkywarsPlayer.getPlayer(killer);
         // Stats update: increment killer's kills
         killerPlayer.getMatchData().getStatistics().increment(PlayerStatsKey.KILLS);
         VariablePopulator.addPlayer(map, killer, ArrayPath.of("killer"));

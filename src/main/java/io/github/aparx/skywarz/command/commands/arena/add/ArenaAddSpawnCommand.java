@@ -7,9 +7,10 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaSpawnCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -41,7 +42,7 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
 
   @Override
   protected void setLocation(
-      Location location, SkywarsArena arena, CommandContext context, CommandArgList args) {
+      Location location, GameArena arena, CommandContext context, CommandArgList args) {
     if (args.length() != 1 + TEAM_ARGUMENT_INDEX)
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
@@ -53,7 +54,7 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
       TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
       int spawnId = arena.getData().createSpawnsIfAbsent(team).add(location);
       player.sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Added spawn with ID {0} in arena {1} to team {2}. (unsaved)",
+          "{successPrefix} Added spawn with ID {0} in arena '{1}' to team {2}. (unsaved)",
           spawnId, arena.getName(), team.getChatColor() + team.getDefaultName()
       ));
     }

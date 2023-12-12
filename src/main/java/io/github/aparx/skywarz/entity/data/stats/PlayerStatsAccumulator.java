@@ -1,8 +1,7 @@
-package io.github.aparx.skywarz.entity.data.types;
+package io.github.aparx.skywarz.entity.data.stats;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.database.stats.PlayerDatabaseStats;
-import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Synchronized;

@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * @version 2023-12-10 18:52
  * @since 1.0
  */
-public final class SkywarsSignHandler implements Listener {
+public final class ArenaSignHandler implements Listener {
 
   @Getter
   private static final ConfigProxy templateConfigProxy = new ConfigProxy((proxy) -> {
@@ -43,7 +43,7 @@ public final class SkywarsSignHandler implements Listener {
       "{alive}/{maxPlayers}"
   );
 
-  private final WeakReference<SkywarsArena> arena;
+  private final WeakReference<GameArena> arena;
 
   @Getter
   private SkywarsSignRegister register;
@@ -51,16 +51,16 @@ public final class SkywarsSignHandler implements Listener {
   @Getter
   private List<String> template;
 
-  public SkywarsSignHandler(@NonNull SkywarsArena arena) {
+  public ArenaSignHandler(@NonNull GameArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     this.arena = new WeakReference<>(arena);
     Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
   }
 
   public void update() {
-    SkywarsArena arena = getArena();
+    GameArena arena = getArena();
     LazyVariableLookup lookup = createLookup();
-    Collection<SkywarsSign> collection = getRegister().getCollection();
+    Collection<ArenaSign> collection = getRegister().getCollection();
     collection.stream()
         .filter((sign) -> !sign.update(lookup, arena))
         .collect(Collectors.toList())
@@ -99,12 +99,12 @@ public final class SkywarsSignHandler implements Listener {
     return lookup;
   }
 
-  public @NonNull Optional<SkywarsArena> findArena() {
+  public @NonNull Optional<GameArena> findArena() {
     return Optional.ofNullable(arena.get());
   }
 
-  public @NonNull SkywarsArena getArena() {
-    SkywarsArena skywarsArena = arena.get();
+  public @NonNull GameArena getArena() {
+    GameArena skywarsArena = arena.get();
     Preconditions.checkState(skywarsArena != null, "Arena has become invalid");
     return skywarsArena;
   }
@@ -121,7 +121,7 @@ public final class SkywarsSignHandler implements Listener {
         event.setCancelled(true);
         Bukkit.getScheduler().runTask(Skywars.plugin(), () -> {
           if (entity.isValid())
-            entity.performCommand(String.format("%s join %s", Main.ROOT_COMMAND_NAME, arena.getName()));
+            entity.performCommand(String.format("%s join %s", Main.FULL_COMMAND, arena.getName()));
         });
       }
     }, () -> HandlerList.unregisterAll(this));
@@ -135,7 +135,7 @@ public final class SkywarsSignHandler implements Listener {
       if ("[SW]".equalsIgnoreCase(event.getLine(0))
           && SkywarsPermission.SETUP.has(player)
           && arena.getName().equalsIgnoreCase(event.getLine(1))) {
-        SkywarsSign newSign = new SkywarsSign(event.getBlock().getState());
+        ArenaSign newSign = new ArenaSign(event.getBlock().getState());
         getRegister().getCollection().add(newSign);
         arena.save();
         event.setCancelled(true);

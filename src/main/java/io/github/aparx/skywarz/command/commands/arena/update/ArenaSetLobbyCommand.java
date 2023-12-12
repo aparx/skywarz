@@ -5,9 +5,10 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaSpawnCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.ArenaData;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Location;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -29,13 +30,14 @@ public class ArenaSetLobbyCommand extends AbstractArenaSpawnCommand {
 
   @Override
   protected void setLocation(
-      Location location, SkywarsArena arena, CommandContext context, CommandArgList args) {
+      Location location, GameArena arena, CommandContext context, CommandArgList args) {
     ArenaData data = arena.getData();
     if (data.getBox().isCompleted() && data.getBox().isWithin(location))
       throw new IllegalArgumentException("Lobby spawn must be outside the arena!");
     data.setLobby(location);
     context.getSender().sendMessage(Language.getInstance().substitute(
-        "{successPrefix} Updated lobby spawn of {0}. (unsaved)", arena.getName()));
+        "{successPrefix} Updated lobby spawn of '{0}'. (unsaved)",
+        arena.getName()));
   }
 
 }

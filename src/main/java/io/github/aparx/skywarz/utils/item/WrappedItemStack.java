@@ -1,10 +1,10 @@
 package io.github.aparx.skywarz.utils.item;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.language.LocalizedMessage;
 import lombok.Getter;
-import org.apache.commons.lang.ArrayUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
@@ -12,9 +12,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.util.NumberConversions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,6 +35,24 @@ public class WrappedItemStack implements ConfigurationSerializable {
     this.stack = item;
   }
 
+  public static WrappedItemStack parse(@Nullable ItemStack item) {
+    if (item == null) return null;
+    ItemMeta itemMeta = item.getItemMeta();
+    if (item.hasItemMeta() && itemMeta != null) {
+      if (itemMeta.hasDisplayName())
+        itemMeta.setDisplayName(LocalizedMessage.processRawContent(itemMeta.getDisplayName()));
+      if (itemMeta.hasLore()) {
+        List<String> lore = itemMeta.getLore();
+        if (lore != null && !lore.isEmpty())
+          itemMeta.setLore(lore.stream()
+              .map(LocalizedMessage::processRawContent)
+              .collect(Collectors.toList()));
+      }
+      item.setItemMeta(itemMeta);
+    }
+    return new WrappedItemStack(item);
+  }
+
   public static WrappedItemStack deserialize(Map<String, Object> data) {
     ItemStack item = new ItemStack(
         deserializeType(Objects.toString(data.get("type"))),
@@ -42,10 +60,11 @@ public class WrappedItemStack implements ConfigurationSerializable {
     ItemMeta meta = item.getItemMeta();
     Preconditions.checkNotNull(meta);
     if (data.containsKey("name"))
-      meta.setDisplayName((String) data.get("name"));
+      meta.setDisplayName(LocalizedMessage.processRawContent((String) data.get("name")));
     if (data.containsKey("lore"))
       meta.setLore(((List<?>) data.get("lore")).stream()
           .map(Objects::toString)
+          .map(LocalizedMessage::processRawContent)
           .collect(Collectors.toList()));
     if (data.containsKey("flags"))
       meta.addItemFlags(deserializeFlags((Collection<?>) data.get("flags")));

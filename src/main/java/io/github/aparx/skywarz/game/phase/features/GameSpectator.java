@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.phase.features;
 
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
 public final class GameSpectator {
 
   public static void markAsSpectator(Player entity) {
-    GamePlayer player = GamePlayer.getPlayer(entity);
+    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
     player.getMatchData().setSpectator(true);
     String displayName = String.valueOf(ChatColor.GRAY) + ChatColor.ITALIC + entity.getName();
     entity.setDisplayName(displayName);
@@ -31,22 +31,22 @@ public final class GameSpectator {
     markAsSpectator(entity); // ensure the marking
     PlayerSnapshot.ofSpectator(match, entity).restore(entity);
     match.getAudience().alive()
-        .map(GamePlayer::getOnline)
+        .map(SkywarsPlayer::getOnline)
         .forEach((other) -> other.hidePlayer(Skywars.plugin(), entity));
     Skywars.getInstance()
-        .getGameItemManager()
+        .getItemManager()
         .getItems()
         .require(TeleportItem.class)
         .give(match, entity);
     entity.getInventory().setItem(LeaveItem.SLOT, Skywars.getInstance()
-        .getGameItemManager()
+        .getItemManager()
         .getItems()
         .require(LeaveItem.class)
         .create(match, entity));
   }
 
   public static void removeSpectator(GameMatch match, Player entity) {
-    GamePlayer.getPlayer(entity).getMatchData().setSpectator(false);
+    SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(false);
     match.getAudience().entity().forEach((other) -> {
       other.showPlayer(Skywars.plugin(), entity);
       entity.showPlayer(Skywars.plugin(), other);

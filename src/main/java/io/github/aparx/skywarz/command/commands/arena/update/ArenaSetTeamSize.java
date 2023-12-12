@@ -6,8 +6,9 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -31,7 +32,7 @@ public class ArenaSetTeamSize extends AbstractArenaCommand {
   }
 
   @Override
-  protected void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
+  protected void execute(GameArena arena, CommandContext context, CommandArgList args) {
     if (args.length() != 1 + NUMBER_PARAMETER_INDEX)
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
@@ -39,7 +40,7 @@ public class ArenaSetTeamSize extends AbstractArenaCommand {
       Preconditions.checkArgument(newTeamSize >= 1, "Team size must at least be one");
       arena.getData().setSettings(arena.getData().getSettings().withTeamSize(newTeamSize));
       context.getSender().sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Updated size per team from {0} to {1}. (unsaved)",
+          "{successPrefix} Updated size per team from '{0}' to {1}. (unsaved)",
           arena.getName(), newTeamSize));
     }
   }

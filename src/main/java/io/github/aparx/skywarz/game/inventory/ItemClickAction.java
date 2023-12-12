@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.game.inventory;
 
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 /**
@@ -11,6 +11,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 @FunctionalInterface
 public interface ItemClickAction {
 
-  void click(GamePlayer player, InventoryClickEvent event);
+  void click(SkywarsPlayer player, InventoryClickEvent event);
 
 }

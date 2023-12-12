@@ -1,7 +1,8 @@
 package io.github.aparx.skywarz.entity.data;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.RegisterNotifiable;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.reflect.Constructor;
@@ -14,12 +15,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version 2023-12-03 05:03
  * @since 1.0
  */
-public abstract class GamePlayerData {
+public abstract class SkywarsPlayerData implements RegisterNotifiable {
 
   private static final Map<Class<?>, Constructor<?>> constructors = new ConcurrentHashMap<>();
 
-  public static <T extends GamePlayerData> T newInstance(
-      @NonNull Class<T> type, @NonNull GamePlayer player) {
+  public static <T extends SkywarsPlayerData> T newInstance(
+      @NonNull Class<T> type, @NonNull SkywarsPlayer player) {
     Preconditions.checkNotNull(type, "Type must not be null");
     Preconditions.checkNotNull(player, "Player (owner) must not be null");
     try {
@@ -33,14 +34,14 @@ public abstract class GamePlayerData {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T extends GamePlayerData> Constructor<T> getConstructor(@NonNull Class<T> type) {
+  public static <T extends SkywarsPlayerData> Constructor<T> getConstructor(@NonNull Class<T> type) {
     Preconditions.checkNotNull(type, "Type must not be null");
-    return (Constructor<T>) constructors.computeIfAbsent(type, GamePlayerData::getConstructor0);
+    return (Constructor<T>) constructors.computeIfAbsent(type, SkywarsPlayerData::getConstructor0);
   }
 
   private static Constructor<?> getConstructor0(Class<?> type) {
     try {
-      return type.getConstructor(GamePlayer.class);
+      return type.getConstructor(SkywarsPlayer.class);
     } catch (NoSuchMethodException ignored) {}
     try {
       return type.getConstructor();
@@ -48,5 +49,11 @@ public abstract class GamePlayerData {
       throw new RuntimeException("Missing default constructor", ex);
     }
   }
+
+  /** Called when the underlying player has been registered (joined) */
+  public void notifyRegister() {}
+
+  /** Called when the underlying player has been removed (quit) */
+  public void notifyRemoval() {}
 
 }

@@ -4,7 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
+import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
 import lombok.AccessLevel;
@@ -14,9 +16,7 @@ import org.bukkit.permissions.Permissible;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -88,6 +88,20 @@ public abstract class CommandNode implements CommandNodeExecutor {
         .collect(Collectors.joining(":")));
     if (!node.isRoot())
       createValueMapForNode0(output, node.getParent(), keyPrefix + "parent.");
+  }
+
+  @Override
+  public List<String> onTabComplete(CommandContext context, CommandArgList args) {
+    if (args.length() == 1 && !children.isEmpty()) {
+      String arg0 = args.first().get().toLowerCase();
+      return children.stream()
+          .filter((node) -> node.hasPermission(context.getSender()))
+          .map(CommandNode::getInfo)
+          .map(CommandInfo::getName)
+          .filter((str) -> str.toLowerCase().startsWith(arg0))
+          .collect(Collectors.toList());
+    }
+    return null;
   }
 
   public boolean isMatching(String argument) {

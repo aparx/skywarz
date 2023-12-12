@@ -7,7 +7,6 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
-import org.apache.commons.lang3.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
@@ -21,7 +20,7 @@ import java.util.stream.Stream;
  * @version 2023-12-01 02:51
  * @since 1.0
  */
-public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<SkywarsArena> {
+public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<GameArena> {
 
   public static final File STORAGE_DIRECTORY_OFFSET = new File(".arenas");
 
@@ -33,7 +32,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
     return Objects.toString(key).toLowerCase();
   }
 
-  private final KeyValueSet<String, SkywarsArena> internalSet =
+  private final KeyValueSet<String, GameArena> internalSet =
       KeyValueSets.of((arena) -> transformKey(arena.getName()));
 
   public @NonNull File getDirectory() {
@@ -51,7 +50,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
           .filter((file) -> getFileExtension(file).filter(FILE_EXTENSIONS::contains).isPresent())
           .peek((file) -> Skywars.logger().log(Level.INFO, "Found arena file: {0}", file))
           .filter((file) -> NAME_PATTERN.matcher(getFileNameWithoutExtension(file)).matches())
-          .forEach((file) -> register(new SkywarsArena(getFileNameWithoutExtension(file), file)));
+          .forEach((file) -> register(new GameArena(getFileNameWithoutExtension(file), file)));
   }
 
   private static Optional<String> getFileExtension(File file) {
@@ -71,7 +70,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
     internalSet.clear();
   }
 
-  public void register(@NonNull SkywarsArena arena) {
+  public void register(@NonNull GameArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     synchronized (handlerLock) {
       Preconditions.checkState(internalSet.add(arena), "Could not add arena (duplicate?)");
@@ -80,7 +79,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
   }
 
   @CanIgnoreReturnValue
-  public boolean delete(@NonNull SkywarsArena arena) {
+  public boolean delete(@NonNull GameArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     synchronized (handlerLock) {
       if (!internalSet.remove(arena)) return false;
@@ -99,7 +98,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
   }
 
   @CheckReturnValue
-  public Optional<SkywarsArena> find(@NonNull String name) {
+  public Optional<GameArena> find(@NonNull String name) {
     Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
       return internalSet.find(transformKey(name));
@@ -107,7 +106,7 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
   }
 
   @CanIgnoreReturnValue
-  public @NonNull SkywarsArena get(@NonNull String name) {
+  public @NonNull GameArena get(@NonNull String name) {
     Preconditions.checkNotNull(name, "Name must not be null");
     synchronized (handlerLock) {
       return find(name).orElseThrow(() -> new IllegalArgumentException(
@@ -121,22 +120,22 @@ public final class ArenaManager extends DefaultSkywarsHandler implements Iterabl
     }
   }
 
-  public boolean contains(SkywarsArena arena) {
+  public boolean contains(GameArena arena) {
     synchronized (handlerLock) {
       return internalSet.contains(arena);
     }
   }
 
-  public @NonNull Stream<SkywarsArena> stream() {
+  public @NonNull Stream<GameArena> stream() {
     return internalSet.stream();
   }
 
   @Override
-  public @NonNull Iterator<SkywarsArena> iterator() {
+  public @NonNull Iterator<GameArena> iterator() {
     return internalSet.iterator();
   }
 
-  public Set<SkywarsArena> asSet() {
+  public Set<GameArena> asSet() {
     return internalSet;
   }
 

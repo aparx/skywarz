@@ -8,9 +8,10 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.ArenaData;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
@@ -41,7 +42,7 @@ public class ArenaSetPointCommand extends AbstractArenaCommand {
   }
 
   @Override
-  public void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
+  public void execute(GameArena arena, CommandContext context, CommandArgList args) {
     if (args.length() != 2) {
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
       return;
@@ -90,8 +91,8 @@ public class ArenaSetPointCommand extends AbstractArenaCommand {
   }
 
   private void validateCompareToOtherArenas(
-      SkywarsArena leftOut, BiConsumer<SkywarsArena, ArenaBox> validator) {
-    for (SkywarsArena arena : Skywars.getInstance().getArenaManager()) {
+      GameArena leftOut, BiConsumer<GameArena, ArenaBox> validator) {
+    for (GameArena arena : Skywars.getInstance().getArenaManager()) {
       if (leftOut == arena) continue;
       final ArenaBox box = arena.getData().getBox();
       if (box.isCompleted()) validator.accept(arena, box);

@@ -33,7 +33,7 @@ import java.util.*;
  */
 @Getter
 @SerializableAs("Skywarz.Kit")
-public final class SkywarsKit implements ConfigurationSerializable {
+public final class GameKit implements ConfigurationSerializable {
 
   // TODO Show selected kit in scoreboard
 
@@ -44,12 +44,13 @@ public final class SkywarsKit implements ConfigurationSerializable {
   private final @Nullable WrappedItemStack icon;
 
   private final @Nullable WrappedItemStack @NonNull [] armor;
+
   private final @NonNull IndexMap<WrappedItemStack> contents;
 
-  public SkywarsKit(@NonNull String name,
-                    @Nullable WrappedItemStack icon,
-                    @Nullable WrappedItemStack @NonNull [] armor,
-                    @NonNull IndexMap<WrappedItemStack> contents) {
+  public GameKit(@NonNull String name,
+                 @Nullable WrappedItemStack icon,
+                 @Nullable WrappedItemStack @NonNull [] armor,
+                 @NonNull IndexMap<WrappedItemStack> contents) {
     Preconditions.checkNotNull(name, "Name must not be null");
     Preconditions.checkNotNull(armor, "Armor array must not be null");
     Preconditions.checkNotNull(contents, "Contents array must not be null");
@@ -64,7 +65,7 @@ public final class SkywarsKit implements ConfigurationSerializable {
     return new KitBuilder(name);
   }
 
-  public static SkywarsKit deserialize(Map<String, Object> args) {
+  public static GameKit deserialize(Map<String, Object> args) {
     ArmorSlot[] values = ArmorSlot.values();
     WrappedItemStack[] armor = new WrappedItemStack[values.length];
     Object armorMap = args.get("armor");
@@ -78,7 +79,8 @@ public final class SkywarsKit implements ConfigurationSerializable {
     Object contentMap = args.get("contents");
     if (contentMap instanceof Map)
       contents = deserializeContent((Map<?, ?>) contentMap);
-    return new SkywarsKit((String) args.get("name"), (WrappedItemStack) args.get("icon"), armor, contents);
+    return new GameKit((String) args.get("name"), (WrappedItemStack) args.get("icon"), armor,
+        contents);
   }
 
   private static IndexMap<WrappedItemStack> deserializeContent(Map<?, ?> map) {
@@ -140,8 +142,8 @@ public final class SkywarsKit implements ConfigurationSerializable {
     return armor.length > slot.ordinal() ? armor[slot.ordinal()] : null;
   }
 
-  public SkywarsKit copy() {
-    return new SkywarsKit(getName(), (icon != null ? icon.copy() : null),
+  public GameKit copy() {
+    return new GameKit(getName(), (icon != null ? icon.copy() : null),
         ArrayUtils.clone(armor), contents);
   }
 
@@ -149,7 +151,7 @@ public final class SkywarsKit implements ConfigurationSerializable {
     BOOTS,
     LEGGINGS,
     CHESTPLATE,
-    HELMET;
+    HELMET
   }
 
   @Getter
@@ -176,7 +178,7 @@ public final class SkywarsKit implements ConfigurationSerializable {
 
     @CanIgnoreReturnValue
     public KitBuilder slot(ArmorSlot slot, ItemStack itemStack) {
-      return this.slot(slot, new WrappedItemStack(itemStack));
+      return this.slot(slot, itemStack != null ? new WrappedItemStack(itemStack) : null);
     }
 
     @CanIgnoreReturnValue
@@ -200,6 +202,13 @@ public final class SkywarsKit implements ConfigurationSerializable {
     @CanIgnoreReturnValue
     public KitBuilder slot(@NonNegative int index, Material material) {
       return this.slot(index, ItemBuilder.builder(material).wrap());
+    }
+
+    @CanIgnoreReturnValue
+    public KitBuilder fill(WrappedItemStack @NonNull [] contents) {
+      maxIndex = Math.max(contents.length, maxIndex);
+      this.contents.putAll(contents);
+      return this;
     }
 
     @CanIgnoreReturnValue
@@ -229,8 +238,8 @@ public final class SkywarsKit implements ConfigurationSerializable {
     }
 
     @CheckReturnValue
-    public @NonNull SkywarsKit build() {
-      return new SkywarsKit(name, icon, ArrayUtils.clone(armor), new IndexMap<>(contents));
+    public @NonNull GameKit build() {
+      return new GameKit(name, icon, ArrayUtils.clone(armor), new IndexMap<>(contents));
     }
 
   }

@@ -5,8 +5,9 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaSpawnCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Location;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -29,10 +30,11 @@ public class ArenaSetSpectatorCommand extends AbstractArenaSpawnCommand {
 
   @Override
   protected void setLocation(
-      Location location, SkywarsArena arena, CommandContext context, CommandArgList args) {
+      Location location, GameArena arena, CommandContext context, CommandArgList args) {
     arena.getData().setSpectator(location);
     context.getSender().sendMessage(Language.getInstance().substitute(
-        "{successPrefix} Updated spectator spawn of {0}. (unsaved)", arena.getName()));
+        "{successPrefix} Updated spectator spawn of '{0}'. (unsaved)",
+        arena.getName()));
   }
 
 }

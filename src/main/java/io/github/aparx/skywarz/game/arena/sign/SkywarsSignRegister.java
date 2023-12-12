@@ -25,9 +25,9 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public final class SkywarsSignRegister implements ConfigurationSerializable {
 
-  private static final Function<SkywarsSign, Location> KEY_MAPPER = SkywarsSign::getLocation;
+  private static final Function<ArenaSign, Location> KEY_MAPPER = ArenaSign::getLocation;
 
-  private final @NonNull KeyValueSet<Location, SkywarsSign> collection;
+  private final @NonNull KeyValueSet<Location, ArenaSign> collection;
 
   public SkywarsSignRegister() {
     this(KeyValueSets.of(KEY_MAPPER));
@@ -37,10 +37,10 @@ public final class SkywarsSignRegister implements ConfigurationSerializable {
     Object dataObject = data.get("data");
     if (!(dataObject instanceof Collection<?>))
       dataObject = List.of();
-    KeyValueSet<Location, SkywarsSign> newSet = KeyValueSets.of(KEY_MAPPER);
+    KeyValueSet<Location, ArenaSign> newSet = KeyValueSets.of(KEY_MAPPER);
     for (Object object : (Collection<?>) dataObject)
-      if (object instanceof SkywarsSign)
-        newSet.add((SkywarsSign) object);
+      if (object instanceof ArenaSign)
+        newSet.add((ArenaSign) object);
     return new SkywarsSignRegister(newSet);
   }
 

@@ -28,6 +28,7 @@ import java.util.*;
  */
 @Getter
 @Builder
+@With
 @RequiredArgsConstructor(staticName = "of")
 public final class PlayerSnapshot {
 
@@ -57,15 +58,35 @@ public final class PlayerSnapshot {
   }
 
   public static PlayerSnapshot ofReset(@NonNull Player player, Location location, GameMode mode) {
-    return new PlayerSnapshot(new ItemStack[player.getInventory().getContents().length],
-        List.of(), location, 20, 20, 20, player.getName(), null, mode, false, false, 0.1F, 0.0F, 0,
-        new WeakReference<>(player.getScoreboard()));
+    return PlayerSnapshot.builder()
+        .items(new ItemStack[player.getInventory().getContents().length])
+        .potionEffects(List.of())
+        .location(location)
+        .health(20)
+        .maxHealth(20)
+        .foodLevel(20)
+        .displayName(player.getName())
+        .gameMode(mode)
+        .flySpeed(0.1f)
+        .scoreboard(new WeakReference<>(player.getScoreboard()))
+        .build();
   }
 
   public static PlayerSnapshot ofSpectator(@NonNull GameMatch match, @NonNull Player player) {
-    return new PlayerSnapshot(new ItemStack[player.getInventory().getContents().length],
-        List.of(), match.getArena().getData().getSpectator(), 2, 2, 20, player.getDisplayName(),
-        player.getPlayerListName(), GameMode.ADVENTURE, true, true, 0.1F, 0F, 0, null);
+    return PlayerSnapshot.builder()
+        .items(new ItemStack[player.getInventory().getContents().length])
+        .potionEffects(List.of())
+        .location(match.getArena().getData().getSpectator())
+        .health(2)
+        .maxHealth(2)
+        .foodLevel(20)
+        .displayName(player.getDisplayName())
+        .playerListName(player.getPlayerListName())
+        .gameMode(GameMode.ADVENTURE)
+        .isAllowedFlying(true)
+        .isFlying(true)
+        .flySpeed(0.1F)
+        .build();
   }
 
   public static PlayerSnapshot of(@NonNull Player player) {

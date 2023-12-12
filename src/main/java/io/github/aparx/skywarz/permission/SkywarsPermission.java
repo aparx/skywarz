@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.permission;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import lombok.Getter;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.permissions.Permissible;
@@ -27,6 +27,9 @@ public final class SkywarsPermission {
 
   /** Users with this permission are able to create, delete and generally manage Skywarz */
   public static final SkywarsPermission SETUP = parse("setup");
+
+  /** Users with this permission are able to play in Skywarz */
+  public static final SkywarsPermission PLAY = parse("play");
 
   /** Users with this permission are able to skip the waiting phase */
   public static final SkywarsPermission QUICKSTART = parse("quickstart");
@@ -58,7 +61,8 @@ public final class SkywarsPermission {
   }
 
   public static SkywarsPermission parse(@NonNull String permission) {
-    return new SkywarsPermission(Collections.singletonList(ArrayPath.parse(permission)));
+    return new SkywarsPermission(Collections.singletonList(
+        PERMISSION_PREFIX.add(ArrayPath.parse(permission))));
   }
 
   public static SkywarsPermission parse(@NonNull String @NonNull ... permissions) {
@@ -84,11 +88,13 @@ public final class SkywarsPermission {
       builder.add(path.add("*"));
   }
 
-  public boolean has(@NonNull GamePlayer player) {
+  public boolean has(@NonNull SkywarsPlayer player) {
     return player.findOnline().filter(this::has).isPresent();
   }
 
   public boolean has(@NonNull Permissible permissible) {
-    return permissions.stream().anyMatch((perm) -> permissible.hasPermission(perm.join()));
+    return permissions.stream().anyMatch((perm) -> {
+      return permissible.hasPermission(perm.join());
+    });
   }
 }

@@ -27,6 +27,8 @@ public final class SoundRecord {
   public static final SoundRecord OPEN_INVENTORY = of(Sound.BLOCK_LEVER_CLICK);
   public static final SoundRecord TIMER_TICK = of(Sound.BLOCK_DISPENSER_DISPENSE, .5f, 1.5f);
 
+  public static final SoundRecord KIT_BUILT = of(Sound.BLOCK_ANVIL_USE, .75f);
+
   private final @NonNull Sound sound;
   private final float volume;
   private final float pitch;

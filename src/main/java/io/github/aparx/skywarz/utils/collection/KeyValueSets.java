@@ -1,6 +1,7 @@
 package io.github.aparx.skywarz.utils.collection;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.RegisterNotifiable;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.experimental.UtilityClass;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -31,6 +32,39 @@ public final class KeyValueSets {
   public static <K, V extends Snowflake<? extends K>> KeyValueSet<K, V> ofSnowflake() {
     return of((value) -> Preconditions.checkNotNull(value.getId()));
   }
+
+  public static <K, V extends RegisterNotifiable>
+  KeyValueSet<K, V> ofNotifable(@NonNull Function<V, K> keyMapper) {
+    Preconditions.checkNotNull(keyMapper, "Mapper must not be null");
+    return new AbstractKeyValueSet<>() {
+      @Override
+      public K getKey(V v) {
+        return keyMapper.apply(v);
+      }
+
+      @Override
+      public boolean add(V value) {
+        if (!super.add(value)) return false;
+        if (value != null)
+          value.notifyRegister();
+        return true;
+      }
+
+      @Override
+      public boolean remove(Object value) {
+        if (!super.remove(value)) return false;
+        if (value != null)
+          ((RegisterNotifiable) value).notifyRemoval();
+        return true;
+      }
+    };
+  }
+
+  public static <K, V extends RegisterNotifiable & Snowflake<K>>
+  KeyValueSet<K, V> ofNotifable() {
+    return ofNotifable(Snowflake::getId);
+  }
+
 
   public static <K, E> KeyValueSet<K, E> copyOf(
       @NonNull KeyValueSet<K, E> source,

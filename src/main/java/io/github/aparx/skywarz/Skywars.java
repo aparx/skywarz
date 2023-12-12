@@ -4,14 +4,15 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.database.GameDatabase;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.arena.*;
-import io.github.aparx.skywarz.game.arena.sign.SkywarsSign;
+import io.github.aparx.skywarz.game.arena.sign.ArenaSign;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestItem;
-import io.github.aparx.skywarz.game.item.SkywarsItemManager;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.kit.SkywarsKitHandler;
+import io.github.aparx.skywarz.game.item.GameItemManager;
+import io.github.aparx.skywarz.game.kit.GameKit;
+import io.github.aparx.skywarz.game.kit.GameKitManager;
 import io.github.aparx.skywarz.game.listener.BungeeListener;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
@@ -52,8 +53,8 @@ public final class Skywars {
     ConfigurationSerialization.registerClass(WrappedItemStack.class);
     ConfigurationSerialization.registerClass(ChestItem.class);
     ConfigurationSerialization.registerClass(SkullItem.class);
-    ConfigurationSerialization.registerClass(SkywarsKit.class);
-    ConfigurationSerialization.registerClass(SkywarsSign.class);
+    ConfigurationSerialization.registerClass(GameKit.class);
+    ConfigurationSerialization.registerClass(ArenaSign.class);
   }
 
   @Getter
@@ -84,9 +85,9 @@ public final class Skywars {
     handlers.addAll(Set.of(
         new ArenaManager(),
         new GameMatchManager(),
-        new SkywarsItemManager(),
+        new GameItemManager(),
         new BungeeListener(),
-        SkywarsKitHandler.getInstance()
+        GameKitManager.getInstance()
     ));
   }
 
@@ -128,6 +129,7 @@ public final class Skywars {
     try {
       logger.info("Unloading plugin");
       getHandlers().forEach(SkywarsHandler::unload);
+      SkywarsPlayer.removeAllPlayers();
       database.disconnect();
       return true;
     } catch (Exception e) {
@@ -156,8 +158,12 @@ public final class Skywars {
     return getHandlers().require(GameMatchManager.class);
   }
 
-  public @NonNull SkywarsItemManager getGameItemManager() {
-    return getHandlers().require(SkywarsItemManager.class);
+  public @NonNull GameItemManager getItemManager() {
+    return getHandlers().require(GameItemManager.class);
+  }
+
+  public @NonNull GameKitManager getKitManager() {
+    return getHandlers().require(GameKitManager.class);
   }
 
   private final class HandlerSet extends KeyedByClassSet<SkywarsHandler> {

@@ -3,7 +3,8 @@ package io.github.aparx.skywarz.game.arena.reset;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
+import io.github.aparx.skywarz.utils.TimedProcedure;
 import io.github.aparx.skywarz.utils.material.MaterialTag;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class DefaultArenaReset extends ArenaReset {
 
   private final DefaultArenaResetListener listener = new DefaultArenaResetListener(this);
 
-  public DefaultArenaReset(@NonNull SkywarsArena arena) {
+  public DefaultArenaReset(@NonNull GameArena arena) {
     super(arena);
   }
 
@@ -55,22 +56,26 @@ public class DefaultArenaReset extends ArenaReset {
   @Override
   public void reset() {
     HandlerList.unregisterAll(listener);
-    blocks.forEach((snapshot) -> {
-      Location location = snapshot.getLocation();
-      World world = location.getWorld();
-      if (world != null)
-        world.getBlockAt(location).setBlockData(snapshot.getBlockData());
+    new TimedProcedure().execute((time) -> {
+      GameArena arena = getArena();
+      Skywars.logger().log(Level.INFO, "Resetting {0} (...)", arena.getName());
+      blocks.forEach((snapshot) -> {
+        Location location = snapshot.getLocation();
+        World world = location.getWorld();
+        if (world != null)
+          world.getBlockAt(location).setBlockData(snapshot.getBlockData());
+      });
+      blocks.clear();
+      World world = arena.getData().getWorld();
+      world.getNearbyEntities(arena.getData()
+              .getBox().toBoundingBox()
+              .expand(ITEM_CLEAR_BOX_EXPANSION))
+          .stream()
+          .filter((e) -> e instanceof Item)
+          .forEach(Entity::remove);
+      Skywars.logger().log(Level.INFO, "Reset of {0} completed in {1}",
+          new Object[]{arena.getName(), time.toPerformanceString()});
     });
-    blocks.clear();
-    SkywarsArena arena = getArena();
-    World world = arena.getData().getWorld();
-    world.getNearbyEntities(arena.getData()
-            .getBox().toBoundingBox()
-            .expand(ITEM_CLEAR_BOX_EXPANSION))
-        .stream()
-        .filter((e) -> e instanceof Item)
-        .forEach(Entity::remove);
-    Skywars.plugin().getLogger().log(Level.INFO, "Reset of {0} complete", arena.getName());
   }
 
   @CanIgnoreReturnValue

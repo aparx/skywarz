@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.game.arena.sign;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import org.bukkit.Location;
@@ -25,22 +25,22 @@ import java.util.stream.IntStream;
  * @since 1.0
  */
 @SerializableAs("Skywarz.Sign")
-public class SkywarsSign implements ConfigurationSerializable {
+public class ArenaSign implements ConfigurationSerializable {
 
   private final @NonNull Location location;
 
-  public SkywarsSign(@NonNull Location location) {
+  public ArenaSign(@NonNull Location location) {
     Preconditions.checkNotNull(location, "Location must not be null");
     this.location = location;
   }
 
-  public SkywarsSign(@NonNull BlockState state) {
+  public ArenaSign(@NonNull BlockState state) {
     this(state.getLocation());
     Preconditions.checkState(state instanceof Sign, "State not a sign");
   }
 
-  public static SkywarsSign deserialize(Map<?, ?> data) {
-    return new SkywarsSign((Location) data.get("location"));
+  public static ArenaSign deserialize(Map<?, ?> data) {
+    return new ArenaSign((Location) data.get("location"));
   }
 
   @Override
@@ -49,7 +49,7 @@ public class SkywarsSign implements ConfigurationSerializable {
   }
 
   @CanIgnoreReturnValue
-  public boolean update(@NonNull LazyVariableLookup lookup, SkywarsArena arena) {
+  public boolean update(@NonNull LazyVariableLookup lookup, GameArena arena) {
     Block block = location.getBlock();
     BlockState state = block.getState();
     if (!(state instanceof Sign))
@@ -73,7 +73,7 @@ public class SkywarsSign implements ConfigurationSerializable {
   public boolean equals(Object object) {
     if (this == object) return true;
     if (object == null || getClass() != object.getClass()) return false;
-    SkywarsSign that = (SkywarsSign) object;
+    ArenaSign that = (ArenaSign) object;
     return Objects.equals(location, that.location);
   }
 

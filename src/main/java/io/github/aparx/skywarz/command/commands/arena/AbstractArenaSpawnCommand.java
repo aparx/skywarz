@@ -5,7 +5,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -31,10 +31,10 @@ public abstract class AbstractArenaSpawnCommand extends AbstractArenaCommand {
   }
 
   protected abstract void setLocation(
-      Location location, SkywarsArena arena, CommandContext context, CommandArgList args);
+      Location location, GameArena arena, CommandContext context, CommandArgList args);
 
   @Override
-  public void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
+  public void execute(GameArena arena, CommandContext context, CommandArgList args) {
     Player player = context.getPlayer();
     Location location = player.getLocation().clone();
     World world = location.getWorld();

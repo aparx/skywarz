@@ -14,7 +14,9 @@ import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetLobbyComman
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetPointCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetSpectatorCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetTeamSize;
-import io.github.aparx.skywarz.command.commands.stats.StatsResetCommand;
+import io.github.aparx.skywarz.command.commands.bungee.BungeeToggleCommand;
+import io.github.aparx.skywarz.command.commands.bungee.BungeeUpdateCommand;
+import io.github.aparx.skywarz.command.commands.kit.*;
 import io.github.aparx.skywarz.command.skeleton.CommandBuilder;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.command.skeleton.CommandNodeSet;
@@ -84,10 +86,24 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     roots.add(new JoinCommand());
     roots.add(new LeaveCommand());
     roots.add(new StartCommand());
+    roots.add(new StatsCommand());
 
-    StatsCommand stats = new StatsCommand();
-    stats.add(new StatsResetCommand(stats));
-    roots.add(stats);
+    roots.add(CommandBuilder.builder("bungee")
+        .permission(SkywarsPermission.SETUP)
+        .description("Manage bungeecord for Skywarz on this server")
+        .args("<{children}>")
+        .build()
+        .add(BungeeToggleCommand::new)
+        .add(BungeeUpdateCommand::new));
+
+    roots.add(CommandBuilder.builder("kit")
+        .args("<{children}>")
+        .build()
+        .add(KitCreateCommand::new)
+        .add(KitDeleteCommand::new)
+        .add(KitEditMode::new)
+        .add(KitSaveCommand::new)
+        .add(KitCancelCommand::new));
 
     return tree;
   }
@@ -127,7 +143,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     List<String> suggestions =
         optNode.<Collection<CommandNode>>map(CommandNode::getChildren)
             .orElseGet(forest::getRoots).stream()
-            .filter((node) -> newArgs.length() <= 1 + node.getIndex())
+            .filter((node) -> newArgs.length() == 1 + node.getIndex())
             .filter((node) -> node.hasPermission(sender))
             .map((node) -> node.getInfo().getName())
             .collect(Collectors.toList());

@@ -5,10 +5,10 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.events.match.MatchCreateEvent;
 import io.github.aparx.skywarz.events.match.MatchJoinEvent;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.match.listener.SkywarsMatchListener;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
@@ -30,13 +30,13 @@ import java.util.function.Function;
  */
 public final class GameMatchManager extends DefaultSkywarsHandler implements Iterable<GameMatch> {
 
-  public static final Function<SkywarsArena, GameMatch> DEFAULT_MATCH_FACTORY =
+  public static final Function<GameArena, GameMatch> DEFAULT_MATCH_FACTORY =
       (arena) -> new GameMatch(UUID.randomUUID(), arena);
 
   private static final SkywarsMatchListener LISTENER = new SkywarsMatchListener();
 
-  private final KeyValueSet<UUID, GameMatch> internalSet = KeyValueSets.ofSnowflake();
-  private final WeakHashMap<SkywarsArena, GameMatch> byArena = new WeakHashMap<>();
+  private final KeyValueSet<UUID, GameMatch> internalSet = KeyValueSets.ofNotifable();
+  private final WeakHashMap<GameArena, GameMatch> byArena = new WeakHashMap<>();
   private final SetMultimap<World, GameMatch> byWorld =
       Multimaps.newSetMultimap(new WeakHashMap<>(), WeakHashSet::new);
 
@@ -57,7 +57,7 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
 
   // TODO move to a different (more fitting) place
   @CanIgnoreReturnValue
-  public GameMatch join(@NonNull GamePlayer player, @NonNull SkywarsArena arena) {
+  public GameMatch join(@NonNull SkywarsPlayer player, @NonNull GameArena arena) {
     GameMatchManager matchManager = Skywars.getInstance().getMatchManager();
     GameMatch match = matchManager.find(arena).orElseGet(() -> {
       GameMatch newMatch = GameMatchManager.DEFAULT_MATCH_FACTORY.apply(arena);
@@ -87,20 +87,18 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
   @CanIgnoreReturnValue
   public boolean register(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
-    SkywarsArena source = match.getArena().getSource();
+    GameArena source = match.getArena().getSource();
     Preconditions.checkNotNull(source, "Arena source is invalid");
     Preconditions.checkState(!source.isAcquiredByMatch(),
         "There already is a match running at this arena currently");
-    if (!add(match)) return false;
-    match.notifyRegister();
-    return true;
+    return add(match);
   }
 
   @Synchronized
   @CanIgnoreReturnValue
   public GameMatch getOrCreate(
-      @NonNull SkywarsArena arena,
-      @NonNull Function<SkywarsArena, GameMatch> matchFactory) {
+      @NonNull GameArena arena,
+      @NonNull Function<GameArena, GameMatch> matchFactory) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     Preconditions.checkNotNull(matchFactory, "Factory must not be null");
     if (contains(arena)) return get(arena);
@@ -111,7 +109,7 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
 
   @Synchronized
   @CanIgnoreReturnValue
-  public GameMatch getOrCreate(@NonNull SkywarsArena arena) {
+  public GameMatch getOrCreate(@NonNull GameArena arena) {
     return getOrCreate(arena, DEFAULT_MATCH_FACTORY);
   }
 
@@ -131,7 +129,6 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
     Preconditions.checkNotNull(match, "Match must not be null");
     if (!internalSet.remove(match)) return false;
     byArena.remove(match.getArena().getSource());
-    match.notifyRemoval();
     // TODO check if this actually would throw any exceptions long-term
     byWorld.removeAll(match.getArena().getData().getWorld());
     return true;
@@ -144,7 +141,7 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
   }
 
   @Synchronized
-  public Optional<GameMatch> find(@NonNull SkywarsArena arena) {
+  public Optional<GameMatch> find(@NonNull GameArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     return Optional.ofNullable(byArena.get(arena));
   }
@@ -163,7 +160,7 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
 
   @Synchronized
   @CanIgnoreReturnValue
-  public GameMatch get(@NonNull SkywarsArena arena) {
+  public GameMatch get(@NonNull GameArena arena) {
     return find(arena).orElseThrow();
   }
 
@@ -184,7 +181,7 @@ public final class GameMatchManager extends DefaultSkywarsHandler implements Ite
   }
 
   @Synchronized
-  public boolean contains(SkywarsArena arena) {
+  public boolean contains(GameArena arena) {
     return arena != null && byArena.containsKey(arena);
   }
 

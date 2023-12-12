@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.AccessLevel;
@@ -55,7 +55,7 @@ public class SpecialScoreboard implements Listener {
 
   @Synchronized
   @CanIgnoreReturnValue
-  public boolean show(@NonNull GamePlayer viewer) {
+  public boolean show(@NonNull SkywarsPlayer viewer) {
     Preconditions.checkNotNull(viewer, "Viewer must not be null");
     if (!viewers.add(viewer)) return false;
     createScoreboardIfNeeded();
@@ -71,7 +71,7 @@ public class SpecialScoreboard implements Listener {
     }, 0, updateInterval.toTicks());
     // TODO this is not really needed since SkywarsPlayer is weakly referenced
     Bukkit.getPluginManager().registerEvent(PlayerQuitEvent.class, this, EventPriority.NORMAL,
-        (listener, event) -> GamePlayer
+        (listener, event) -> SkywarsPlayer
             .findPlayer(((PlayerQuitEvent) event).getPlayer())
             .ifPresent(this::remove),
         Skywars.plugin());
@@ -80,7 +80,7 @@ public class SpecialScoreboard implements Listener {
 
   @Synchronized
   @CanIgnoreReturnValue
-  public boolean remove(@NonNull GamePlayer viewer) {
+  public boolean remove(@NonNull SkywarsPlayer viewer) {
     Preconditions.checkNotNull(viewer, "Viewer must not be null");
     if (!viewers.remove(viewer)) return false;
     viewer.findOnline().ifPresent((player) -> {

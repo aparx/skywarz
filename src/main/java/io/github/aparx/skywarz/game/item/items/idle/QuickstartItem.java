@@ -45,6 +45,6 @@ public class QuickstartItem extends StaticSkywarsItem {
   protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     event.setCancelled(true);
     SoundRecord.ACTION_SUCCESS.play(event.getPlayer());
-    event.getPlayer().performCommand(String.format("%s start", Main.ROOT_COMMAND_NAME));
+    event.getPlayer().performCommand(String.format("%s start", Main.FULL_COMMAND));
   }
 }

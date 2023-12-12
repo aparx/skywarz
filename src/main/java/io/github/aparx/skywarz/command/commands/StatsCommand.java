@@ -6,12 +6,12 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
+import io.github.aparx.skywarz.command.commands.stats.StatsResetCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.command.skeleton.CommandForest;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.database.object.CachableLazyObjectRegister;
 import io.github.aparx.skywarz.database.object.FetchableObjectState;
-import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -33,15 +33,14 @@ public class StatsCommand extends CommandNode {
 
   private static final int OTHER_ARGUMENT_INDEX = 0;
 
-  private final CommandForest subtree = new CommandForest();
-
   public StatsCommand() {
     super(CommandInfo.builder("stats")
-        .description("Show statistics from a player")
+        .description("Show statistics of a player")
         .permission(SkywarsPermission.merge(SkywarsPermission.STATS_SELF,
             SkywarsPermission.STATS_OTHER))
-        .args("(<player>:{children})")
+        .args("(<player>)")
         .build());
+    add(new StatsResetCommand(this));
   }
 
   @Override

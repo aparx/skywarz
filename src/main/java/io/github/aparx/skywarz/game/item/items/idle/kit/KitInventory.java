@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.item.items.idle.kit;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.inventory.SpecialInventory;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
 import io.github.aparx.skywarz.game.inventory.InventoryItem;
@@ -11,7 +11,7 @@ import io.github.aparx.skywarz.game.inventory.InventoryPosition;
 import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
 import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryContent;
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
@@ -58,9 +58,10 @@ public class KitInventory extends PaginatingInventory {
   private static final InventoryPosition KIT_BUTTON_CANCEL = InventoryPosition.ofPoint(7, 2);
 
   private final @NonNull GameMatch match;
-  private final @NonNull GamePlayer viewer;
+  private final @NonNull SkywarsPlayer viewer;
 
-  public KitInventory(@NonNull GameMatch match, @NonNull GamePlayer viewer, @NonNull String title) {
+  public KitInventory(@NonNull GameMatch match, @NonNull SkywarsPlayer viewer,
+                      @NonNull String title) {
     super(null, TickDuration.ofSecond(), DIMENSION_MIN, DIMENSION_MAX, new ArrayList<>(), title);
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(viewer, "Viewer must not be null");
@@ -69,7 +70,7 @@ public class KitInventory extends PaginatingInventory {
   }
 
   public void fillInventory() {
-    KeyValueSet<String, SkywarsKit> kits = match.getKits();
+    KeyValueSet<String, GameKit> kits = match.getKits();
     getElements().addAll(kits.stream()
         .map(KitItem::new)
         .collect(Collectors.toList()));
@@ -81,7 +82,7 @@ public class KitInventory extends PaginatingInventory {
 
     private static final int MAX_CONTENT_ROW_LENGTH = 4;
 
-    private final @NonNull SkywarsKit kit;
+    private final @NonNull GameKit kit;
 
     private final Supplier<InventoryItem> glassFactory =
         Suppliers.memoize(() -> InventoryItem.of(
@@ -144,7 +145,7 @@ public class KitInventory extends PaginatingInventory {
     }
 
     @Override
-    public void click(GamePlayer player, InventoryClickEvent event) {
+    public void click(SkywarsPlayer player, InventoryClickEvent event) {
       Preconditions.checkState(player.equals(viewer));
       event.setCancelled(true);
       SpecialInventory<PaginatableInventoryContent> kitInventory =
@@ -185,11 +186,15 @@ public class KitInventory extends PaginatingInventory {
       InventoryItem cancel = cancelFactory.get();
       createButton(KIT_BUTTON_EQUIP, equip, page);
       createButton(KIT_BUTTON_CANCEL, cancel, page);
-      SkywarsKit.ArmorSlot[] values = SkywarsKit.ArmorSlot.values();
+      GameKit.ArmorSlot[] values = GameKit.ArmorSlot.values();
       for (int i = 0; i < values.length; ++i) {
         WrappedItemStack armor = kit.getArmor(values[i]);
         page.set(InventoryPosition.ofPoint(0, values.length - i - 1),
-            armor == null ? null : InventoryItem.ofCancelling(armor));
+            armor == null ? InventoryItem.ofCancelling(
+                ItemBuilder.builder(Material.BLACK_STAINED_GLASS_PANE)
+                    .name(ChatColor.GRAY + "No " + StringUtils.capitalize(values[i].name().toLowerCase()))
+                    .wrap())
+                : InventoryItem.ofCancelling(armor));
       }
       InventoryPosition begin = InventoryPosition.ofPoint(2, 0);
       int maxReference = MAX_CONTENT_ROW_LENGTH - (hasPagination ? 1 : 0);

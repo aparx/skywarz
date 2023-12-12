@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -125,8 +125,8 @@ public abstract class SkywarsItem extends ConfigObject {
   }
 
   protected Optional<GameMatch> filterMatch(Player player) {
-    return GamePlayer.findPlayer(player)
-        .map(GamePlayer::getMatchData)
+    return SkywarsPlayer.findPlayer(player)
+        .map(SkywarsPlayer::getMatchData)
         .filter(PlayerMatchData::isInMatch)
         .map(PlayerMatchData::getMatch)
         .filter((match) -> Arrays.stream(states).anyMatch(match::isState));

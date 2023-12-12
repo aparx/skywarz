@@ -7,7 +7,7 @@ import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -30,7 +30,7 @@ public class LeaveCommand extends CommandNode {
   @Override
   public void execute(CommandContext context, CommandArgList args) {
     Player entity = context.getPlayer();
-    GamePlayer player = GamePlayer.getPlayer(entity);
+    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));

@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.events.match;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,8 +28,8 @@ public class MatchJoinEvent extends MatchEvent implements Cancellable {
     this.entity = entity;
   }
 
-  public @NonNull GamePlayer getPlayer() {
-    return GamePlayer.getPlayer(getEntity());
+  public @NonNull SkywarsPlayer getPlayer() {
+    return SkywarsPlayer.getPlayer(getEntity());
   }
 
 }

@@ -3,8 +3,8 @@ package io.github.aparx.skywarz.language;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.GamePlayer;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import org.apache.commons.lang.ArrayUtils;
@@ -37,13 +37,20 @@ public final class LocalizedMessage {
 
   private final StringSubstitutor defaultSubstitutor;
 
+
   public LocalizedMessage(@NonNull StringLookup defaultLookup, @NonNull String content) {
     Preconditions.checkNotNull(defaultLookup, "Lookup must not be null");
     Preconditions.checkNotNull(content, "Content must not be null");
     this.rawContent = content;
-    this.content = ChatColor.translateAlternateColorCodes('&', rawContent);
+    this.content = processRawContent(rawContent);
     this.defaultSubstitutor = new StringSubstitutor(defaultLookup,
         VARIABLE_PREFIX, VARIABLE_SUFFIX, VARIABLE_ESCAPE);
+  }
+
+  public static String processRawContent(@Nullable String rawMessage) {
+    if (rawMessage != null)
+      return ChatColor.translateAlternateColorCodes('&', rawMessage);
+    return null;
   }
 
   public static boolean isEmpty(LocalizedMessage translatable) {
@@ -104,7 +111,7 @@ public final class LocalizedMessage {
     return substitute(valueMap);
   }
 
-  public String substitute(@NonNull GamePlayer player, @NonNull ArrayPath prefix) {
+  public String substitute(@NonNull SkywarsPlayer player, @NonNull ArrayPath prefix) {
     LazyVariableLookup map = new LazyVariableLookup();
     player.findOnline().ifPresent((o) -> VariablePopulator.addPlayer(map, o, prefix));
     return substitute(map);
@@ -122,7 +129,7 @@ public final class LocalizedMessage {
     return substitute(map);
   }
 
-  public String substitute(@NonNull SkywarsKit kit, @NonNull ArrayPath prefix) {
+  public String substitute(@NonNull GameKit kit, @NonNull ArrayPath prefix) {
     LazyVariableLookup map = new LazyVariableLookup();
     VariablePopulator.addKit(map, kit, prefix);
     return substitute(map);

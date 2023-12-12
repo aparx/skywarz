@@ -1,10 +1,9 @@
 package io.github.aparx.skywarz.database.stats;
 
-import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
-import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import lombok.Getter;
 import lombok.Setter;
 

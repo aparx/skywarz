@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.team;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
@@ -40,7 +40,7 @@ public class GameTeam extends WeakPlayerGroup {
   }
 
   @Override
-  public boolean add(GamePlayer member) {
+  public boolean add(SkywarsPlayer member) {
     Preconditions.checkNotNull(member, "Member must not be null");
     Preconditions.checkState(hasSpace(), "No space for new members anymore");
     if (!super.add(member)) return false;
@@ -51,7 +51,7 @@ public class GameTeam extends WeakPlayerGroup {
   @Override
   public boolean remove(Object o) {
     if (!super.remove(o)) return false;
-    ((GamePlayer) o).getMatchData().setTeam(null);
+    ((SkywarsPlayer) o).getMatchData().setTeam(null);
     return true;
   }
 }

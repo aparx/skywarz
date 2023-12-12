@@ -1,9 +1,15 @@
 package io.github.aparx.skywarz.startup;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.SkywarsCommand;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -13,14 +19,17 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public final class Main extends JavaPlugin {
 
-  public static final String ROOT_COMMAND_NAME = "skywars";
+  public static final String FULL_COMMAND = "skywars";
+
+  public static final String SHORT_COMMAND = "sw";
 
   @Override
   public void onEnable() {
+    Magics.setDevelopment(getDescription().getVersion().contains("dev"));
     Skywars.getInstance().load(this);
 
     SkywarsCommand command = new SkywarsCommand();
-    PluginCommand skywars = getCommand(ROOT_COMMAND_NAME);
+    PluginCommand skywars = getCommand(FULL_COMMAND);
     Preconditions.checkNotNull(skywars);
     skywars.setExecutor(command);
     skywars.setTabCompleter(command);

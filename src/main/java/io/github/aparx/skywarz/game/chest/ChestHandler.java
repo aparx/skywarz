@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.game.chest;
 
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.bukkit.Location;
@@ -30,14 +30,14 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ChestHandler {
 
   @Getter(AccessLevel.NONE)
-  private final WeakReference<SkywarsArena> arena;
+  private final WeakReference<GameArena> arena;
 
   @Getter(AccessLevel.NONE)
   private final Set<Vector> opened = new HashSet<>();
 
   private final @NonNull ChestItems items;
 
-  public ChestHandler(@NonNull SkywarsArena arena, @NonNull ChestItems items) {
+  public ChestHandler(@NonNull GameArena arena, @NonNull ChestItems items) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     this.arena = new WeakReference<>(arena);
     this.items = items;
@@ -59,11 +59,11 @@ public class ChestHandler {
     }
   }
 
-  public Optional<SkywarsArena> findArena() {
+  public Optional<GameArena> findArena() {
     return Optional.ofNullable(arena.get());
   }
 
-  public @NonNull SkywarsArena getArena() {
+  public @NonNull GameArena getArena() {
     return findArena().orElseThrow();
   }
 

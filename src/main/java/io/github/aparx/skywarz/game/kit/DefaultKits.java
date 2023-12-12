@@ -19,33 +19,33 @@ import java.util.Map;
 @Getter
 @RequiredArgsConstructor
 public enum DefaultKits {
-  RUSHER(SkywarsKit.builder("Rusher")
+  RUSHER(GameKit.builder("Rusher")
       .icon(ItemBuilder.builder()
           .name("§c§lRusher")
           .material(Material.IRON_SWORD)
           .enchants(Map.of(Enchantment.LUCK, 2))
           .flags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
           .wrap())
-      .slot(SkywarsKit.ArmorSlot.HELMET, ItemBuilder.builder(Material.IRON_HELMET).wrap())
-      .slot(SkywarsKit.ArmorSlot.CHESTPLATE, ItemBuilder.builder(Material.DIAMOND_CHESTPLATE).wrap())
-      .slot(SkywarsKit.ArmorSlot.LEGGINGS, ItemBuilder.builder(Material.IRON_LEGGINGS).wrap())
-      .slot(SkywarsKit.ArmorSlot.BOOTS, ItemBuilder.builder(Material.LEATHER_BOOTS).wrap())
+      .slot(GameKit.ArmorSlot.HELMET, ItemBuilder.builder(Material.IRON_HELMET).wrap())
+      .slot(GameKit.ArmorSlot.CHESTPLATE, ItemBuilder.builder(Material.DIAMOND_CHESTPLATE).wrap())
+      .slot(GameKit.ArmorSlot.LEGGINGS, ItemBuilder.builder(Material.IRON_LEGGINGS).wrap())
+      .slot(GameKit.ArmorSlot.BOOTS, ItemBuilder.builder(Material.LEATHER_BOOTS).wrap())
       .add(ItemBuilder.builder(Material.IRON_SWORD).wrap())
       .add(ItemBuilder.builder(Material.STONE).amount(32).wrap())
       .slot(8, ItemBuilder.builder(Material.ENCHANTED_GOLDEN_APPLE).amount(3).wrap())
       .build()),
 
-  BUILDER(SkywarsKit.builder("Builder")
+  BUILDER(GameKit.builder("Builder")
       .icon(ItemBuilder.builder()
           .name("§9§lBuilder")
           .material(Material.WOODEN_AXE)
           .enchants(Map.of(Enchantment.LUCK, 2))
           .flags(ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_ATTRIBUTES)
           .wrap())
-      .slot(SkywarsKit.ArmorSlot.HELMET, Material.DIAMOND_HELMET)
-      .slot(SkywarsKit.ArmorSlot.CHESTPLATE, Material.CHAINMAIL_CHESTPLATE)
-      .slot(SkywarsKit.ArmorSlot.LEGGINGS, Material.LEATHER_LEGGINGS)
-      .slot(SkywarsKit.ArmorSlot.BOOTS, Material.LEATHER_BOOTS)
+      .slot(GameKit.ArmorSlot.HELMET, Material.DIAMOND_HELMET)
+      .slot(GameKit.ArmorSlot.CHESTPLATE, Material.CHAINMAIL_CHESTPLATE)
+      .slot(GameKit.ArmorSlot.LEGGINGS, Material.LEATHER_LEGGINGS)
+      .slot(GameKit.ArmorSlot.BOOTS, Material.LEATHER_BOOTS)
       .add(Material.IRON_SWORD)
       .add(Material.IRON_AXE)
       .add(Material.IRON_PICKAXE)
@@ -56,16 +56,16 @@ public enum DefaultKits {
       .slot(8, ItemBuilder.builder(Material.GOLDEN_APPLE).amount(2).wrap())
       .build()),
 
-  DIRT(SkywarsKit.builder("Dirt")
+  DIRT(GameKit.builder("Dirt")
       .icon(ItemBuilder.builder()
           .name(ChatColor.RED + "Dirt")
           .lore(ChatColor.GRAY + "All wood, all dirt")
           .material(Material.DIRT)
           .wrap())
-      .slot(SkywarsKit.ArmorSlot.HELMET, ItemBuilder.builder(Material.LEATHER_HELMET).wrap())
-      .slot(SkywarsKit.ArmorSlot.CHESTPLATE, ItemBuilder.builder(Material.LEATHER_CHESTPLATE).wrap())
-      .slot(SkywarsKit.ArmorSlot.LEGGINGS, ItemBuilder.builder(Material.LEATHER_LEGGINGS).wrap())
-      .slot(SkywarsKit.ArmorSlot.BOOTS, ItemBuilder.builder(Material.LEATHER_BOOTS).wrap())
+      .slot(GameKit.ArmorSlot.HELMET, ItemBuilder.builder(Material.LEATHER_HELMET).wrap())
+      .slot(GameKit.ArmorSlot.CHESTPLATE, ItemBuilder.builder(Material.LEATHER_CHESTPLATE).wrap())
+      .slot(GameKit.ArmorSlot.LEGGINGS, ItemBuilder.builder(Material.LEATHER_LEGGINGS).wrap())
+      .slot(GameKit.ArmorSlot.BOOTS, ItemBuilder.builder(Material.LEATHER_BOOTS).wrap())
       .add(Material.WOODEN_SWORD)
       .add(Material.WOODEN_AXE)
       .add(Material.WOODEN_PICKAXE)
@@ -76,5 +76,5 @@ public enum DefaultKits {
       .repeatAdd(6, ItemBuilder.builder(Material.DIRT).amount(32).wrap())
       .build());
 
-  private final @NonNull SkywarsKit kit;
+  private final @NonNull GameKit kit;
 }

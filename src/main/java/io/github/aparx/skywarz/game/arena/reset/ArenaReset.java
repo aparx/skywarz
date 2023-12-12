@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.arena.reset;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
@@ -13,9 +13,9 @@ import java.lang.ref.WeakReference;
  */
 public abstract class ArenaReset {
 
-  private final WeakReference<SkywarsArena> arena;
+  private final WeakReference<GameArena> arena;
 
-  public ArenaReset(@NonNull SkywarsArena arena) {
+  public ArenaReset(@NonNull GameArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     this.arena = new WeakReference<>(arena);
   }
@@ -28,8 +28,8 @@ public abstract class ArenaReset {
 
   public abstract void reset();
 
-  public SkywarsArena getArena() {
-    SkywarsArena arena = this.arena.get();
+  public GameArena getArena() {
+    GameArena arena = this.arena.get();
     Preconditions.checkState(arena != null, "Arena became invalid");
     return arena;
   }

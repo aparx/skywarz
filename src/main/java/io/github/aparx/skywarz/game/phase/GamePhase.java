@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.phase;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStartEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStopEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseTickEvent;
@@ -73,10 +73,10 @@ public abstract class GamePhase implements Listener {
   protected abstract void updateTick();
 
   /** Event method called when a player joins while this phase is ongoing. */
-  public abstract void handleJoin(GamePlayer player);
+  public abstract void handleJoin(SkywarsPlayer player);
 
   /** Event method called when a player leaves while this phase is ongoing. */
-  public void handleLeave(GamePlayer player) {}
+  public void handleLeave(SkywarsPlayer player) {}
 
   protected void onStart() {
     if (listener != null) listener.load();

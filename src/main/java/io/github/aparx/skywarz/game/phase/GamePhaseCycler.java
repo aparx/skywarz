@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.phase;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.phase.phases.done.DonePhase;
@@ -81,7 +81,7 @@ public final class GamePhaseCycler {
       Optional<GamePhase> phase = findPhase(state);
       phase.ifPresent(GamePhase::start);
       this.state = state;
-      SkywarsArena source = match.getArena().getSource();
+      GameArena source = match.getArena().getSource();
       if (source != null) source.getSignHandler().update();
       return phase;
     });

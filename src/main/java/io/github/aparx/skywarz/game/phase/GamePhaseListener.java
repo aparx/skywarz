@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.game.phase;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
@@ -26,7 +26,7 @@ public abstract class GamePhaseListener<T extends GamePhase> implements Listener
 
   private final @NonNull T phase;
 
-  private final Function<GamePlayer, Optional<GameMatch>> playerFilter = (player) -> {
+  private final Function<SkywarsPlayer, Optional<GameMatch>> playerFilter = (player) -> {
     Optional<GameMatch> matchQuery = getPhase().findMatch();
     if (matchQuery.isEmpty()) return Optional.empty();
     GameMatch match = matchQuery.get();
@@ -51,7 +51,7 @@ public abstract class GamePhaseListener<T extends GamePhase> implements Listener
   }
 
   protected Optional<GameMatch> filterMatchFromPlayer(Player entity) {
-    return GamePlayer.findPlayer(entity).flatMap(playerFilter);
+    return SkywarsPlayer.findPlayer(entity).flatMap(playerFilter);
   }
 
   protected Optional<GameMatch> filterMatch(GameMatch match) {

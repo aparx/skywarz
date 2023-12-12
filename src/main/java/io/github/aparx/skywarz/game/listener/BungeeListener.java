@@ -2,11 +2,11 @@ package io.github.aparx.skywarz.game.listener;
 
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.events.match.MatchCreateEvent;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStopEvent;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
@@ -42,7 +42,7 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
     return MainConfig.getInstance().isDedicated();
   }
 
-  public final SkywarsArena getBungeeArena() {
+  public final GameArena getBungeeArena() {
     return Skywars.getInstance().getArenaManager().get(
         MainConfig.getInstance().getDedicatedArena());
   }
@@ -57,14 +57,14 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
     HandlerList.unregisterAll(this);
   }
 
-  @SuppressWarnings("DataFlowIssue") // OK, IDE bug
+  @SuppressWarnings("DataFlowIssue") // OK, IDE static analysis bug
   @EventHandler(priority = EventPriority.LOW)
   void onQuit(PlayerQuitEvent event) {
     if (isBungeecord())
       event.setQuitMessage(null);
   }
 
-  @SuppressWarnings("DataFlowIssue") // OK, IDE bug
+  @SuppressWarnings("DataFlowIssue") // OK, IDE static analysis bug
   @EventHandler(priority = EventPriority.LOW)
   void onJoin(PlayerJoinEvent event) {
     if (!isBungeecord()) return;
@@ -72,19 +72,16 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
     Player player = event.getPlayer();
     try {
       Skywars.getInstance().getMatchManager().join(
-          GamePlayer.getPlayer(player), getBungeeArena());
+          SkywarsPlayer.getPlayer(player), getBungeeArena());
     } catch (Exception e) {
       Skywars.logger().log(Level.FINE, "Player could not join (although required)", e);
-      String errorMessage = !(e instanceof LocalizableError)
+      String errorMessage = ChatColor.RED + (!(e instanceof LocalizableError)
           ? Language.getInstance().substitute(MessageKeys.Match.JOIN_ERROR)
-          : e.getLocalizedMessage();
-      Bukkit.getScheduler().runTask(Skywars.plugin(), () -> {
-        if (!player.isValid()) return;
-        if (SkywarsPermission.SETUP.has(player)) {
-          player.sendMessage(errorMessage);
-          player.sendMessage(ChatColor.RED + "Reason: " + e.getMessage());
-        } else player.kickPlayer(errorMessage);
-      });
+          : e.getLocalizedMessage());
+      if (SkywarsPermission.SETUP.has(player)) {
+        player.sendMessage(errorMessage);
+        player.sendMessage(ChatColor.RED + "Reason: " + e.getMessage());
+      } else player.kickPlayer(errorMessage);
     }
   }
 
@@ -117,7 +114,7 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
   void onEnd(ServerListPingEvent event) {
     if (isBungeecord()) try {
       Iterator<GameMatch> iterator = Skywars.getInstance().getMatchManager().iterator();
-      SkywarsArena bungeeArena = getBungeeArena();
+      GameArena bungeeArena = getBungeeArena();
       LazyVariableLookup lookup = new LazyVariableLookup();
       VariablePopulator.addArenaOrAcquiree(lookup, bungeeArena, ArrayPath.of());
       if (iterator.hasNext())

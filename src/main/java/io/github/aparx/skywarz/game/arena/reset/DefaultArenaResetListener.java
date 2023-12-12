@@ -3,14 +3,15 @@ package io.github.aparx.skywarz.game.arena.reset;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaDataSnapshot;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.utils.collection.WeakHashSet;
 import io.github.aparx.skywarz.utils.material.MaterialTag;
 import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
@@ -18,15 +19,13 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Hanging;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -34,9 +33,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -51,18 +48,30 @@ public final class DefaultArenaResetListener implements Listener {
 
   private final DefaultArenaReset reset;
 
+  private final WeakHashSet<Entity> entityBlockChanges = new WeakHashSet<>();
+
   public DefaultArenaResetListener(@NonNull DefaultArenaReset reset) {
     Preconditions.checkNotNull(reset);
     this.reset = reset;
   }
 
-  public @NonNull SkywarsArena getArena() {
+  public @NonNull GameArena getArena() {
     try {
       return reset.getArena();
     } catch (Exception e) {
       HandlerList.unregisterAll(this);
       throw e;
     }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  void onEntityChange(EntityChangeBlockEvent event) {
+    if (!event.isCancelled())
+      // this only captures entity/block changes within the arena. If a block falls out of
+      // the arena, it will not be captured. TODO: maybe implement a tracking of the entity
+      handle(event.getBlock(), () -> {
+        getReset().addStructure(DefaultArenaReset.BlockSnapshot.take(event.getBlock()));
+      });
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -76,7 +85,7 @@ public final class DefaultArenaResetListener implements Listener {
     if (event.isCancelled()) return;
     List<Location> added = new ArrayList<>();
     handle(event.getEntity().getWorld(), event.blockList(), (block, match) -> {
-      SkywarsArena arena = match.getArena().getSource();
+      GameArena arena = match.getArena().getSource();
       Preconditions.checkNotNull(arena, "Source became invalid");
       if (!added.isEmpty() || arena.getData().getBox().isWithin(event.getEntity().getBoundingBox()))
         // only force the removal of blocks within the event if the entity itself is in the arena
@@ -203,7 +212,7 @@ public final class DefaultArenaResetListener implements Listener {
   void handle(World world, List<Block> blocks, BiConsumer<Block, GameMatch> callback) {
     findMatch().ifPresent((match) -> {
       ArenaSnapshot arena = match.getArena();
-      SkywarsArena source = arena.getSource();
+      GameArena source = arena.getSource();
       if (world.equals(match.getArena().getData().getWorld()))
         blocks.forEach((block) -> {
           Preconditions.checkState(block.getWorld().equals(world));
@@ -216,20 +225,20 @@ public final class DefaultArenaResetListener implements Listener {
 
   void handle(Block block, Runnable callback) {
     handle(block.getWorld(), List.of(block), (b, match) -> {
-      SkywarsArena source = match.getArena().getSource();
+      GameArena source = match.getArena().getSource();
       Preconditions.checkNotNull(source, "Source became invalid");
       callback.run();
     });
   }
 
-  void handle(Player entity, BiConsumer<GameMatch, SkywarsArena> callback) {
-    GamePlayer.findPlayer(entity).ifPresent((player) -> {
+  void handle(Player entity, BiConsumer<GameMatch, GameArena> callback) {
+    SkywarsPlayer.findPlayer(entity).ifPresent((player) -> {
       PlayerMatchData data = player.getMatchData();
       findMatch()
           .filter((x) -> data.isInMatch() && x.equals(data.getMatch()))
           .filter((x) -> x.getState().isAfterOrEqual(GameMatchState.PLAYING))
           .ifPresent((match) -> {
-            SkywarsArena source = match.getArena().getSource();
+            GameArena source = match.getArena().getSource();
             if (source != null) callback.accept(match, source);
           });
     });

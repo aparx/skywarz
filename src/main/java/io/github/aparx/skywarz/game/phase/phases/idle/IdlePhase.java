@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.phase.phases.idle;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
@@ -62,7 +62,7 @@ public class IdlePhase extends GamePhase {
   }
 
   @Override
-  public void handleJoin(GamePlayer player) {
+  public void handleJoin(SkywarsPlayer player) {
     // Manage entity
     Player entity = player.getOnline();
     GameMatch match = getMatch();
@@ -74,7 +74,7 @@ public class IdlePhase extends GamePhase {
     PlayerSnapshot.ofReset(entity,
         match.getArena().getData().getLobby(),
         GameMode.ADVENTURE).restore(entity);
-    KeyedByClassSet<SkywarsItem> items = Skywars.getInstance().getGameItemManager().getItems();
+    KeyedByClassSet<SkywarsItem> items = Skywars.getInstance().getItemManager().getItems();
     entity.getInventory().setItem(LeaveItem.SLOT, items
         .require(LeaveItem.class).create(match, entity));
     items.require(TeamSelectorItem.class).give(match, entity);
@@ -87,7 +87,7 @@ public class IdlePhase extends GamePhase {
   protected void updateTick() {
     Ticker ticker = getTicker();
     GameMatch match = getMatch();
-    WeakGroupAudience<GamePlayer> players = match.getAudience();
+    WeakGroupAudience<SkywarsPlayer> players = match.getAudience();
     final int minPlayers = match.getMinPlayerCount();
     final int playerSize = players.size();
     int missingPlayerAmount = minPlayers - playerSize;

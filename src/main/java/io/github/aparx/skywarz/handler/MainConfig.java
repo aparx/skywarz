@@ -12,6 +12,7 @@ import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 
 import java.util.*;
 
@@ -26,6 +27,7 @@ public class MainConfig extends ConfigObject {
   @Getter
   public static final MainConfig instance = new MainConfig();
 
+  @Setter
   @ConfigMapping("bungeecord.enabled")
   @Document({
       "If true, this server is seen as a dedicated Skywarz server.",
@@ -33,13 +35,14 @@ public class MainConfig extends ConfigObject {
   })
   private boolean isDedicated = false;
 
+  @Setter
   @ConfigMapping("bungeecord.arena")
   @Document({
       "The dedicated arena that is represented by this dedicated server.",
       "If the above boolean is true, a player will be put into a match for this arena.",
       "If the arena does not exist and the player has no setup permission, they are kicked."
   })
-  private String dedicatedArena = "<ArenaName>";
+  private String dedicatedArena = "<Arena>";
 
   @ConfigMapping("bungeecord.motd")
   @Document("The Motd when the Bungeecord mode is enabled (can be used for external analysis)")

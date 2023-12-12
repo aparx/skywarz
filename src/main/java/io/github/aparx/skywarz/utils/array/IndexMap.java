@@ -3,14 +3,11 @@ package io.github.aparx.skywarz.utils.array;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.IntFunction;
 import java.util.function.ObjIntConsumer;
 
@@ -23,25 +20,30 @@ public class IndexMap<E> implements Iterable<E> {
 
   private static final int DEFAULT_INITIAL_CAPACITY = 10;
 
+  private final int initialCapacity;
+
   private Object[] array;
 
   private int elementCount;
 
   public IndexMap() {
-    this.array = new Object[DEFAULT_INITIAL_CAPACITY];
+    this(DEFAULT_INITIAL_CAPACITY);
   }
 
   public IndexMap(int initialCapacity) {
-    this.array = new Object[Math.max(initialCapacity, 0)];
+    this.initialCapacity = Math.max(initialCapacity, 0);
+    this.array = new Object[this.initialCapacity];
   }
 
   public IndexMap(@NonNull Map<Integer, ? extends E> map) {
-    this.array = new Object[map.size()];
+    this.initialCapacity = map.size();
+    this.array = new Object[initialCapacity];
     putAll(map);
   }
 
   public IndexMap(@NonNull IndexMap<? extends E> other) {
-    this.array = new Object[other.capacity()];
+    this.initialCapacity = other.capacity();
+    this.array = new Object[initialCapacity];
     this.elementCount = other.elementCount;
     System.arraycopy(other.array, 0, array, 0, other.capacity());
   }
@@ -55,13 +57,15 @@ public class IndexMap<E> implements Iterable<E> {
   }
 
   public void clear() {
-    Arrays.fill(array, null);
+    if (array.length > initialCapacity)
+      array = new Object[initialCapacity];
+    else Arrays.fill(array, null);
     elementCount = 0;
   }
 
   public void ensureCapacity(int capacity) {
     if (capacity > capacity())
-      resizeToCapacity(capacity);
+      resizeToCapacity0(capacity);
   }
 
   @SuppressWarnings("unchecked")
@@ -95,6 +99,17 @@ public class IndexMap<E> implements Iterable<E> {
   public void putAll(Map<Integer, ? extends E> map) {
     Preconditions.checkNotNull(map, "Map must not be null");
     map.forEach((index, obj) -> array[index] = obj);
+  }
+
+  public void putAll(E @NonNull [] array) {
+    ensureCapacity(array.length);
+    System.arraycopy(array, 0, this.array, 0, array.length);
+    int count = 0;
+    // next filter out how many elements after given array are contained in this map
+    if (elementCount != 0)
+      for (int i = array.length - 1; i < this.array.length && count < elementCount; ++i)
+        if (this.array[i] != null) ++count;
+    elementCount = count + array.length;
   }
 
   @CanIgnoreReturnValue
@@ -141,18 +156,19 @@ public class IndexMap<E> implements Iterable<E> {
 
   /** Regrow array to accommodate for given {@code index} */
   private void regrowIfNeeded(int index) {
-    final int cap = capacity();
-    int grow = 1 + index - cap;
-    if (grow > 0)
-      resizeToCapacity(cap + (int) Math.ceil(grow * 1.5));
+    if (index >= capacity())
+      resizeToCapacity0(calculateNewCapacity(1 + index));
   }
 
-  private void resizeToCapacity(int newCapacity) {
+  private void resizeToCapacity0(int newCapacity) {
     Object[] newArray = new Object[newCapacity];
     System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newCapacity));
     this.array = newArray;
   }
 
+  private int calculateNewCapacity(int newCapacity) {
+    return (int) Math.ceil(newCapacity * 1.5);
+  }
 
   @SuppressWarnings("unchecked")
   public void forEach(ObjIntConsumer<E> consumer) {

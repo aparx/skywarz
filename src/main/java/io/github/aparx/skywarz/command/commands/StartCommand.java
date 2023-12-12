@@ -5,7 +5,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -34,7 +34,7 @@ public class StartCommand extends CommandNode {
 
   @Override
   public void execute(CommandContext context, CommandArgList args) {
-    GamePlayer player = GamePlayer.getPlayer(context.getPlayer());
+    SkywarsPlayer player = SkywarsPlayer.getPlayer(context.getPlayer());
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));

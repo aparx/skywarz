@@ -8,7 +8,7 @@ import io.github.aparx.skywarz.database.DatabaseObjectManager;
 import io.github.aparx.skywarz.database.GameDatabase;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.database.object.CachableLazyObjectRegister;
-import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.Getter;

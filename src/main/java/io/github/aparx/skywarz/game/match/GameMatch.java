@@ -3,23 +3,24 @@ package io.github.aparx.skywarz.game.match;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.RegisterNotifiable;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
-import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.events.match.MatchPointsCalculateEvent;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.kit.SkywarsKitHandler;
+import io.github.aparx.skywarz.game.kit.GameKit;
+import io.github.aparx.skywarz.game.kit.GameKitManager;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboardHandlers;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.language.LocalizableError;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
 import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.team.TeamMap;
@@ -47,7 +48,7 @@ import java.util.function.Predicate;
  */
 @Getter
 @Setter
-public class GameMatch implements Snowflake<UUID> {
+public class GameMatch implements Snowflake<UUID>, RegisterNotifiable {
 
   private final @NonNull UUID id;
 
@@ -59,7 +60,7 @@ public class GameMatch implements Snowflake<UUID> {
   @Setter(onMethod_ = {@Synchronized})
   private volatile @NonNull GameMatchState state = GameMatchState.SETUP;
 
-  private volatile KeyValueSet<String, SkywarsKit> kits = SkywarsKitHandler.getInstance().getKits();
+  private volatile KeyValueSet<String, GameKit> kits = GameKitManager.getInstance().getKits();
 
   private final GamePhaseCycler cycler = new GamePhaseCycler(this);
 
@@ -73,7 +74,7 @@ public class GameMatch implements Snowflake<UUID> {
 
   private final WeakPlayerGroup audience = new WeakPlayerGroup() {
     @Override
-    public boolean add(GamePlayer player) {
+    public boolean add(SkywarsPlayer player) {
       if (!super.add(player)) return false;
       player.getMatchData().setMatch(GameMatch.this);
       return true;
@@ -82,14 +83,14 @@ public class GameMatch implements Snowflake<UUID> {
     @Override
     public boolean remove(Object o) {
       if (!super.remove(o)) return false;
-      ((GamePlayer) o).getMatchData().setMatch(null);
+      ((SkywarsPlayer) o).getMatchData().setMatch(null);
       return true;
     }
   };
 
   private GameTeam winner;
 
-  public GameMatch(@NonNull UUID id, @NonNull SkywarsArena arena) {
+  public GameMatch(@NonNull UUID id, @NonNull GameArena arena) {
     Preconditions.checkNotNull(id, "ID must not be null");
     Preconditions.checkNotNull(arena, "Arena must not be null");
     this.id = id;
@@ -98,21 +99,23 @@ public class GameMatch implements Snowflake<UUID> {
   }
 
   /** Called by the {@code MatchManager} when this match has been registered. */
+  @Override
   @Synchronized
   public void notifyRegister() {
     // Starts the lobby
     Preconditions.checkState(arena.isCompleted(), "Arena must be completed");
-    SkywarsArena arenaSource = arena.getSource();
+    GameArena arenaSource = arena.getSource();
     Preconditions.checkNotNull(arenaSource, "Arena has become invalid");
     this.arena = new ArenaSnapshot(arenaSource);
     this.teamMap.createTeams();
-    this.kits = SkywarsKitHandler.getInstance().createSnapshot();
+    this.kits = GameKitManager.getInstance().createSnapshot();
     cycler.cycleJump(GameMatchState.IDLE);
 
     getWatchTask().start();
   }
 
   /** Called by the {@code MatchManager} when this match has been removed. */
+  @Override
   public void notifyRemoval() {
     try {
       // Stops the lobby
@@ -123,7 +126,7 @@ public class GameMatch implements Snowflake<UUID> {
     } finally {
       // enforce map reset
       Optional.ofNullable(getArena().getSource())
-          .map(SkywarsArena::getReset)
+          .map(GameArena::getReset)
           .ifPresent(ArenaReset::reset);
     }
   }
@@ -139,15 +142,15 @@ public class GameMatch implements Snowflake<UUID> {
   }
 
   public int getMinPlayerCount() {
-    return SkywarsArena.getMinPlayerCount(getArena().getData().getSettings());
+    return GameArena.getMinPlayerCount(getArena().getData().getSettings());
   }
 
   public int getMaxPlayerCount() {
-    return SkywarsArena.getMaxPlayerCount(getArena().getData().getSettings(), getTeamMap().size());
+    return GameArena.getMaxPlayerCount(getArena().getData().getSettings(), getTeamMap().size());
   }
 
   @CanIgnoreReturnValue
-  public boolean join(@NonNull GamePlayer player) {
+  public boolean join(@NonNull SkywarsPlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     PlayerMatchData data = player.getMatchData();
     if (audience.contains(player)
@@ -161,7 +164,7 @@ public class GameMatch implements Snowflake<UUID> {
           (lang) -> lang.get(MessageKeys.Errors.MATCH_IS_FULL));
     if (isExceedingPlayerSize) kickFirstNonPriorityPlayer();
     if (!audience.add(player)) return false;
-    data.setSnapshot(player.createPlayerSnapshot());
+    data.setSnapshot(player.takeSnapshot());
     try {
       getCycler().getPhase().ifPresent((phase) -> phase.handleJoin(player));
       if (!data.isSpectator())
@@ -178,7 +181,7 @@ public class GameMatch implements Snowflake<UUID> {
   }
 
   @CanIgnoreReturnValue
-  public boolean leave(@NonNull GamePlayer player) {
+  public boolean leave(@NonNull SkywarsPlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     if (!getAudience().remove(player)) return false;
     PlayerMatchData data = player.getMatchData();
@@ -210,7 +213,7 @@ public class GameMatch implements Snowflake<UUID> {
    *
    * @param player the player to which to apply the stats to
    */
-  public void applyStats(@NonNull GamePlayer player) {
+  public void applyStats(@NonNull SkywarsPlayer player) {
     PlayerMatchData matchData = player.getMatchData();
     boolean hasWon = matchData.isInTeam() && Objects.equals(getWinner(), matchData.getTeam());
     PlayerStatsAccumulator statistics = player.getMatchData().getStatistics();
@@ -223,7 +226,7 @@ public class GameMatch implements Snowflake<UUID> {
     });
   }
 
-  public int calculatePoints(GamePlayer player, PlayerStatsAccumulator accumulator) {
+  public int calculatePoints(SkywarsPlayer player, PlayerStatsAccumulator accumulator) {
     final int weightOfWin = 10;
     MatchPointsCalculateEvent event = new MatchPointsCalculateEvent(this, player, accumulator);
     event.setPoints(NumberConversions.ceil(2 * accumulator.findGet(PlayerStatsKey.KILLS)
@@ -236,8 +239,8 @@ public class GameMatch implements Snowflake<UUID> {
 
   private void kickFirstNonPriorityPlayer() {
     // Kick other player due to player having priority
-    GamePlayer kick = getAudience().stream()
-        .filter(Predicate.not(GamePlayer::hasPriority))
+    SkywarsPlayer kick = getAudience().stream()
+        .filter(Predicate.not(SkywarsPlayer::hasPriority))
         .findAny()
         .orElseThrow(() -> new LocalizableError("Could not find non-priority player",
             (lang) -> lang.get(MessageKeys.Match.PRIORITY_ERROR)));

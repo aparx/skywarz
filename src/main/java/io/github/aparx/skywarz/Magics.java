@@ -1,8 +1,17 @@
 package io.github.aparx.skywarz;
 
+import com.google.common.base.Functions;
+import com.google.common.base.Suppliers;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.Synchronized;
 import lombok.experimental.UtilityClass;
+import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Supplier;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -19,12 +28,20 @@ public final class Magics {
 
   public static final TickDuration DEV_IDLE_DURATION = TickDuration.of(TimeUnit.SECONDS, 3);
 
-  /** Returns whether Skywarz is run in development mode */
-  private static final boolean DEVELOPMENT = false;
+  private static volatile boolean developmentFlag;
 
   public static boolean isDevelopment() {
-    // use a getter to avoid "PointlessArithmeticExpression" and for future changes
-    return DEVELOPMENT;
+    // inner synchronized for better code visibility
+    synchronized (Magics.class) {
+      return developmentFlag;
+    }
+  }
+
+  public static void setDevelopment(boolean flag) {
+    // inner synchronized for better code visibility
+    synchronized (Magics.class) {
+      developmentFlag = flag;
+    }
   }
 
 }

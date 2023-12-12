@@ -9,7 +9,7 @@ import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.arena.reset.DefaultArenaReset;
-import io.github.aparx.skywarz.game.arena.sign.SkywarsSignHandler;
+import io.github.aparx.skywarz.game.arena.sign.ArenaSignHandler;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.setup.CompletableSetup;
@@ -29,7 +29,7 @@ import java.util.*;
  * @since 1.0
  */
 @Getter
-public final class SkywarsArena extends ConfigObject implements CompletableSetup {
+public final class GameArena extends ConfigObject implements CompletableSetup {
 
   @Setter(AccessLevel.NONE)
   private final @NonNull String name;
@@ -40,13 +40,13 @@ public final class SkywarsArena extends ConfigObject implements CompletableSetup
 
   private @NonNull ArenaReset reset = new DefaultArenaReset(this);
 
-  private final SkywarsSignHandler signHandler = new SkywarsSignHandler(this);
+  private final ArenaSignHandler signHandler = new ArenaSignHandler(this);
 
-  public SkywarsArena(@NonNull String initialName) {
+  public GameArena(@NonNull String initialName) {
     this(initialName, createArenaFile(initialName));
   }
 
-  public SkywarsArena(@NonNull String initialName, @NonNull File file) {
+  public GameArena(@NonNull String initialName, @NonNull File file) {
     super((proxy) -> Skywars.getInstance().getConfigHandler()
         .getOrCreate(file.getPath(), (configId) -> new YamlConfig(configId, file)));
     Validate.notEmpty(initialName, "Initial name must not be blank");
@@ -114,7 +114,7 @@ public final class SkywarsArena extends ConfigObject implements CompletableSetup
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    SkywarsArena arena = (SkywarsArena) o;
+    GameArena arena = (GameArena) o;
     return Objects.equals(name, arena.name);
   }
 

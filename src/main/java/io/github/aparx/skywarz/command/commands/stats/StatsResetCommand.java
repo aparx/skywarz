@@ -22,6 +22,7 @@ public class StatsResetCommand extends CommandNode {
 
   public StatsResetCommand(@NonNull StatsCommand parent) {
     super(CommandInfo.builder("reset")
+        .description("Reset the statistics for a specific player")
         .args("<player>")
         .permission(SkywarsPermission.STATS_MANIPULATE)
         .build(), parent);
@@ -50,8 +51,7 @@ public class StatsResetCommand extends CommandNode {
           })
           .exceptionally((t) -> {
             context.getSender().sendMessage(Language.getInstance().substitute(
-                "{warningPrefix} Could not delete stat entries from player: {0}",
-                t.getMessage()));
+                "{warningPrefix} Could not delete stat entries from player: {0}", t.getMessage()));
             return null;
           });
     }

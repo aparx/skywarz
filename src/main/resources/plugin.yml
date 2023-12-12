@@ -9,6 +9,40 @@ commands:
   skywarz:
     usage: "/skywarz <...>"
     aliases: [ "sw", "skywars" ]
+permissions:
+  skywarz.play:
+    description: "Allows a player to join a match (required for bungeecord)"
+    default: true
+  # VIP permissions
+  skywarz.priority:
+    description: "Allows to have priority when a lobby is full"
+  skywarz.quickstart:
+    description: "Allows to skip the lobby timer and quickly start the game"
+  # Stat permissions
+  skywarz.stats.self:
+    description: "Allows to see their own Skywarz statistics"
+    default: true
+  skywarz.stats.other:
+    description: "Allows to see other people's Skywarz statistics"
+  skywarz.stats.modify:
+    description: "Allows to modify the statistics of people"
+  skywarz.stats.*:
+    description: "User can see everybody's statistics and manipulate them"
+    children:
+      skywarz.stats.self: true
+      skywarz.stats.other: true
+      skywarz.stats:other: true
+  # Admin permissions
+  skywarz.setup:
+    description: "Allows to create, delete and manage Skywarz matches, arenas and more"
+  skywarz.*:
+    description: "Allows the player to do everything in Skywarz"
+    children:
+      skywarz.priority: true
+      skywarz.setup: true
+      skywarz.play: true
+      skywarz.quickstart: true
+      skywarz.stats.*: true
 
 libraries:
   - org.apache.commons:commons-text:1.11.0

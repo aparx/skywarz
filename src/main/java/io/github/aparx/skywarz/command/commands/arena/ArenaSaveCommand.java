@@ -4,8 +4,9 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
+import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.MessageKeys;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -28,7 +29,7 @@ public class ArenaSaveCommand extends AbstractArenaCommand {
   }
 
   @Override
-  public void execute(SkywarsArena arena, CommandContext context, CommandArgList args) {
+  public void execute(GameArena arena, CommandContext context, CommandArgList args) {
     arena.save();
     Language language = Language.getInstance();
     StringBuilder builder = new StringBuilder("{successPrefix} Saved arena '{0}'");

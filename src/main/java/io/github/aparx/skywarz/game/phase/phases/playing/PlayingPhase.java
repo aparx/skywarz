@@ -5,12 +5,12 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.GameSettings;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.phase.GamePhase;
@@ -70,7 +70,7 @@ public class PlayingPhase extends GamePhase {
   }
 
   @Override
-  public void handleJoin(GamePlayer player) {
+  public void handleJoin(SkywarsPlayer player) {
     PlayerMatchData data = player.getMatchData();
     data.setSpectator(true);
     // Handle spectator join
@@ -79,7 +79,7 @@ public class PlayingPhase extends GamePhase {
   }
 
   @Override
-  public void handleLeave(GamePlayer player) {
+  public void handleLeave(SkywarsPlayer player) {
     findMatch().ifPresent((match) -> {
       match.applyStats(player);
       player.findOnline().ifPresent((e) -> GameSpectator.removeSpectator(getMatch(), e));
@@ -106,7 +106,7 @@ public class PlayingPhase extends GamePhase {
     spawnPlayers();
   }
 
-  protected void updateScoreboard(GamePlayer player) {
+  protected void updateScoreboard(SkywarsPlayer player) {
     getMatch().getScoreboardHandlers().getHandler(
             player.getMatchData().isSpectator()
                 ? MatchScoreboard.PLAYING_DEAD
@@ -171,7 +171,7 @@ public class PlayingPhase extends GamePhase {
    */
   void spawnPlayers() {
     GameMatch match = getMatch();
-    List<SkywarsKit> kitPool = new ArrayList<>(match.getKits());
+    List<GameKit> kitPool = new ArrayList<>(match.getKits());
     Map<TeamEnum, SpawnGroup> spawns = new HashMap<>();
     match.getTeamMap().stream()
         .map(GameTeam::getTeamEnum)
@@ -190,7 +190,7 @@ public class PlayingPhase extends GamePhase {
               .get(MessageKeys.Match.KIT_ASSIGN)
               .substitute(player, ArrayPath.of("player")));
         }
-        SkywarsKit kit = matchData.getKit();
+        GameKit kit = matchData.getKit();
         Preconditions.checkNotNull(kit, "Kit is still null");
         // (2) spawn the player at their respective team spawn
         Integer[] spawnIds = spawnGroup.toKeyArray();
@@ -210,7 +210,7 @@ public class PlayingPhase extends GamePhase {
     });
   }
 
-  void dequeueOnError(GamePlayer player, Runnable runnable) {
+  void dequeueOnError(SkywarsPlayer player, Runnable runnable) {
     try {
       runnable.run();
     } catch (Exception e) {
@@ -222,9 +222,9 @@ public class PlayingPhase extends GamePhase {
   }
 
   @CanIgnoreReturnValue
-  SkywarsKit selectRandomKit(List<SkywarsKit> kitPool, GamePlayer player) {
+  GameKit selectRandomKit(List<GameKit> kitPool, SkywarsPlayer player) {
     Preconditions.checkState(!kitPool.isEmpty(), "No kit available");
-    SkywarsKit kit = kitPool.get(ThreadLocalRandom.current().nextInt(0, kitPool.size()));
+    GameKit kit = kitPool.get(ThreadLocalRandom.current().nextInt(0, kitPool.size()));
     player.getMatchData().setKit(kit);
     return kit;
   }

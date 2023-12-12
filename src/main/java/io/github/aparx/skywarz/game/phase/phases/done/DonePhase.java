@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.phase.phases.done;
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
@@ -46,7 +46,7 @@ public class DonePhase extends GamePhase {
   }
 
   @Override
-  public void handleJoin(GamePlayer player) {
+  public void handleJoin(SkywarsPlayer player) {
     throw new IllegalStateException("Cannot join during DONE state");
   }
 
@@ -66,7 +66,7 @@ public class DonePhase extends GamePhase {
         .get(MessageKeys.Match.TEAM_WON)
         .substitute(won, ArrayPath.of("team"));
     match.getAudience().entity().forEach((entity) -> {
-      GamePlayer player = GamePlayer.getPlayer(entity);
+      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
       if (!player.getMatchData().isSpectator())
         match.applyStats(player); // apply stats since player is not dead already
       GameSpectator.removeSpectator(match, entity);
@@ -74,7 +74,7 @@ public class DonePhase extends GamePhase {
       entity.teleport(match.getArena().getData().getLobby());
       entity.getInventory().setItem(LeaveItem.SLOT,
           Skywars.getInstance()
-              .getGameItemManager()
+              .getItemManager()
               .getItems()
               .require(LeaveItem.class)
               .create(match, entity));

@@ -9,6 +9,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -70,8 +71,18 @@ public final class Language implements MessageStorage<ArrayPath> {
   }
 
   @CheckReturnValue
+  public String substitute(List<String> content) {
+    return substitute(String.join("\n", content));
+  }
+
+  @CheckReturnValue
   public String substitute(String content, Map<String, ?> data) {
     return localize(content).substitute(data);
+  }
+
+  @CheckReturnValue
+  public String substitute(List<String> content, Map<String, ?> data) {
+    return substitute(String.join("\n", content), data);
   }
 
   @CheckReturnValue
@@ -80,8 +91,18 @@ public final class Language implements MessageStorage<ArrayPath> {
   }
 
   @CheckReturnValue
+  public String substitute(List<String> content, LazyVariableLookup lookup) {
+    return substitute(String.join("\n", content), lookup);
+  }
+
+  @CheckReturnValue
   public String substitute(String content, Object... args) {
     return localize(content).substitute(args);
+  }
+
+  @CheckReturnValue
+  public String substitute(List<String> content, Object... args) {
+    return substitute(String.join("\n", content), args);
   }
 
   @CheckReturnValue

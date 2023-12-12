@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.game.item.items.idle;
 
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
 import io.github.aparx.skywarz.game.item.items.idle.kit.KitInventory;
 import io.github.aparx.skywarz.game.match.GameMatch;
@@ -56,7 +56,7 @@ public class KitSelectorItem extends StaticSkywarsItem {
   @Override
   protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     event.setCancelled(true);
-    GamePlayer player = GamePlayer.getPlayer(event.getPlayer());
+    SkywarsPlayer player = SkywarsPlayer.getPlayer(event.getPlayer());
     KitInventory kitInventory = new KitInventory(match, player, menuTitle);
     kitInventory.fillInventory();
     kitInventory.open(player.getOnline());

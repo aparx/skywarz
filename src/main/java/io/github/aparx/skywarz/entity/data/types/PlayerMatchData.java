@@ -1,9 +1,10 @@
 package io.github.aparx.skywarz.entity.data.types;
 
-import io.github.aparx.skywarz.entity.GamePlayer;
-import io.github.aparx.skywarz.entity.data.GamePlayerData;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import lombok.AccessLevel;
@@ -22,7 +23,7 @@ import java.util.UUID;
  */
 @Getter
 @Setter
-public final class PlayerMatchData extends GamePlayerData {
+public final class PlayerMatchData extends SkywarsPlayerData {
 
   private final UUID uuid;
 
@@ -36,12 +37,12 @@ public final class PlayerMatchData extends GamePlayerData {
 
   private PlayerSnapshot snapshot;
 
-  private SkywarsKit kit;
+  private GameKit kit;
 
   /** This statistic is independent of the player's main statistics and only focuses on one match */
   private @NonNull PlayerStatsAccumulator statistics;
 
-  public PlayerMatchData(@NonNull GamePlayer player) {
+  public PlayerMatchData(@NonNull SkywarsPlayer player) {
     this.uuid = player.getId();
     this.statistics = new PlayerStatsAccumulator(player.getId());
   }

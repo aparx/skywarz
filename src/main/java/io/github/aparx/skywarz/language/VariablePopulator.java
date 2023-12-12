@@ -4,14 +4,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.GameSettings;
-import io.github.aparx.skywarz.game.arena.SkywarsArena;
-import io.github.aparx.skywarz.game.kit.SkywarsKit;
+import io.github.aparx.skywarz.game.arena.GameArena;
+import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchManager;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -45,8 +45,8 @@ public final class VariablePopulator {
       @NonNull ArrayPath prefix,
       @Nullable Object nullValue) {
     lookup.set(prefix.add("name"), entity.getName());
-    GamePlayer.findPlayer(entity.getUniqueId())
-        .map(GamePlayer::getPlayerData)
+    SkywarsPlayer.findPlayer(entity.getUniqueId())
+        .map(SkywarsPlayer::getPlayerData)
         .flatMap((storage) -> storage.find(PlayerMatchData.class))
         .ifPresent((data) -> {
           addKit(lookup, data.getKit(), prefix.add("kit"), nullValue);
@@ -119,7 +119,7 @@ public final class VariablePopulator {
 
   public static void addKit(
       @NonNull LazyVariableLookup lookup,
-      @Nullable SkywarsKit kit,
+      @Nullable GameKit kit,
       @NonNull ArrayPath prefix,
       @Nullable Object nullValue) {
     lookup.set(prefix.add("name"), kit == null ? nullValue : kit.getName());
@@ -128,7 +128,7 @@ public final class VariablePopulator {
 
   public static void addKit(
       @NonNull LazyVariableLookup lookup,
-      @Nullable SkywarsKit kit,
+      @Nullable GameKit kit,
       @NonNull ArrayPath prefix) {
     addKit(lookup, kit, prefix, null);
   }
@@ -168,7 +168,7 @@ public final class VariablePopulator {
 
   /** Adds {@code arena} (or the match acquiring it) to {@code lookup} at offset {@code prefix}. */
   public static void addArenaOrAcquiree(
-      LazyVariableLookup lookup, SkywarsArena arena, ArrayPath prefix) {
+      LazyVariableLookup lookup, GameArena arena, ArrayPath prefix) {
     GameMatchManager matches = Skywars.getInstance().getMatchManager();
     lookup.setIfAbsent(prefix.add("name"), arena.getName());
     matches.find(arena).ifPresentOrElse((match) -> {
@@ -182,14 +182,14 @@ public final class VariablePopulator {
             .filter(Predicate.not(SpawnGroup::isEmpty))
             .isPresent())
           ++teamCount;
-      int minPlayerCount = SkywarsArena.getMinPlayerCount(settings);
+      int minPlayerCount = GameArena.getMinPlayerCount(settings);
       addState(lookup, arena.isCompleted()
               ? GameMatchState.IDLE
               : GameMatchState.SETUP,
           ArrayPath.of("state"));
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
-      lookup.set(ArrayPath.of("maxPlayers"), SkywarsArena.getMaxPlayerCount(settings, teamCount));
+      lookup.set(ArrayPath.of("maxPlayers"), GameArena.getMaxPlayerCount(settings, teamCount));
       lookup.set(ArrayPath.of("missing"), minPlayerCount);
       lookup.set(ArrayPath.of("players"), 0);
       lookup.set(ArrayPath.of("alive"), 0);
