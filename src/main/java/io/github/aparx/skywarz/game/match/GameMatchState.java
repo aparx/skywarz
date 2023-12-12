@@ -15,7 +15,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @Getter
 @RequiredArgsConstructor
-public enum SkywarsMatchState {
+public enum GameMatchState {
 
   /** Match is not joinable since it is still in setup */
   SETUP(null),
@@ -36,22 +36,22 @@ public enum SkywarsMatchState {
     return this != SETUP && this != DONE;
   }
 
-  public SkywarsMatchState previous() {
+  public GameMatchState previous() {
     int index = ordinal() - 1;
-    SkywarsMatchState[] values = values();
+    GameMatchState[] values = values();
     return index < 0 ? values[values.length - 1] : values[index];
   }
 
-  public SkywarsMatchState next() {
-    SkywarsMatchState[] states = values();
+  public GameMatchState next() {
+    GameMatchState[] states = values();
     return states[(1 + ordinal()) % states.length];
   }
 
-  public boolean isBeforeOrEqual(SkywarsMatchState state) {
+  public boolean isBeforeOrEqual(GameMatchState state) {
     return ordinal() <= state.ordinal();
   }
 
-  public boolean isAfterOrEqual(SkywarsMatchState state) {
+  public boolean isAfterOrEqual(GameMatchState state) {
     return ordinal() >= state.ordinal();
   }
 }

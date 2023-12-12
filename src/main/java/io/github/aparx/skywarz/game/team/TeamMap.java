@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.team;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -19,17 +19,17 @@ import java.util.stream.Stream;
 @Getter
 public final class TeamMap implements Iterable<GameTeam> {
 
-  private final WeakReference<SkywarsMatch> match;
+  private final WeakReference<GameMatch> match;
 
   private @NonNull Map<TeamEnum, GameTeam> teams = new HashMap<>();
 
-  public TeamMap(@NonNull SkywarsMatch match) {
+  public TeamMap(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     this.match = new WeakReference<>(match);
   }
 
-  public @NonNull SkywarsMatch getMatch() {
-    SkywarsMatch match = this.match.get();
+  public @NonNull GameMatch getMatch() {
+    GameMatch match = this.match.get();
     Preconditions.checkState(match != null, "Match has become invalid");
     return match;
   }
@@ -39,11 +39,10 @@ public final class TeamMap implements Iterable<GameTeam> {
   }
 
   public void createTeams() {
-    final SkywarsMatch match = getMatch();
+    final GameMatch match = getMatch();
     this.teams = match.getArena().getData().getSpawns().entrySet().stream()
         .filter((entry) -> !entry.getValue().isEmpty())
-        .map((entry) -> TeamEnum.valueOf(entry.getKey()))
-        .map((teamEnum) -> new GameTeam(match, teamEnum))
+        .map((entry) -> new GameTeam(match, entry.getKey()))
         .collect(Collectors.toMap(GameTeam::getTeamEnum, Function.identity()));
   }
 

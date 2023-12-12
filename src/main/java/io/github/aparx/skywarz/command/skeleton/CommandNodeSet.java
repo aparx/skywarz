@@ -1,9 +1,8 @@
-package io.github.aparx.skywarz.command.tree;
+package io.github.aparx.skywarz.command.skeleton;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.utils.collection.AbstractKeyValueSet;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.LinkedHashMap;

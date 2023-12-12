@@ -20,7 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ChestItems implements ConfigurationSerializable {
 
   static {
-    ConfigField.getMutators().add(ConfigFieldValueMutator.newMapper(
+    ConfigField.addMutator(ConfigFieldValueMutator.newMapper(
         ChestItems.class, Collection.class,
         (field, value) -> value.values(),
         (field, value) -> ChestItems.of(value)));

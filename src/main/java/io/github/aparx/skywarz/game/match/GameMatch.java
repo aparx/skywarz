@@ -15,13 +15,13 @@ import io.github.aparx.skywarz.game.kit.SkywarsKitHandler;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboardHandlers;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.language.LocalizableError;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
+import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -47,7 +47,7 @@ import java.util.function.Predicate;
  */
 @Getter
 @Setter
-public class SkywarsMatch implements Snowflake<UUID> {
+public class GameMatch implements Snowflake<UUID> {
 
   private final @NonNull UUID id;
 
@@ -57,13 +57,13 @@ public class SkywarsMatch implements Snowflake<UUID> {
 
   @Getter(onMethod_ = {@Synchronized})
   @Setter(onMethod_ = {@Synchronized})
-  private volatile @NonNull SkywarsMatchState state = SkywarsMatchState.SETUP;
+  private volatile @NonNull GameMatchState state = GameMatchState.SETUP;
 
   private volatile KeyValueSet<String, SkywarsKit> kits = SkywarsKitHandler.getInstance().getKits();
 
-  private final SkywarsPhaseCycler cycler = new SkywarsPhaseCycler(this);
+  private final GamePhaseCycler cycler = new GamePhaseCycler(this);
 
-  private final SkywarsMatchWatchTask watchTask = new SkywarsMatchWatchTask(this);
+  private final GameMatchWatchTask watchTask = new GameMatchWatchTask(this);
 
   private final TeamMap teamMap = new TeamMap(this);
 
@@ -73,23 +73,23 @@ public class SkywarsMatch implements Snowflake<UUID> {
 
   private final WeakPlayerGroup audience = new WeakPlayerGroup() {
     @Override
-    public boolean add(SkywarsPlayer player) {
+    public boolean add(GamePlayer player) {
       if (!super.add(player)) return false;
-      player.getMatchData().setMatch(SkywarsMatch.this);
+      player.getMatchData().setMatch(GameMatch.this);
       return true;
     }
 
     @Override
     public boolean remove(Object o) {
       if (!super.remove(o)) return false;
-      ((SkywarsPlayer) o).getMatchData().setMatch(null);
+      ((GamePlayer) o).getMatchData().setMatch(null);
       return true;
     }
   };
 
   private GameTeam winner;
 
-  public SkywarsMatch(@NonNull UUID id, @NonNull SkywarsArena arena) {
+  public GameMatch(@NonNull UUID id, @NonNull SkywarsArena arena) {
     Preconditions.checkNotNull(id, "ID must not be null");
     Preconditions.checkNotNull(arena, "Arena must not be null");
     this.id = id;
@@ -107,7 +107,7 @@ public class SkywarsMatch implements Snowflake<UUID> {
     this.arena = new ArenaSnapshot(arenaSource);
     this.teamMap.createTeams();
     this.kits = SkywarsKitHandler.getInstance().createSnapshot();
-    cycler.cycleJump(SkywarsMatchState.IDLE);
+    cycler.cycleJump(GameMatchState.IDLE);
 
     getWatchTask().start();
   }
@@ -129,7 +129,7 @@ public class SkywarsMatch implements Snowflake<UUID> {
   }
 
   @Synchronized
-  public boolean isState(SkywarsMatchState state) {
+  public boolean isState(GameMatchState state) {
     return this.state == state;
   }
 
@@ -147,14 +147,14 @@ public class SkywarsMatch implements Snowflake<UUID> {
   }
 
   @CanIgnoreReturnValue
-  public boolean join(@NonNull SkywarsPlayer player) {
+  public boolean join(@NonNull GamePlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     PlayerMatchData data = player.getMatchData();
     if (audience.contains(player)
         || data.isInMatch()
         || !getState().isJoinable())
       return false;
-    boolean isExceedingPlayerSize = isState(SkywarsMatchState.IDLE)
+    boolean isExceedingPlayerSize = isState(GameMatchState.IDLE)
         && getAudience().size() >= getMaxPlayerCount();
     if (isExceedingPlayerSize && !player.hasPriority())
       throw new LocalizableError("Max players exceeded",
@@ -178,7 +178,7 @@ public class SkywarsMatch implements Snowflake<UUID> {
   }
 
   @CanIgnoreReturnValue
-  public boolean leave(@NonNull SkywarsPlayer player) {
+  public boolean leave(@NonNull GamePlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     if (!getAudience().remove(player)) return false;
     PlayerMatchData data = player.getMatchData();
@@ -210,7 +210,7 @@ public class SkywarsMatch implements Snowflake<UUID> {
    *
    * @param player the player to which to apply the stats to
    */
-  public void applyStats(@NonNull SkywarsPlayer player) {
+  public void applyStats(@NonNull GamePlayer player) {
     PlayerMatchData matchData = player.getMatchData();
     boolean hasWon = matchData.isInTeam() && Objects.equals(getWinner(), matchData.getTeam());
     PlayerStatsAccumulator statistics = player.getMatchData().getStatistics();
@@ -223,7 +223,7 @@ public class SkywarsMatch implements Snowflake<UUID> {
     });
   }
 
-  public int calculatePoints(SkywarsPlayer player, PlayerStatsAccumulator accumulator) {
+  public int calculatePoints(GamePlayer player, PlayerStatsAccumulator accumulator) {
     final int weightOfWin = 10;
     MatchPointsCalculateEvent event = new MatchPointsCalculateEvent(this, player, accumulator);
     event.setPoints(NumberConversions.ceil(2 * accumulator.findGet(PlayerStatsKey.KILLS)
@@ -236,8 +236,8 @@ public class SkywarsMatch implements Snowflake<UUID> {
 
   private void kickFirstNonPriorityPlayer() {
     // Kick other player due to player having priority
-    SkywarsPlayer kick = getAudience().stream()
-        .filter(Predicate.not(SkywarsPlayer::hasPriority))
+    GamePlayer kick = getAudience().stream()
+        .filter(Predicate.not(GamePlayer::hasPriority))
         .findAny()
         .orElseThrow(() -> new LocalizableError("Could not find non-priority player",
             (lang) -> lang.get(MessageKeys.Match.PRIORITY_ERROR)));

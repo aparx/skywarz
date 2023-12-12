@@ -17,6 +17,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,16 +35,16 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
   private @Nullable Location spectator;
   private @Nullable Location lobby;
   private @Nullable WeakReference<World> world;
-  private @NonNull Map<String, SpawnGroup> spawns;
+  private @NonNull EnumMap<TeamEnum, SpawnGroup> spawns;
   private @NonNull GameSettings settings;
 
   public ArenaData() {
-    this(new ArenaBox(), new HashMap<>(), GameSettings.of());
+    this(new ArenaBox(), new EnumMap<>(TeamEnum.class), GameSettings.of());
   }
 
   public ArenaData(
       @NonNull ArenaBox box,
-      @NonNull Map<String, SpawnGroup> spawns,
+      @NonNull EnumMap<TeamEnum, SpawnGroup> spawns,
       @NonNull GameSettings settings) {
     Preconditions.checkNotNull(box, "Box must not be null");
     this.box = box;
@@ -52,9 +53,9 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
   }
 
   public static ArenaData deserialize(@NonNull Map<?, ?> data) {
-    Map<String, SpawnGroup> spawns = ConversionUtils.toStringObjectSpecificMap(data.get("spawns"), SpawnGroup.class::cast);
     ArenaData newData = new ArenaData((ArenaBox) data.get("box"),
-        spawns,
+        ConversionUtils.toEnumMap(ConversionUtils.toSpecificStringMap(data.get("spawns"),
+            SpawnGroup.class::cast), TeamEnum.class),
         (GameSettings) data.get("settings"));
     newData.setLobby((Location) data.get("lobby"));
     newData.setSpectator((Location) data.get("spectator"));
@@ -74,7 +75,7 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     map.put("spectator", getSpectator());
     if (this.world != null)
       map.put("world", getWorld().getName());
-    map.put("spawns", getSpawns());
+    map.put("spawns", ConversionUtils.toGenericStringMap(getSpawns()));
     map.put("settings", getSettings());
     return map;
   }
@@ -98,14 +99,14 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     this.settings = settings;
   }
 
-  public void setSpawns(@NonNull Map<String, SpawnGroup> spawns) {
+  public void setSpawns(@NonNull EnumMap<TeamEnum, SpawnGroup> spawns) {
     Preconditions.checkNotNull(spawns, "Spawns must not be null");
     this.spawns = spawns;
   }
 
   @CanIgnoreReturnValue
   public SpawnGroup createSpawnsIfAbsent(@NonNull TeamEnum team) {
-    return spawns.computeIfAbsent(team.name(), (key) -> new SpawnList());
+    return spawns.computeIfAbsent(team, (key) -> new SpawnList());
   }
 
 }

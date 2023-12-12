@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.events.match;
 
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.event.Cancellable;
@@ -21,7 +21,7 @@ public class MatchCreateEvent extends MatchEvent implements Cancellable {
 
   private boolean cancelled;
 
-  public MatchCreateEvent(@NonNull SkywarsMatch match) {
+  public MatchCreateEvent(@NonNull GameMatch match) {
     super(match);
   }
 

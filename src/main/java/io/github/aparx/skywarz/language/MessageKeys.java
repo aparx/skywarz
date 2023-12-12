@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.language;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.NonNull;
@@ -101,8 +101,8 @@ public final class MessageKeys {
   private static final EnumMap<TimeUnit, ArrayPath> singularTimeUnitKeys =
       new EnumMap<>(TimeUnit.class);
 
-  private static final EnumMap<SkywarsMatchState, ArrayPath> matchStateKeys =
-      new EnumMap<>(SkywarsMatchState.class);
+  private static final EnumMap<GameMatchState, ArrayPath> matchStateKeys =
+      new EnumMap<>(GameMatchState.class);
 
   private static final EnumMap<TeamEnum, ArrayPath> teamNameKeys =
       new EnumMap<>(TeamEnum.class);
@@ -113,7 +113,7 @@ public final class MessageKeys {
       pluralTimeUnitKeys.put(unit, time.add("plural"));
       singularTimeUnitKeys.put(unit, time.add("singular"));
     });
-    Arrays.stream(SkywarsMatchState.values()).forEach((state) -> {
+    Arrays.stream(GameMatchState.values()).forEach((state) -> {
       matchStateKeys.put(state, ArrayPath.of("state", state.name()));
     });
     Arrays.stream(TeamEnum.values()).forEach((team) -> {
@@ -126,7 +126,7 @@ public final class MessageKeys {
     return plural ? pluralTimeUnitKeys.get(unit) : singularTimeUnitKeys.get(unit);
   }
 
-  public static ArrayPath getMatchStateKey(@NonNull SkywarsMatchState state) {
+  public static ArrayPath getMatchStateKey(@NonNull GameMatchState state) {
     Preconditions.checkNotNull(state, "State must not be null");
     return matchStateKeys.get(state);
   }
@@ -213,7 +213,7 @@ public final class MessageKeys {
       map.put(getTimeUnitKey(unit, false), name.substring(0, name.length() - 1));
     }
 
-    for (SkywarsMatchState state : SkywarsMatchState.values())
+    for (GameMatchState state : GameMatchState.values())
       map.put(getMatchStateKey(state), StringUtils.capitalize(state.name().toLowerCase()));
 
     for (TeamEnum teamEnum : TeamEnum.values())

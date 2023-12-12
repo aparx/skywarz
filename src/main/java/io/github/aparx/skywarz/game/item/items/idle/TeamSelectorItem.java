@@ -5,13 +5,13 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.inventory.*;
 import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.language.Language;
@@ -84,16 +84,16 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
   private String teamMemberSlot = "§8• {0}";
 
   public TeamSelectorItem() {
-    super("team selector", new SkywarsMatchState[]{SkywarsMatchState.IDLE});
+    super("team selector", new GameMatchState[]{GameMatchState.IDLE});
     setSlot(1);
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull GameMatch match, @NonNull Player initiator) {
     ItemStack stack = item.getStack().clone();
     Optional.ofNullable(ColoredMaterial.getColored(stack.getType()))
-        .ifPresent((colored) -> SkywarsPlayer.findPlayer(initiator)
-            .map(SkywarsPlayer::getMatchData)
+        .ifPresent((colored) -> GamePlayer.findPlayer(initiator)
+            .map(GamePlayer::getMatchData)
             .filter(PlayerMatchData::isInTeam)
             .map(PlayerMatchData::getTeam)
             .ifPresent((team) -> {
@@ -103,16 +103,16 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
   }
 
   @Override
-  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     Player entity = event.getPlayer();
-    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+    GamePlayer player = GamePlayer.getPlayer(entity);
     SoundRecord.OPEN_INVENTORY.play(player);
     createInventory(match, player).open(entity);
   }
 
   @CheckReturnValue
-  private SpecialInventory<?> createInventory(@NonNull SkywarsMatch match,
-                                              @NonNull SkywarsPlayer player) {
+  private SpecialInventory<?> createInventory(@NonNull GameMatch match,
+                                              @NonNull GamePlayer player) {
     int maxTeamSize = match.getTeamSize();
     TeamMap teamMap = match.getTeamMap();
     InventoryDimensions dimensions = InventoryDimensions.ofLengths(
@@ -137,8 +137,8 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
 
   private final class TeamItem implements InventoryItem {
 
-    private final @NonNull SkywarsMatch match;
-    private final @NonNull SkywarsPlayer player;
+    private final @NonNull GameMatch match;
+    private final @NonNull GamePlayer player;
     private final @NonNull GameTeam team;
     private final int maxTeamSize;
     private final SpecialInventory<?> inventory;
@@ -146,8 +146,8 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
     private final ItemBuilder itemBuilder;
 
     public TeamItem(
-        @NonNull SkywarsMatch match,
-        @NonNull SkywarsPlayer player,
+        @NonNull GameMatch match,
+        @NonNull GamePlayer player,
         @NonNull GameTeam team,
         @NonNegative int maxTeamSize,
         @NonNull SpecialInventory<?> inventory) {
@@ -176,7 +176,7 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
       else if (!team.hasSpace()) lore.add("§8» " + teamStatusFull);
       else lore.add((ticks % 2 == 0 ? "§8» " : "   ") + ChatColor.GRAY + teamStatusJoinable);
       List<String> members = team.stream()
-          .map(SkywarsPlayer::getName)
+          .map(GamePlayer::getName)
           .map((name) -> Language.getInstance().substitute(teamMemberSlot, name))
           .collect(Collectors.toList());
       lore.add(StringUtils.SPACE);
@@ -191,7 +191,7 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
     }
 
     @Override
-    public void click(SkywarsPlayer player, InventoryClickEvent event) {
+    public void click(GamePlayer player, InventoryClickEvent event) {
       final PlayerMatchData data = player.getMatchData();
       event.setCancelled(true);
       if (isInTeam()) return;

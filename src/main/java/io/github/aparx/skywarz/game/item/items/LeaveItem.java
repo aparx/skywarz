@@ -4,14 +4,13 @@ import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.commands.LeaveCommand;
 import io.github.aparx.skywarz.game.item.SkywarsItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.startup.Main;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -40,18 +39,18 @@ public final class LeaveItem extends SkywarsItem {
       .wrap();
 
   public LeaveItem() {
-    super("leave", new SkywarsMatchState[]{SkywarsMatchState.IDLE, SkywarsMatchState.PLAYING, SkywarsMatchState.DONE});
+    super("leave", new GameMatchState[]{GameMatchState.IDLE, GameMatchState.PLAYING, GameMatchState.DONE});
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull GameMatch match, @NonNull Player initiator) {
     return item.getStack().clone();
   }
 
   @Override
-  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     Player player = event.getPlayer();
-    SkywarsCommand.tree.getRoots().stream()
+    SkywarsCommand.forest.getRoots().stream()
         .filter((node) -> node instanceof LeaveCommand)
         .map((node) -> node.createCommand(Main.ROOT_COMMAND_NAME))
         .findFirst()

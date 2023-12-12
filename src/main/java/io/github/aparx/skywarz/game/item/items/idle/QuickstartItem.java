@@ -3,8 +3,8 @@ package io.github.aparx.skywarz.game.item.items.idle;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.startup.Main;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -32,17 +32,17 @@ public class QuickstartItem extends StaticSkywarsItem {
       .wrap();
 
   public QuickstartItem() {
-    super("quickstart", new SkywarsMatchState[]{SkywarsMatchState.IDLE});
+    super("quickstart", new GameMatchState[]{GameMatchState.IDLE});
     setSlot(7);
   }
 
   @Override
-  protected ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator) {
+  protected ItemStack createItemStack(@NonNull GameMatch match, @NonNull Player initiator) {
     return item.getStack().clone();
   }
 
   @Override
-  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {
+  protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     event.setCancelled(true);
     SoundRecord.ACTION_SUCCESS.play(event.getPlayer());
     event.getPlayer().performCommand(String.format("%s start", Main.ROOT_COMMAND_NAME));

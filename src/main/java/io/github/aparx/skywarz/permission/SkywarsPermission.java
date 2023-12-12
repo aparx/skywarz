@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.permission;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import lombok.Getter;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.permissions.Permissible;
@@ -84,7 +84,7 @@ public final class SkywarsPermission {
       builder.add(path.add("*"));
   }
 
-  public boolean has(@NonNull SkywarsPlayer player) {
+  public boolean has(@NonNull GamePlayer player) {
     return player.findOnline().filter(this::has).isPresent();
   }
 

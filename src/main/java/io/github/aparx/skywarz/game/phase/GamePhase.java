@@ -3,12 +3,12 @@ package io.github.aparx.skywarz.game.phase;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStartEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStopEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseTickEvent;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.AccessLevel;
@@ -30,15 +30,15 @@ import java.util.logging.Level;
  * @since 1.0
  */
 @Getter
-public abstract class SkywarsPhase implements Listener {
+public abstract class GamePhase implements Listener {
 
   private final @NonNull TickDuration interval;
 
-  private final @NonNull SkywarsPhaseCycler cycler;
+  private final @NonNull GamePhaseCycler cycler;
 
   private final @NonNull TickDuration duration;
 
-  private final @NonNull SkywarsMatchState state;
+  private final @NonNull GameMatchState state;
 
   @Getter(AccessLevel.NONE)
   private volatile BukkitTask task;
@@ -46,17 +46,17 @@ public abstract class SkywarsPhase implements Listener {
   private final @NonNull TimeTicker ticker;
 
   @Setter(AccessLevel.PROTECTED)
-  private @Nullable SkywarsPhaseListener<?> listener;
+  private @Nullable GamePhaseListener<?> listener;
 
-  public SkywarsPhase(@NonNull SkywarsMatchState state,
-                      @NonNull SkywarsPhaseCycler cycler,
-                      @NonNull TickDuration duration) {
+  public GamePhase(@NonNull GameMatchState state,
+                   @NonNull GamePhaseCycler cycler,
+                   @NonNull TickDuration duration) {
     this(state, cycler, duration, TickDuration.ofTick());
   }
 
-  public SkywarsPhase(
-      @NonNull SkywarsMatchState state,
-      @NonNull SkywarsPhaseCycler cycler,
+  public GamePhase(
+      @NonNull GameMatchState state,
+      @NonNull GamePhaseCycler cycler,
       @NonNull TickDuration duration,
       @NonNull TickDuration interval) {
     Preconditions.checkNotNull(state, "State must not be null");
@@ -73,10 +73,10 @@ public abstract class SkywarsPhase implements Listener {
   protected abstract void updateTick();
 
   /** Event method called when a player joins while this phase is ongoing. */
-  public abstract void handleJoin(SkywarsPlayer player);
+  public abstract void handleJoin(GamePlayer player);
 
   /** Event method called when a player leaves while this phase is ongoing. */
-  public void handleLeave(SkywarsPlayer player) {}
+  public void handleLeave(GamePlayer player) {}
 
   protected void onStart() {
     if (listener != null) listener.load();
@@ -116,7 +116,7 @@ public abstract class SkywarsPhase implements Listener {
   @Synchronized
   public final void tick() {
     try {
-      Optional<SkywarsMatch> matchOptional = findMatch();
+      Optional<GameMatch> matchOptional = findMatch();
       if (matchOptional.isEmpty()) {
         Skywars.logger().fine("[GamePhaseCycler] Match became invalid (enforce stop)");
         stop(StopReason.UNKNOWN);
@@ -137,11 +137,11 @@ public abstract class SkywarsPhase implements Listener {
     }
   }
 
-  public @NonNull SkywarsMatch getMatch() {
+  public @NonNull GameMatch getMatch() {
     return cycler.getMatch();
   }
 
-  public Optional<SkywarsMatch> findMatch() {
+  public Optional<GameMatch> findMatch() {
     return cycler.findMatch();
   }
 

@@ -3,7 +3,7 @@ package io.github.aparx.skywarz;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
-import io.github.aparx.skywarz.database.SkywarsDatabase;
+import io.github.aparx.skywarz.database.GameDatabase;
 import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.arena.*;
 import io.github.aparx.skywarz.game.arena.sign.SkywarsSign;
@@ -17,7 +17,7 @@ import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.handler.SkywarsHandler;
-import io.github.aparx.skywarz.game.match.SkywarsMatchManager;
+import io.github.aparx.skywarz.game.match.GameMatchManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.utils.collection.KeyedByClassSet;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -59,7 +59,7 @@ public final class Skywars {
   @Getter
   private static final Skywars instance = new Skywars();
 
-  private final SkywarsDatabase database = new SkywarsDatabase();
+  private final GameDatabase database = new GameDatabase();
 
   private final KeyedByClassSet<SkywarsHandler> handlers = new HandlerSet();
 
@@ -83,7 +83,7 @@ public final class Skywars {
   private Skywars() {
     handlers.addAll(Set.of(
         new ArenaManager(),
-        new SkywarsMatchManager(),
+        new GameMatchManager(),
         new SkywarsItemManager(),
         new BungeeListener(),
         SkywarsKitHandler.getInstance()
@@ -152,8 +152,8 @@ public final class Skywars {
     return getHandlers().require(ArenaManager.class);
   }
 
-  public @NonNull SkywarsMatchManager getMatchManager() {
-    return getHandlers().require(SkywarsMatchManager.class);
+  public @NonNull GameMatchManager getMatchManager() {
+    return getHandlers().require(GameMatchManager.class);
   }
 
   public @NonNull SkywarsItemManager getGameItemManager() {

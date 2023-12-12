@@ -10,7 +10,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.arena.reset.DefaultArenaReset;
 import io.github.aparx.skywarz.game.arena.sign.SkywarsSignHandler;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -92,7 +92,7 @@ public final class SkywarsArena extends ConfigObject implements CompletableSetup
     return findAcquiringMatch().isPresent();
   }
 
-  public Optional<SkywarsMatch> findAcquiringMatch() {
+  public Optional<GameMatch> findAcquiringMatch() {
     return Skywars.getInstance().getMatchManager().find(this);
   }
 

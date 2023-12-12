@@ -1,11 +1,11 @@
 package io.github.aparx.skywarz.game.phase.features;
 
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -16,10 +16,10 @@ import org.bukkit.entity.Player;
  * @since 1.0
  */
 @UtilityClass
-public final class SkywarsSpectator {
+public final class GameSpectator {
 
   public static void markAsSpectator(Player entity) {
-    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+    GamePlayer player = GamePlayer.getPlayer(entity);
     player.getMatchData().setSpectator(true);
     String displayName = String.valueOf(ChatColor.GRAY) + ChatColor.ITALIC + entity.getName();
     entity.setDisplayName(displayName);
@@ -27,11 +27,11 @@ public final class SkywarsSpectator {
   }
 
   /** Modifies and teleports {@code entity} to be a spectator. */
-  public static void spawnAsSpectator(SkywarsMatch match, Player entity) {
+  public static void spawnAsSpectator(GameMatch match, Player entity) {
     markAsSpectator(entity); // ensure the marking
     PlayerSnapshot.ofSpectator(match, entity).restore(entity);
     match.getAudience().alive()
-        .map(SkywarsPlayer::getOnline)
+        .map(GamePlayer::getOnline)
         .forEach((other) -> other.hidePlayer(Skywars.plugin(), entity));
     Skywars.getInstance()
         .getGameItemManager()
@@ -45,8 +45,8 @@ public final class SkywarsSpectator {
         .create(match, entity));
   }
 
-  public static void removeSpectator(SkywarsMatch match, Player entity) {
-    SkywarsPlayer.getPlayer(entity).getMatchData().setSpectator(false);
+  public static void removeSpectator(GameMatch match, Player entity) {
+    GamePlayer.getPlayer(entity).getMatchData().setSpectator(false);
     match.getAudience().entity().forEach((other) -> {
       other.showPlayer(Skywars.plugin(), entity);
       entity.showPlayer(Skywars.plugin(), other);

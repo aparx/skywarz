@@ -6,10 +6,10 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.language.LocalizableError;
-import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -30,11 +30,11 @@ public class LeaveCommand extends CommandNode {
   @Override
   public void execute(CommandContext context, CommandArgList args) {
     Player entity = context.getPlayer();
-    SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+    GamePlayer player = GamePlayer.getPlayer(entity);
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
-    SkywarsMatch match = data.getMatch();
+    GameMatch match = data.getMatch();
     Preconditions.checkNotNull(match, "Already left the match");
     Preconditions.checkState(match.leave(player), "Cannot leave match");
     Bukkit.getPluginManager().callEvent(new MatchLeaveEvent(match, entity));

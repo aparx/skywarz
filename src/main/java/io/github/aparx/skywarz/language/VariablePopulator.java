@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
@@ -12,9 +12,9 @@ import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.GameSettings;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchManager;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchManager;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.utils.tick.Ticker;
@@ -45,8 +45,8 @@ public final class VariablePopulator {
       @NonNull ArrayPath prefix,
       @Nullable Object nullValue) {
     lookup.set(prefix.add("name"), entity.getName());
-    SkywarsPlayer.findPlayer(entity.getUniqueId())
-        .map(SkywarsPlayer::getPlayerData)
+    GamePlayer.findPlayer(entity.getUniqueId())
+        .map(GamePlayer::getPlayerData)
         .flatMap((storage) -> storage.find(PlayerMatchData.class))
         .ifPresent((data) -> {
           addKit(lookup, data.getKit(), prefix.add("kit"), nullValue);
@@ -141,12 +141,12 @@ public final class VariablePopulator {
     lookup.set(prefix.add("literal"), Suppliers.memoize(() -> formatLiteral(ticker)));
   }
 
-  public static void addMatch(LazyVariableLookup lookup, SkywarsMatch match, ArrayPath prefix) {
+  public static void addMatch(LazyVariableLookup lookup, GameMatch match, ArrayPath prefix) {
     addMatch(lookup, match, prefix, null);
   }
 
   public static void addMatch(
-      LazyVariableLookup lookup, SkywarsMatch match, ArrayPath prefix, Object nullValue) {
+      LazyVariableLookup lookup, GameMatch match, ArrayPath prefix, Object nullValue) {
     lookup.set(prefix.add("id"), match.getId());
     lookup.set(prefix.add("arena"), match.getArena().getName());
     lookup.set(prefix.add("minPlayers"), match.getMinPlayerCount());
@@ -169,7 +169,7 @@ public final class VariablePopulator {
   /** Adds {@code arena} (or the match acquiring it) to {@code lookup} at offset {@code prefix}. */
   public static void addArenaOrAcquiree(
       LazyVariableLookup lookup, SkywarsArena arena, ArrayPath prefix) {
-    SkywarsMatchManager matches = Skywars.getInstance().getMatchManager();
+    GameMatchManager matches = Skywars.getInstance().getMatchManager();
     lookup.setIfAbsent(prefix.add("name"), arena.getName());
     matches.find(arena).ifPresentOrElse((match) -> {
       addMatch(lookup, match, ArrayPath.of(), null);
@@ -184,8 +184,8 @@ public final class VariablePopulator {
           ++teamCount;
       int minPlayerCount = SkywarsArena.getMinPlayerCount(settings);
       addState(lookup, arena.isCompleted()
-              ? SkywarsMatchState.IDLE
-              : SkywarsMatchState.SETUP,
+              ? GameMatchState.IDLE
+              : GameMatchState.SETUP,
           ArrayPath.of("state"));
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
@@ -198,7 +198,7 @@ public final class VariablePopulator {
   }
 
   public static void addState(
-      LazyVariableLookup lookup, SkywarsMatchState state, ArrayPath prefix) {
+      LazyVariableLookup lookup, GameMatchState state, ArrayPath prefix) {
     lookup.set(prefix.add("name"), state.getTranslatedName());
     lookup.set(prefix.add("color"), state.isJoinable() ? ChatColor.GREEN : ChatColor.RED);
   }

@@ -7,8 +7,8 @@ import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.VariablePopulator;
@@ -29,7 +29,7 @@ import java.util.List;
 @Getter
 public class GameScoreboard extends ConfigObject {
 
-  private final @NonNull SkywarsMatchState state;
+  private final @NonNull GameMatchState state;
 
   private final @NonNull TickDuration updateInterval;
 
@@ -46,7 +46,7 @@ public class GameScoreboard extends ConfigObject {
   private @NonNull List<String> templateLines;
 
   public GameScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @Nullable String name,
       @NonNull TickDuration intervalUpdate,
       @Nullable String initialTitle) {
@@ -54,7 +54,7 @@ public class GameScoreboard extends ConfigObject {
   }
 
   public GameScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
       @NonNull List<String> initialTemplateLines) {
@@ -62,7 +62,7 @@ public class GameScoreboard extends ConfigObject {
   }
 
   public GameScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @Nullable String name,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
@@ -83,13 +83,13 @@ public class GameScoreboard extends ConfigObject {
     this.templateLines = templateLines;
   }
 
-  public SpecialScoreboard createScoreboard(@NonNull SkywarsMatch match, @Nullable Player viewer) {
+  public SpecialScoreboard createScoreboard(@NonNull GameMatch match, @Nullable Player viewer) {
     return new SpecialScoreboard(updateInterval, (sb) -> createContent(sb, match, viewer));
   }
 
   @CheckReturnValue
   protected ScoreboardContent createContent(
-      @NonNull SpecialScoreboard scoreboard, @NonNull SkywarsMatch match, @Nullable Player viewer) {
+      @NonNull SpecialScoreboard scoreboard, @NonNull GameMatch match, @Nullable Player viewer) {
     LazyVariableLookup lookup = new LazyVariableLookup();
     final String nullValue = "-";
     // this should be moved out of a player's individual scoreboard, to save resources

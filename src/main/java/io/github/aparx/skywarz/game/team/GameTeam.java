@@ -1,9 +1,9 @@
 package io.github.aparx.skywarz.game.team;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.WeakPlayerGroup;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,19 +17,19 @@ import java.lang.ref.WeakReference;
 @Getter
 public class GameTeam extends WeakPlayerGroup {
 
-  private final @NonNull WeakReference<SkywarsMatch> match;
+  private final @NonNull WeakReference<GameMatch> match;
 
   private final @NonNull TeamEnum teamEnum;
 
-  public GameTeam(@NonNull SkywarsMatch match, @NonNull TeamEnum teamEnum) {
+  public GameTeam(@NonNull GameMatch match, @NonNull TeamEnum teamEnum) {
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(teamEnum, "TeamEnum must not be null");
     this.match = new WeakReference<>(match);
     this.teamEnum = teamEnum;
   }
 
-  public @NonNull SkywarsMatch getMatch() {
-    SkywarsMatch match = this.match.get();
+  public @NonNull GameMatch getMatch() {
+    GameMatch match = this.match.get();
     Preconditions.checkState(match != null, "Match has become invalid");
     return match;
   }
@@ -40,7 +40,7 @@ public class GameTeam extends WeakPlayerGroup {
   }
 
   @Override
-  public boolean add(SkywarsPlayer member) {
+  public boolean add(GamePlayer member) {
     Preconditions.checkNotNull(member, "Member must not be null");
     Preconditions.checkState(hasSpace(), "No space for new members anymore");
     if (!super.add(member)) return false;
@@ -51,7 +51,7 @@ public class GameTeam extends WeakPlayerGroup {
   @Override
   public boolean remove(Object o) {
     if (!super.remove(o)) return false;
-    ((SkywarsPlayer) o).getMatchData().setTeam(null);
+    ((GamePlayer) o).getMatchData().setTeam(null);
     return true;
   }
 }

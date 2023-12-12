@@ -5,17 +5,17 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.GameSettings;
 import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
-import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.game.phase.GamePhase;
+import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
+import io.github.aparx.skywarz.game.phase.features.GameSpectator;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.game.team.TeamEnum;
@@ -41,7 +41,7 @@ import java.util.logging.Level;
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class PlayingPhase extends SkywarsPhase {
+public class PlayingPhase extends GamePhase {
 
   private static final SoundRecord SPAWN_SOUND =
       SoundRecord.of(Sound.ENTITY_PLAYER_LEVELUP, .25f, .75f);
@@ -49,10 +49,10 @@ public class PlayingPhase extends SkywarsPhase {
   // TODO move to game settings
   private static final TickDuration PROTECTION_PHASE_TIME = TickDuration.of(TimeUnit.SECONDS, 60);
 
-  public PlayingPhase(@NonNull SkywarsPhaseCycler cycler) {
-    super(SkywarsMatchState.PLAYING, cycler,
+  public PlayingPhase(@NonNull GamePhaseCycler cycler) {
+    super(GameMatchState.PLAYING, cycler,
         !Magics.isDevelopment()
-            ? MainConfig.getInstance().getPhaseDuration(SkywarsMatchState.PLAYING)
+            ? MainConfig.getInstance().getPhaseDuration(GameMatchState.PLAYING)
             : Magics.DEV_PLAYING_DURATION,
         TickDuration.of(TimeUnit.TICKS, 5));
     setListener(new PlayingListener(this));
@@ -70,33 +70,33 @@ public class PlayingPhase extends SkywarsPhase {
   }
 
   @Override
-  public void handleJoin(SkywarsPlayer player) {
+  public void handleJoin(GamePlayer player) {
     PlayerMatchData data = player.getMatchData();
     data.setSpectator(true);
     // Handle spectator join
-    player.findOnline().ifPresent((e) -> SkywarsSpectator.spawnAsSpectator(getMatch(), e));
+    player.findOnline().ifPresent((e) -> GameSpectator.spawnAsSpectator(getMatch(), e));
     updateScoreboard(player);
   }
 
   @Override
-  public void handleLeave(SkywarsPlayer player) {
+  public void handleLeave(GamePlayer player) {
     findMatch().ifPresent((match) -> {
       match.applyStats(player);
-      player.findOnline().ifPresent((e) -> SkywarsSpectator.removeSpectator(getMatch(), e));
+      player.findOnline().ifPresent((e) -> GameSpectator.removeSpectator(getMatch(), e));
     });
   }
 
   @Override
   protected void onStart() {
     super.onStart();
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     Objects.requireNonNull(match.getArena().getSource()).getReset().capture();
     match.getAudience().online().forEach((player) -> dequeueOnError(player, () -> {
       PlayerMatchData matchData = player.getMatchData();
       player.findOnline().ifPresent((online) -> {
         PlayerSnapshot.ofReset(online).restore(online);
         if (matchData.isSpectator())
-          SkywarsSpectator.spawnAsSpectator(match, online);
+          GameSpectator.spawnAsSpectator(match, online);
       });
       if (!matchData.isSpectator() && !matchData.isInTeam())
         // Join player into team since they have not selected one
@@ -106,7 +106,7 @@ public class PlayingPhase extends SkywarsPhase {
     spawnPlayers();
   }
 
-  protected void updateScoreboard(SkywarsPlayer player) {
+  protected void updateScoreboard(GamePlayer player) {
     getMatch().getScoreboardHandlers().getHandler(
             player.getMatchData().isSpectator()
                 ? MatchScoreboard.PLAYING_DEAD
@@ -119,7 +119,7 @@ public class PlayingPhase extends SkywarsPhase {
   protected void updateTick() {
     // (1) determine all teams that are alive
     if (evaluateGameEnd()) return;
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     TimeTicker ticker = getTicker();
     long duration = getDuration().toSeconds();
     long secsLeft = duration - ticker.getElapsed(TimeUnit.SECONDS);
@@ -136,8 +136,8 @@ public class PlayingPhase extends SkywarsPhase {
   @CanIgnoreReturnValue
   protected boolean evaluateGameEnd() {
     int aliveCount = 0;
-    SkywarsMatch match = getMatch();
-    if (!match.isState(SkywarsMatchState.PLAYING))
+    GameMatch match = getMatch();
+    if (!match.isState(GameMatchState.PLAYING))
       return false;
     if (match.getWinner() == null) {
       TeamMap teamMap = match.getTeamMap();
@@ -170,7 +170,7 @@ public class PlayingPhase extends SkywarsPhase {
    * <p>If an error occurs when evaluating where a player should spawn, they are dequeued.
    */
   void spawnPlayers() {
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     List<SkywarsKit> kitPool = new ArrayList<>(match.getKits());
     Map<TeamEnum, SpawnGroup> spawns = new HashMap<>();
     match.getTeamMap().stream()
@@ -210,7 +210,7 @@ public class PlayingPhase extends SkywarsPhase {
     });
   }
 
-  void dequeueOnError(SkywarsPlayer player, Runnable runnable) {
+  void dequeueOnError(GamePlayer player, Runnable runnable) {
     try {
       runnable.run();
     } catch (Exception e) {
@@ -222,7 +222,7 @@ public class PlayingPhase extends SkywarsPhase {
   }
 
   @CanIgnoreReturnValue
-  SkywarsKit selectRandomKit(List<SkywarsKit> kitPool, SkywarsPlayer player) {
+  SkywarsKit selectRandomKit(List<SkywarsKit> kitPool, GamePlayer player) {
     Preconditions.checkState(!kitPool.isEmpty(), "No kit available");
     SkywarsKit kit = kitPool.get(ThreadLocalRandom.current().nextInt(0, kitPool.size()));
     player.getMatchData().setKit(kit);

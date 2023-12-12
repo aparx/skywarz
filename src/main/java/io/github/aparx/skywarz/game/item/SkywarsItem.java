@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.lang.ArrayUtils;
@@ -36,7 +36,7 @@ public abstract class SkywarsItem extends ConfigObject {
   private static final String ID_LORE_PREFIX =
       String.valueOf(ChatColor.DARK_GRAY) + ChatColor.ITALIC;
 
-  private final @NonNull SkywarsMatchState[] states;
+  private final @NonNull GameMatchState[] states;
 
   private final int flags;
 
@@ -44,16 +44,16 @@ public abstract class SkywarsItem extends ConfigObject {
   @Getter
   private final String itemID = RandomStringUtils.random(10, "0123456789abcdef");
 
-  public SkywarsItem(@NonNull String name, @NonNull SkywarsMatchState[] states) {
+  public SkywarsItem(@NonNull String name, @NonNull GameMatchState[] states) {
     this(name, states, 0);
   }
 
-  public SkywarsItem(@NonNull String name, @NonNull SkywarsMatchState[] states, int flags) {
+  public SkywarsItem(@NonNull String name, @NonNull GameMatchState[] states, int flags) {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("items/" + name));
     Preconditions.checkNotNull(states, "States must not be null");
     Validate.noNullElements(states, "State must not be null");
     Preconditions.checkState((flags & ~Flags.FLAGS) == 0, "Unknown flags");
-    this.states = (SkywarsMatchState[]) ArrayUtils.clone(states);
+    this.states = (GameMatchState[]) ArrayUtils.clone(states);
     this.flags = flags;
   }
 
@@ -65,10 +65,10 @@ public abstract class SkywarsItem extends ConfigObject {
    * @param initiator the initiator (user) of this item
    * @return the itemstack, {@code not null}
    */
-  protected abstract ItemStack createItemStack(@NonNull SkywarsMatch match, @NonNull Player initiator);
+  protected abstract ItemStack createItemStack(@NonNull GameMatch match, @NonNull Player initiator);
 
   @CanIgnoreReturnValue
-  public final ItemStack create(@NonNull SkywarsMatch match, @NonNull Player initiator) {
+  public final ItemStack create(@NonNull GameMatch match, @NonNull Player initiator) {
     ItemStack stack = createDummy(match, initiator);
     ItemMeta meta = stack.getItemMeta();
     Preconditions.checkNotNull(meta, "Item has no meta");
@@ -84,7 +84,7 @@ public abstract class SkywarsItem extends ConfigObject {
 
   // TODO find a more fitting name
   @CanIgnoreReturnValue
-  public final ItemStack createDummy(@NonNull SkywarsMatch match, @NonNull Player initiator) {
+  public final ItemStack createDummy(@NonNull GameMatch match, @NonNull Player initiator) {
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(initiator, "Player must not be null");
     Preconditions.checkState(Arrays.stream(states).anyMatch(match::isState),
@@ -112,21 +112,21 @@ public abstract class SkywarsItem extends ConfigObject {
   public void unregister() {}
 
   /** Event method called whenever a player interacts with this {@code GameItem} */
-  protected void handleClick(@NonNull SkywarsMatch match, PlayerInteractEvent event) {}
+  protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {}
 
   /** Event method called whenever a player drops this {@code GameItem} */
-  protected void handleDrop(@NonNull SkywarsMatch match, PlayerDropItemEvent event) {
+  protected void handleDrop(@NonNull GameMatch match, PlayerDropItemEvent event) {
     event.setCancelled(!Flags.isDropable(getFlags()));
   }
 
   /** Event method called whenever a player moves this {@code GameItem} in an inventory */
-  protected void handleInventory(@NonNull SkywarsMatch match, InventoryInteractEvent event) {
+  protected void handleInventory(@NonNull GameMatch match, InventoryInteractEvent event) {
     event.setCancelled(!Flags.isMovable(getFlags()));
   }
 
-  protected Optional<SkywarsMatch> filterMatch(Player player) {
-    return SkywarsPlayer.findPlayer(player)
-        .map(SkywarsPlayer::getMatchData)
+  protected Optional<GameMatch> filterMatch(Player player) {
+    return GamePlayer.findPlayer(player)
+        .map(GamePlayer::getMatchData)
         .filter(PlayerMatchData::isInMatch)
         .map(PlayerMatchData::getMatch)
         .filter((match) -> Arrays.stream(states).anyMatch(match::isState));

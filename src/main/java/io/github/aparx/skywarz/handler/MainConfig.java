@@ -3,19 +3,17 @@ package io.github.aparx.skywarz.handler;
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
+import io.github.aparx.bufig.configurable.field.generic.UnaryGenericCapture;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -78,9 +76,11 @@ public class MainConfig extends ConfigObject {
 
   @Getter(AccessLevel.NONE)
   @ConfigMapping("duration.phases")
+  @UnaryGenericCapture(GameMatchState.class)
   @Document("The different durations of all running game phases")
   // Note: we use a Map with string keys over an EnumMap due to serialization
-  private Map<String, TickDuration> phaseDurationMap = new HashMap<>();
+  private EnumMap<GameMatchState, TickDuration> phaseDurationMap =
+      new EnumMap<>(GameMatchState.class);
 
   @ConfigMapping("duration.protection")
   @Document("How long players cannot take damage (protection time)")
@@ -88,7 +88,7 @@ public class MainConfig extends ConfigObject {
 
   private MainConfig() {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("main"));
-    Arrays.stream(SkywarsMatchState.values()).forEach((unit) -> {
+    Arrays.stream(GameMatchState.values()).forEach((unit) -> {
       TickDuration defaultDuration = unit.getDefaultDuration();
       if (defaultDuration != null)
         setPhaseDuration(unit, defaultDuration);
@@ -105,14 +105,14 @@ public class MainConfig extends ConfigObject {
     super.save();
   }
 
-  public void setPhaseDuration(@NonNull SkywarsMatchState state, @NonNull TickDuration duration) {
+  public void setPhaseDuration(@NonNull GameMatchState state, @NonNull TickDuration duration) {
     Preconditions.checkNotNull(state, "State must not be null");
     Preconditions.checkNotNull(duration, "Duration must not be null");
-    phaseDurationMap.put(state.name(), duration);
+    phaseDurationMap.put(state, duration);
   }
 
-  public TickDuration getPhaseDuration(@NonNull SkywarsMatchState state) {
-    return phaseDurationMap.get(state.name());
+  public TickDuration getPhaseDuration(@NonNull GameMatchState state) {
+    return phaseDurationMap.get(state);
   }
 
 }

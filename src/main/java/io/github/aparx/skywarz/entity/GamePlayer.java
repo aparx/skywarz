@@ -5,7 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.entity.data.PlayerDataSet;
-import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
+import io.github.aparx.skywarz.entity.data.GamePlayerData;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
@@ -37,53 +37,53 @@ import java.util.function.Supplier;
  * @since 1.0
  */
 @Getter
-public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
+public final class GamePlayer implements Snowflake<UUID>, Audience {
 
   private static final Supplier<? extends RuntimeException> ERROR_PLAYER_INVALID =
       () -> new IllegalStateException("Player has become invalid (left?)");
 
-  private static final Map<UUID, SkywarsPlayer> playerMap = new ConcurrentHashMap<>();
+  private static final Map<UUID, GamePlayer> playerMap = new ConcurrentHashMap<>();
 
   private static Listener quitListener = null;
 
   private final @NonNull UUID id;
 
-  private final PlayerDataSet<SkywarsPlayerData> playerData = new PlayerDataSet<>(this);
+  private final PlayerDataSet<GamePlayerData> playerData = new PlayerDataSet<>(this);
 
-  private SkywarsPlayer(@NonNull UUID id) {
+  private GamePlayer(@NonNull UUID id) {
     Preconditions.checkNotNull(id, "ID must not be null");
     this.id = id;
   }
 
-  public static @NonNull SkywarsPlayer getPlayer(@NonNull UUID uniqueId) {
+  public static @NonNull GamePlayer getPlayer(@NonNull UUID uniqueId) {
     Preconditions.checkNotNull(uniqueId, "ID must not be null");
     loadListenerIfNeeded();
-    return playerMap.computeIfAbsent(uniqueId, SkywarsPlayer::new);
+    return playerMap.computeIfAbsent(uniqueId, GamePlayer::new);
   }
 
-  public static @NonNull SkywarsPlayer getPlayer(@NonNull Player player) {
+  public static @NonNull GamePlayer getPlayer(@NonNull Player player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     return getPlayer(player.getUniqueId());
   }
 
-  public static Optional<SkywarsPlayer> findPlayer(@NonNull UUID uniqueId) {
+  public static Optional<GamePlayer> findPlayer(@NonNull UUID uniqueId) {
     Preconditions.checkNotNull(uniqueId, "ID must not be null");
     loadListenerIfNeeded();
     return Optional.ofNullable(playerMap.get(uniqueId));
   }
 
-  public static Optional<SkywarsPlayer> findPlayer(@NonNull Player player) {
+  public static Optional<GamePlayer> findPlayer(@NonNull Player player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     return findPlayer(player.getUniqueId());
   }
 
   @CanIgnoreReturnValue
-  public static @NonNull SkywarsPlayer removePlayer(@NonNull UUID uniqueId) {
+  public static @NonNull GamePlayer removePlayer(@NonNull UUID uniqueId) {
     return playerMap.remove(uniqueId); // TODO call player.onRemove()?
   }
 
   @CanIgnoreReturnValue
-  public static boolean removePlayer(@NonNull SkywarsPlayer player) {
+  public static boolean removePlayer(@NonNull GamePlayer player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     return playerMap.remove(player.getId(), player);
   }
@@ -168,7 +168,7 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience {
   public boolean equals(Object object) {
     if (this == object) return true;
     if (object == null || getClass() != object.getClass()) return false;
-    SkywarsPlayer player = (SkywarsPlayer) object;
+    GamePlayer player = (GamePlayer) object;
     return Objects.equals(id, player.id);
   }
 

@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.phase.phases.done.DonePhase;
 import io.github.aparx.skywarz.game.phase.phases.playing.PlayingPhase;
 import io.github.aparx.skywarz.game.phase.phases.idle.IdlePhase;
@@ -14,7 +14,6 @@ import lombok.Synchronized;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -24,33 +23,33 @@ import java.util.function.Function;
  * @version 2023-12-04 02:13
  * @since 1.0
  */
-public final class SkywarsPhaseCycler {
+public final class GamePhaseCycler {
 
-  private static final Function<SkywarsPhaseCycler, Set<SkywarsPhase>> DEFAULT_PHASE_FACTORY =
+  private static final Function<GamePhaseCycler, Set<GamePhase>> DEFAULT_PHASE_FACTORY =
       (cycler) -> Set.of(new IdlePhase(cycler), new PlayingPhase(cycler), new DonePhase(cycler));
 
-  private final @NonNull WeakReference<SkywarsMatch> match;
+  private final @NonNull WeakReference<GameMatch> match;
 
-  private final ImmutableMap<SkywarsMatchState, SkywarsPhase> phaseMap;
+  private final ImmutableMap<GameMatchState, GamePhase> phaseMap;
 
   @Getter(onMethod_ = {@Synchronized})
-  private volatile SkywarsMatchState state = SkywarsMatchState.values()[0];
+  private volatile GameMatchState state = GameMatchState.values()[0];
 
-  public SkywarsPhaseCycler(@NonNull SkywarsMatch match) {
+  public GamePhaseCycler(@NonNull GameMatch match) {
     this(match, DEFAULT_PHASE_FACTORY);
   }
 
-  public SkywarsPhaseCycler(
-      @NonNull SkywarsMatch match,
-      @NonNull Function<SkywarsPhaseCycler, @NonNull Set<SkywarsPhase>> factory) {
+  public GamePhaseCycler(
+      @NonNull GameMatch match,
+      @NonNull Function<GamePhaseCycler, @NonNull Set<GamePhase>> factory) {
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(factory, "Factory must not be null");
     this.match = new WeakReference<>(match);
-    Set<SkywarsPhase> phases = factory.apply(this);
+    Set<GamePhase> phases = factory.apply(this);
     Preconditions.checkNotNull(phases, "Phases must not be null");
-    ImmutableMap.Builder<SkywarsMatchState, SkywarsPhase> builder =
+    ImmutableMap.Builder<GameMatchState, GamePhase> builder =
         ImmutableMap.builderWithExpectedSize(phases.size());
-    for (SkywarsPhase phase : phases)
+    for (GamePhase phase : phases)
       builder.put(phase.getState(), phase);
     this.phaseMap = builder.build();
     Preconditions.checkState(phaseMap.size() >= 2,
@@ -60,27 +59,27 @@ public final class SkywarsPhaseCycler {
 
 
   @Synchronized
-  public Optional<SkywarsPhase> peek() {
+  public Optional<GamePhase> peek() {
     return findPhase(state.next());
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public Optional<SkywarsPhase> cycleNext() {
+  public Optional<GamePhase> cycleNext() {
     return cycleJump(state.next());
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public Optional<SkywarsPhase> cycleJump(@NonNull SkywarsMatchState state) {
+  public Optional<GamePhase> cycleJump(@NonNull GameMatchState state) {
     Preconditions.checkNotNull(state, "State must not be null");
     if (state == this.state)
       return findPhase(state);
-    findPhase(this.state).ifPresent((x) -> x.stop(SkywarsPhase.StopReason.UNKNOWN));
+    findPhase(this.state).ifPresent((x) -> x.stop(GamePhase.StopReason.UNKNOWN));
     return findMatch().flatMap((match) -> {
       match.setState(state);
-      Optional<SkywarsPhase> phase = findPhase(state);
-      phase.ifPresent(SkywarsPhase::start);
+      Optional<GamePhase> phase = findPhase(state);
+      phase.ifPresent(GamePhase::start);
       this.state = state;
       SkywarsArena source = match.getArena().getSource();
       if (source != null) source.getSignHandler().update();
@@ -90,11 +89,11 @@ public final class SkywarsPhaseCycler {
 
 
   @Synchronized
-  public Optional<SkywarsPhase> findPhase(SkywarsMatchState state) {
+  public Optional<GamePhase> findPhase(GameMatchState state) {
     return Optional.ofNullable(phaseMap.get(state));
   }
 
-  public Optional<SkywarsPhase> getPhase() {
+  public Optional<GamePhase> getPhase() {
     return findPhase(getState());
   }
 
@@ -103,13 +102,13 @@ public final class SkywarsPhaseCycler {
     cycleJump(getMatch().getState());
   }
 
-  public @NonNull SkywarsMatch getMatch() {
-    SkywarsMatch match = this.match.get();
+  public @NonNull GameMatch getMatch() {
+    GameMatch match = this.match.get();
     Preconditions.checkState(match != null, "Match has become invalid");
     return match;
   }
 
-  public Optional<SkywarsMatch> findMatch() {
+  public Optional<GameMatch> findMatch() {
     return Optional.ofNullable(this.match.get());
   }
 

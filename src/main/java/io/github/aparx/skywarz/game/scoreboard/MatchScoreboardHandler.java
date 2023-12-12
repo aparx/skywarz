@@ -1,8 +1,8 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -23,11 +23,11 @@ public final class MatchScoreboardHandler {
   private final @NonNull MatchScoreboard scoreboard;
 
   @Getter(AccessLevel.NONE)
-  private final @NonNull WeakReference<SkywarsMatch> match;
+  private final @NonNull WeakReference<GameMatch> match;
 
-  private final WeakHashMap<SkywarsPlayer, SpecialScoreboard> scoreboardMap = new WeakHashMap<>();
+  private final WeakHashMap<GamePlayer, SpecialScoreboard> scoreboardMap = new WeakHashMap<>();
 
-  public MatchScoreboardHandler(@NonNull MatchScoreboard scoreboard, @NonNull SkywarsMatch match) {
+  public MatchScoreboardHandler(@NonNull MatchScoreboard scoreboard, @NonNull GameMatch match) {
     Preconditions.checkNotNull(scoreboard, "Scoreboard must not be null");
     Preconditions.checkNotNull(match, "Match must not be null");
     this.scoreboard = scoreboard;
@@ -38,20 +38,20 @@ public final class MatchScoreboardHandler {
     return getOrCreateScoreboard(null);
   }
 
-  public SpecialScoreboard getOrCreateScoreboard(@Nullable SkywarsPlayer player) {
+  public SpecialScoreboard getOrCreateScoreboard(@Nullable GamePlayer player) {
     return scoreboardMap.computeIfAbsent(player, (k) ->
         scoreboard.getScoreboard().createScoreboard(getMatch(), k != null ? k.getOnline() : null));
   }
 
-  public Optional<SpecialScoreboard> findScoreboard(@Nullable SkywarsPlayer player) {
+  public Optional<SpecialScoreboard> findScoreboard(@Nullable GamePlayer player) {
     return Optional.ofNullable(scoreboardMap.get(player));
   }
 
-  public Optional<SkywarsMatch> findMatch() {
+  public Optional<GameMatch> findMatch() {
     return Optional.ofNullable(match.get());
   }
 
-  public SkywarsMatch getMatch() {
+  public GameMatch getMatch() {
     return findMatch().orElseThrow();
   }
 

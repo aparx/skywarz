@@ -5,7 +5,7 @@ import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.events.match.MatchCreateEvent;
 import io.github.aparx.skywarz.events.match.MatchJoinEvent;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
@@ -28,16 +28,16 @@ import java.util.function.Function;
  * @version 2023-12-03 06:26
  * @since 1.0
  */
-public final class SkywarsMatchManager extends DefaultSkywarsHandler implements Iterable<SkywarsMatch> {
+public final class GameMatchManager extends DefaultSkywarsHandler implements Iterable<GameMatch> {
 
-  public static final Function<SkywarsArena, SkywarsMatch> DEFAULT_MATCH_FACTORY =
-      (arena) -> new SkywarsMatch(UUID.randomUUID(), arena);
+  public static final Function<SkywarsArena, GameMatch> DEFAULT_MATCH_FACTORY =
+      (arena) -> new GameMatch(UUID.randomUUID(), arena);
 
   private static final SkywarsMatchListener LISTENER = new SkywarsMatchListener();
 
-  private final KeyValueSet<UUID, SkywarsMatch> internalSet = KeyValueSets.ofSnowflake();
-  private final WeakHashMap<SkywarsArena, SkywarsMatch> byArena = new WeakHashMap<>();
-  private final SetMultimap<World, SkywarsMatch> byWorld =
+  private final KeyValueSet<UUID, GameMatch> internalSet = KeyValueSets.ofSnowflake();
+  private final WeakHashMap<SkywarsArena, GameMatch> byArena = new WeakHashMap<>();
+  private final SetMultimap<World, GameMatch> byWorld =
       Multimaps.newSetMultimap(new WeakHashMap<>(), WeakHashSet::new);
 
   @Override
@@ -57,10 +57,10 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
 
   // TODO move to a different (more fitting) place
   @CanIgnoreReturnValue
-  public SkywarsMatch join(@NonNull SkywarsPlayer player, @NonNull SkywarsArena arena) {
-    SkywarsMatchManager matchManager = Skywars.getInstance().getMatchManager();
-    SkywarsMatch match = matchManager.find(arena).orElseGet(() -> {
-      SkywarsMatch newMatch = SkywarsMatchManager.DEFAULT_MATCH_FACTORY.apply(arena);
+  public GameMatch join(@NonNull GamePlayer player, @NonNull SkywarsArena arena) {
+    GameMatchManager matchManager = Skywars.getInstance().getMatchManager();
+    GameMatch match = matchManager.find(arena).orElseGet(() -> {
+      GameMatch newMatch = GameMatchManager.DEFAULT_MATCH_FACTORY.apply(arena);
       Preconditions.checkState(matchManager.register(newMatch), "Could not register match");
       MatchCreateEvent createEvent = new MatchCreateEvent(newMatch);
       Bukkit.getPluginManager().callEvent(createEvent);
@@ -85,7 +85,7 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
 
   @Synchronized
   @CanIgnoreReturnValue
-  public boolean register(@NonNull SkywarsMatch match) {
+  public boolean register(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     SkywarsArena source = match.getArena().getSource();
     Preconditions.checkNotNull(source, "Arena source is invalid");
@@ -98,26 +98,26 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
 
   @Synchronized
   @CanIgnoreReturnValue
-  public SkywarsMatch getOrCreate(
+  public GameMatch getOrCreate(
       @NonNull SkywarsArena arena,
-      @NonNull Function<SkywarsArena, SkywarsMatch> matchFactory) {
+      @NonNull Function<SkywarsArena, GameMatch> matchFactory) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     Preconditions.checkNotNull(matchFactory, "Factory must not be null");
     if (contains(arena)) return get(arena);
-    SkywarsMatch newMatch = matchFactory.apply(arena);
+    GameMatch newMatch = matchFactory.apply(arena);
     Preconditions.checkState(register(newMatch), "Could not register match");
     return newMatch;
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public SkywarsMatch getOrCreate(@NonNull SkywarsArena arena) {
+  public GameMatch getOrCreate(@NonNull SkywarsArena arena) {
     return getOrCreate(arena, DEFAULT_MATCH_FACTORY);
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public boolean add(@NonNull SkywarsMatch match) {
+  public boolean add(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     if (!internalSet.add(match)) return false;
     byArena.put(match.getArena().getSource(), match);
@@ -127,7 +127,7 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
 
   @Synchronized
   @CanIgnoreReturnValue
-  public boolean remove(@NonNull SkywarsMatch match) {
+  public boolean remove(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     if (!internalSet.remove(match)) return false;
     byArena.remove(match.getArena().getSource());
@@ -138,38 +138,38 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
   }
 
   @Synchronized
-  public Optional<SkywarsMatch> find(@NonNull UUID matchId) {
+  public Optional<GameMatch> find(@NonNull UUID matchId) {
     Preconditions.checkNotNull(matchId, "ID must not be null");
     return internalSet.find(matchId);
   }
 
   @Synchronized
-  public Optional<SkywarsMatch> find(@NonNull SkywarsArena arena) {
+  public Optional<GameMatch> find(@NonNull SkywarsArena arena) {
     Preconditions.checkNotNull(arena, "Arena must not be null");
     return Optional.ofNullable(byArena.get(arena));
   }
 
   @Synchronized
-  public Set<SkywarsMatch> find(@NonNull World world) {
+  public Set<GameMatch> find(@NonNull World world) {
     Preconditions.checkNotNull(world, "World must not be null");
     return byWorld.get(world);
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public SkywarsMatch get(@NonNull UUID matchId) {
+  public GameMatch get(@NonNull UUID matchId) {
     return find(matchId).orElseThrow();
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public SkywarsMatch get(@NonNull SkywarsArena arena) {
+  public GameMatch get(@NonNull SkywarsArena arena) {
     return find(arena).orElseThrow();
   }
 
   @Synchronized
   @CanIgnoreReturnValue
-  public Set<SkywarsMatch> get(@NonNull World world) {
+  public Set<GameMatch> get(@NonNull World world) {
     return find(world);
   }
 
@@ -179,7 +179,7 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
   }
 
   @Synchronized
-  public boolean contains(SkywarsMatch match) {
+  public boolean contains(GameMatch match) {
     return match != null && internalSet.contains(match);
   }
 
@@ -194,7 +194,7 @@ public final class SkywarsMatchManager extends DefaultSkywarsHandler implements 
   }
 
   @Override
-  public @NonNull Iterator<SkywarsMatch> iterator() {
+  public @NonNull Iterator<GameMatch> iterator() {
     return internalSet.iterator();
   }
 }

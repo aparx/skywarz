@@ -6,8 +6,8 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.command.tree.CommandTree;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.command.skeleton.CommandForest;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.database.object.CachableLazyObjectRegister;
 import io.github.aparx.skywarz.database.object.FetchableObjectState;
@@ -33,7 +33,7 @@ public class StatsCommand extends CommandNode {
 
   private static final int OTHER_ARGUMENT_INDEX = 0;
 
-  private final CommandTree subtree = new CommandTree();
+  private final CommandForest subtree = new CommandForest();
 
   public StatsCommand() {
     super(CommandInfo.builder("stats")

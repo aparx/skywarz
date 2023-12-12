@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.events.match;
 
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -17,9 +17,9 @@ public class MatchEvent extends Event {
   @Getter
   private static final HandlerList handlerList = new HandlerList();
 
-  protected SkywarsMatch match;
+  protected GameMatch match;
 
-  public MatchEvent(SkywarsMatch match) {
+  public MatchEvent(GameMatch match) {
     this.match = match;
   }
 

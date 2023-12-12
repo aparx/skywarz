@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.command.tree;
+package io.github.aparx.skywarz.command.skeleton;
 
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
@@ -21,7 +21,7 @@ import java.util.logging.Level;
  * @since 1.0
  */
 @Getter
-public final class CommandTree implements CommandNodeExecutor {
+public final class CommandForest implements CommandNodeExecutor {
 
   private final CommandNodeSet roots = new CommandNodeSet(null);
 

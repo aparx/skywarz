@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.tree.CommandNode;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import org.bukkit.Location;
 import org.bukkit.World;

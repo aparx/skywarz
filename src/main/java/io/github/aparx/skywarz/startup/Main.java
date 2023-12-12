@@ -3,8 +3,6 @@ package io.github.aparx.skywarz.startup;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.SkywarsCommand;
-import io.github.aparx.skywarz.game.listener.BungeeListener;
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 

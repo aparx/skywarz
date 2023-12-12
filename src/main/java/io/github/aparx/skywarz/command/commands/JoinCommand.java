@@ -6,7 +6,7 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.language.LocalizableError;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.language.MessageKeys;
@@ -34,7 +34,7 @@ public class JoinCommand extends AbstractArenaCommand {
     if (args.length() != 1) context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
       Player entity = context.getPlayer();
-      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      GamePlayer player = GamePlayer.getPlayer(entity);
       PlayerMatchData data = player.getMatchData();
       if (data.isInMatch())
         throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.IN_A_MATCH));

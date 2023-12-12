@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.game.phase.features;
 
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import lombok.experimental.UtilityClass;
 
@@ -12,7 +12,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public final class LevelAnimator {
 
-  public static void animate(SkywarsPhase phase, int secondsLeft) {
+  public static void animate(GamePhase phase, int secondsLeft) {
     long duration = phase.getDuration().toTicks();
     long elapsed = phase.getTicker().getElapsed(TimeUnit.TICKS);
     float exp = calcExp(duration, elapsed);

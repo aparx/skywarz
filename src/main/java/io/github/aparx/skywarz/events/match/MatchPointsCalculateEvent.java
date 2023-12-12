@@ -1,9 +1,9 @@
 package io.github.aparx.skywarz.events.match;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import lombok.Setter;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -22,7 +22,7 @@ import javax.annotation.Signed;
 @Getter
 public class MatchPointsCalculateEvent extends MatchEvent {
 
-  private final @NonNull SkywarsPlayer player;
+  private final @NonNull GamePlayer player;
   private final @NonNull PlayerStatsAccumulator matchStats;
 
   /**
@@ -34,8 +34,8 @@ public class MatchPointsCalculateEvent extends MatchEvent {
   private @Signed int points;
 
   public MatchPointsCalculateEvent(
-      @NonNull SkywarsMatch match,
-      @NonNull SkywarsPlayer player,
+      @NonNull GameMatch match,
+      @NonNull GamePlayer player,
       @NonNull PlayerStatsAccumulator matchStats) {
     super(match);
     Preconditions.checkNotNull(match, "Match must not be null");

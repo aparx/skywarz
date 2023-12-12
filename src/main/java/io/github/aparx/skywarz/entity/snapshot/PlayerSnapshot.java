@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.entity.snapshot;
 
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.bukkit.Bukkit;
@@ -62,7 +62,7 @@ public final class PlayerSnapshot {
         new WeakReference<>(player.getScoreboard()));
   }
 
-  public static PlayerSnapshot ofSpectator(@NonNull SkywarsMatch match, @NonNull Player player) {
+  public static PlayerSnapshot ofSpectator(@NonNull GameMatch match, @NonNull Player player) {
     return new PlayerSnapshot(new ItemStack[player.getInventory().getContents().length],
         List.of(), match.getArena().getData().getSpectator(), 2, 2, 20, player.getDisplayName(),
         player.getPlayerListName(), GameMode.ADVENTURE, true, true, 0.1F, 0F, 0, null);

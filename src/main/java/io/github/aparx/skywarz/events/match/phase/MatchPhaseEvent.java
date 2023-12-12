@@ -2,8 +2,8 @@ package io.github.aparx.skywarz.events.match.phase;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.events.match.MatchEvent;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.phase.GamePhase;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -15,9 +15,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Getter
 public class MatchPhaseEvent extends MatchEvent {
 
-  private final @NonNull SkywarsPhase phase;
+  private final @NonNull GamePhase phase;
 
-  public MatchPhaseEvent(SkywarsMatch match, @NonNull SkywarsPhase phase) {
+  public MatchPhaseEvent(GameMatch match, @NonNull GamePhase phase) {
     super(match);
     Preconditions.checkNotNull(phase, "Phase must not be null");
     this.phase = phase;

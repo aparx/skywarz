@@ -2,18 +2,17 @@ package io.github.aparx.skywarz.game.phase.phases.done;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.game.phase.GamePhase;
+import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
-import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.phase.features.GameSpectator;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.handler.MainConfig;
@@ -37,24 +36,24 @@ import java.util.concurrent.ThreadLocalRandom;
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class DonePhase extends SkywarsPhase {
+public class DonePhase extends GamePhase {
 
-  public DonePhase(@NonNull SkywarsPhaseCycler cycler) {
-    super(SkywarsMatchState.DONE, cycler,
-        MainConfig.getInstance().getPhaseDuration(SkywarsMatchState.DONE),
+  public DonePhase(@NonNull GamePhaseCycler cycler) {
+    super(GameMatchState.DONE, cycler,
+        MainConfig.getInstance().getPhaseDuration(GameMatchState.DONE),
         TickDuration.of(TimeUnit.TICKS, 2));
     setListener(new DoneListener(this));
   }
 
   @Override
-  public void handleJoin(SkywarsPlayer player) {
+  public void handleJoin(GamePlayer player) {
     throw new IllegalStateException("Cannot join during DONE state");
   }
 
   @Override
   protected void onStart() {
     super.onStart();
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     GameTeam won = match.getWinner();
     final boolean hasWinner = won != null;
     Language language = Language.getInstance();
@@ -67,10 +66,10 @@ public class DonePhase extends SkywarsPhase {
         .get(MessageKeys.Match.TEAM_WON)
         .substitute(won, ArrayPath.of("team"));
     match.getAudience().entity().forEach((entity) -> {
-      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      GamePlayer player = GamePlayer.getPlayer(entity);
       if (!player.getMatchData().isSpectator())
         match.applyStats(player); // apply stats since player is not dead already
-      SkywarsSpectator.removeSpectator(match, entity);
+      GameSpectator.removeSpectator(match, entity);
       PlayerSnapshot.ofReset(entity, GameMode.ADVENTURE).restore(entity);
       entity.teleport(match.getArena().getData().getLobby());
       entity.getInventory().setItem(LeaveItem.SLOT,
@@ -103,7 +102,7 @@ public class DonePhase extends SkywarsPhase {
 
   @Override
   protected void updateTick() {
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     long duration = getDuration().toSeconds();
     long secsLeft = duration - getTicker().getElapsed(TimeUnit.SECONDS);
     if (getTicker().isCycling(TimeUnit.SECONDS)) {
@@ -125,7 +124,7 @@ public class DonePhase extends SkywarsPhase {
   }
 
   private void spawnFireworks(MainConfig mainConfig, Color color) {
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     Location location = match.getArena().getData().getLobby();
     Location mutable = location.clone();
     Random random = ThreadLocalRandom.current();

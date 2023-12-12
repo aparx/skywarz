@@ -7,8 +7,8 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.SkywarsCommand;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.command.tree.CommandNodeSet;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.command.skeleton.CommandNodeSet;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.PaginationUtils;
@@ -31,7 +31,7 @@ public final class HelpCommand extends CommandNode {
       Suppliers.memoize(new Supplier<ImmutableList<CommandNode>>() {
         @Override
         public ImmutableList<CommandNode> get() {
-          CommandNodeSet roots = SkywarsCommand.tree.getRoots();
+          CommandNodeSet roots = SkywarsCommand.forest.getRoots();
           ImmutableList.Builder<CommandNode> builder = ImmutableList.builder();
           for (CommandNode root : roots) accumulate(builder, root);
           return builder.build();

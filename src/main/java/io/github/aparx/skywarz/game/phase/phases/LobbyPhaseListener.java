@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.phase.phases;
 
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseListener;
+import io.github.aparx.skywarz.game.phase.GamePhase;
+import io.github.aparx.skywarz.game.phase.GamePhaseListener;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -22,9 +22,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version 2023-12-07 10:49
  * @since 1.0
  */
-public class LobbyPhaseListener extends SkywarsPhaseListener<SkywarsPhase> {
+public class LobbyPhaseListener extends GamePhaseListener<GamePhase> {
 
-  public LobbyPhaseListener(@NonNull SkywarsPhase phase) {
+  public LobbyPhaseListener(@NonNull GamePhase phase) {
     super(phase);
   }
 

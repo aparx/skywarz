@@ -2,20 +2,17 @@ package io.github.aparx.skywarz.game.listener;
 
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.events.match.MatchCreateEvent;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.events.match.phase.MatchPhaseStopEvent;
-import io.github.aparx.skywarz.events.match.phase.MatchPhaseTickEvent;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.*;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
-import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -28,7 +25,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.ServerListPingEvent;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -76,7 +72,7 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
     Player player = event.getPlayer();
     try {
       Skywars.getInstance().getMatchManager().join(
-          SkywarsPlayer.getPlayer(player), getBungeeArena());
+          GamePlayer.getPlayer(player), getBungeeArena());
     } catch (Exception e) {
       Skywars.logger().log(Level.FINE, "Player could not join (although required)", e);
       String errorMessage = !(e instanceof LocalizableError)
@@ -109,25 +105,25 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
 
   @EventHandler(priority = EventPriority.LOW)
   void onEnd(MatchPhaseStopEvent event) {
-    if (isBungeecord() && SkywarsMatchState.DONE.equals(event.getPhase().getState())) {
+    if (isBungeecord() && GameMatchState.DONE.equals(event.getPhase().getState())) {
       Bukkit.getServer().shutdown();
       Skywars.logger().log(Level.INFO,
           "Match {0} completed, shutting down server",
-          Optional.ofNullable(event.getMatch()).map(SkywarsMatch::getId));
+          Optional.ofNullable(event.getMatch()).map(GameMatch::getId));
     }
   }
 
   @EventHandler(priority = EventPriority.LOW)
   void onEnd(ServerListPingEvent event) {
     if (isBungeecord()) try {
-      Iterator<SkywarsMatch> iterator = Skywars.getInstance().getMatchManager().iterator();
+      Iterator<GameMatch> iterator = Skywars.getInstance().getMatchManager().iterator();
       SkywarsArena bungeeArena = getBungeeArena();
       LazyVariableLookup lookup = new LazyVariableLookup();
       VariablePopulator.addArenaOrAcquiree(lookup, bungeeArena, ArrayPath.of());
       if (iterator.hasNext())
         VariablePopulator.addMatch(lookup, iterator.next(), ArrayPath.of());
       event.setMotd(MainConfig.getInstance().getDedicatedMotd().stream().limit(2)
-          .map((x) -> Language.getInstance().substitute(x, lookup))
+          .map((line) -> Language.getInstance().substitute(line, lookup))
           .collect(Collectors.joining("\n")));
     } catch (Exception ignored) {}
   }

@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.inventory;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.game.inventory.content.InventoryContentView;
 import io.github.aparx.skywarz.utils.collection.WeakHashSet;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -208,7 +208,7 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
           int slot = event.getSlot();
           if (event.getCurrentItem() != null
               && slot >= 0 && slot < getDimensions().size()) {
-            SkywarsPlayer player = SkywarsPlayer.getPlayer((Player) whoClicked);
+            GamePlayer player = GamePlayer.getPlayer((Player) whoClicked);
             content.find(slot).ifPresent((item) -> item.click(player, event));
           }
         },

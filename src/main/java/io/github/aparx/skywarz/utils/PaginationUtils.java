@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.utils;
 
 import io.github.aparx.skywarz.command.CommandContext;
-import io.github.aparx.skywarz.command.tree.CommandNode;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

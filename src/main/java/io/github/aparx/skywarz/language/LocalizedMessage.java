@@ -3,9 +3,9 @@ package io.github.aparx.skywarz.language;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.text.StringSubstitutor;
@@ -104,7 +104,7 @@ public final class LocalizedMessage {
     return substitute(valueMap);
   }
 
-  public String substitute(@NonNull SkywarsPlayer player, @NonNull ArrayPath prefix) {
+  public String substitute(@NonNull GamePlayer player, @NonNull ArrayPath prefix) {
     LazyVariableLookup map = new LazyVariableLookup();
     player.findOnline().ifPresent((o) -> VariablePopulator.addPlayer(map, o, prefix));
     return substitute(map);
@@ -128,7 +128,7 @@ public final class LocalizedMessage {
     return substitute(map);
   }
 
-  public String substitute(@NonNull SkywarsMatch match, @NonNull ArrayPath prefix) {
+  public String substitute(@NonNull GameMatch match, @NonNull ArrayPath prefix) {
     LazyVariableLookup map = new LazyVariableLookup();
     VariablePopulator.addMatch(map, match, prefix);
     return substitute(map);

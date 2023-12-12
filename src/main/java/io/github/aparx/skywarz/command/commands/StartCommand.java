@@ -4,12 +4,12 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.game.phase.GamePhase;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
@@ -34,16 +34,16 @@ public class StartCommand extends CommandNode {
 
   @Override
   public void execute(CommandContext context, CommandArgList args) {
-    SkywarsPlayer player = SkywarsPlayer.getPlayer(context.getPlayer());
+    GamePlayer player = GamePlayer.getPlayer(context.getPlayer());
     PlayerMatchData data = player.getMatchData();
     if (!data.isInMatch())
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
     try {
-      SkywarsMatch match = data.getMatch();
+      GameMatch match = data.getMatch();
       Preconditions.checkNotNull(match);
-      Preconditions.checkState(match.isState(SkywarsMatchState.IDLE));
+      Preconditions.checkState(match.isState(GameMatchState.IDLE));
       Preconditions.checkState(match.getAudience().size() >= match.getMinPlayerCount());
-      SkywarsPhase phase = match.getCycler().getPhase().orElseThrow();
+      GamePhase phase = match.getCycler().getPhase().orElseThrow();
       TickDuration passed = phase.getDuration().add(QUICKSTART_TARGET.multiply(-1));
       Preconditions.checkState(!phase.getTicker().hasElapsed(passed));
       phase.getTicker().set(passed);

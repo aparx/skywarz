@@ -11,31 +11,31 @@ import java.util.stream.Stream;
  * @version 2023-12-04 10:54
  * @since 1.0
  */
-public class WeakPlayerGroup extends WeakGroupAudience<SkywarsPlayer> {
+public class WeakPlayerGroup extends WeakGroupAudience<GamePlayer> {
 
   public WeakPlayerGroup() {}
 
-  public WeakPlayerGroup(Collection<? extends SkywarsPlayer> initialMembers) {
+  public WeakPlayerGroup(Collection<? extends GamePlayer> initialMembers) {
     super(initialMembers);
   }
 
-  public Stream<? extends SkywarsPlayer> online() {
-    return stream().filter(SkywarsPlayer::isOnline);
+  public Stream<? extends GamePlayer> online() {
+    return stream().filter(GamePlayer::isOnline);
   }
 
   /** Returns a stream of all online and alive players (non-spectators) */
-  public Stream<? extends SkywarsPlayer> alive() {
+  public Stream<? extends GamePlayer> alive() {
     return online().filter((player) -> !player.getMatchData().isSpectator());
   }
 
   /** Returns a stream of all online and dead players (spectators) */
-  public Stream<? extends SkywarsPlayer> dead() {
+  public Stream<? extends GamePlayer> dead() {
     return online().filter((player) -> player.getMatchData().isSpectator());
   }
 
   /** Returns a stream of all online and dead players (spectators) */
   public Stream<? extends Player> entity() {
-    return online().map(SkywarsPlayer::findOnline).filter(Optional::isPresent).map(Optional::get);
+    return online().map(GamePlayer::findOnline).filter(Optional::isPresent).map(Optional::get);
   }
 
   public int getOnlineCount() {

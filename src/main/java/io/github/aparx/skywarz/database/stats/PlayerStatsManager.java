@@ -4,9 +4,8 @@ import com.google.common.base.Preconditions;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.DaoManager;
 import com.j256.ormlite.table.TableUtils;
-import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.database.DatabaseObjectManager;
-import io.github.aparx.skywarz.database.SkywarsDatabase;
+import io.github.aparx.skywarz.database.GameDatabase;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.database.object.CachableLazyObjectRegister;
 import io.github.aparx.skywarz.entity.data.types.PlayerStatsAccumulator;
@@ -29,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public final class PlayerStatsManager extends DatabaseObjectManager {
 
-  public PlayerStatsManager(@NonNull SkywarsDatabase database) {
+  public PlayerStatsManager(@NonNull GameDatabase database) {
     super(database);
   }
 
@@ -51,7 +50,7 @@ public final class PlayerStatsManager extends DatabaseObjectManager {
 
   @Override
   public CompletableFuture<Void> register() throws SQLException {
-    SkywarsDatabase database = getDatabase();
+    GameDatabase database = getDatabase();
     Preconditions.checkState(database.isEnabled(), "Database is not enabled");
     registry.register();
     DaoManager.createDao(database.getSource(), PlayerDatabaseStats.class);

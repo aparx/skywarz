@@ -21,17 +21,17 @@ import java.util.logging.Level;
  * @version 2023-12-04 10:50
  * @since 1.0
  */
-public final class SkywarsMatchWatchTask {
+public final class GameMatchWatchTask {
 
   private BukkitTask task;
 
   private final TickDuration interval = TickDuration.of(TimeUnit.SECONDS, 5);
 
-  private final WeakReference<SkywarsMatch> match;
+  private final WeakReference<GameMatch> match;
 
   private final Ticker playerlessTicker = new TimeTicker(interval);
 
-  public SkywarsMatchWatchTask(@NonNull SkywarsMatch match) {
+  public GameMatchWatchTask(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     this.match = new WeakReference<>(match);
   }
@@ -56,15 +56,15 @@ public final class SkywarsMatchWatchTask {
     return true;
   }
 
-  public @NonNull SkywarsMatch getMatch() {
-    SkywarsMatch match = this.match.get();
+  public @NonNull GameMatch getMatch() {
+    GameMatch match = this.match.get();
     Preconditions.checkState(match != null, "Match has become invalid");
     return match;
   }
 
   public void tick(@NonNull TickDuration minPlayerlessTimeForRemoval) {
     try {
-      SkywarsMatch match = getMatch();
+      GameMatch match = getMatch();
       WeakPlayerGroup audience = match.getAudience();
       if (audience.online().findAny().isEmpty()) {
         playerlessTicker.tick();

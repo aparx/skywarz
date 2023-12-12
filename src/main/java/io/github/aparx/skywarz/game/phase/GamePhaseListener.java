@@ -2,9 +2,9 @@ package io.github.aparx.skywarz.game.phase;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -22,14 +22,14 @@ import java.util.function.Function;
  * @since 1.0
  */
 @Getter
-public abstract class SkywarsPhaseListener<T extends SkywarsPhase> implements Listener {
+public abstract class GamePhaseListener<T extends GamePhase> implements Listener {
 
   private final @NonNull T phase;
 
-  private final Function<SkywarsPlayer, Optional<SkywarsMatch>> playerFilter = (player) -> {
-    Optional<SkywarsMatch> matchQuery = getPhase().findMatch();
+  private final Function<GamePlayer, Optional<GameMatch>> playerFilter = (player) -> {
+    Optional<GameMatch> matchQuery = getPhase().findMatch();
     if (matchQuery.isEmpty()) return Optional.empty();
-    SkywarsMatch match = matchQuery.get();
+    GameMatch match = matchQuery.get();
     return player.getPlayerData()
         .find(PlayerMatchData.class)
         .filter(PlayerMatchData::isInMatch)
@@ -37,7 +37,7 @@ public abstract class SkywarsPhaseListener<T extends SkywarsPhase> implements Li
         .map((x) -> match);
   };
 
-  public SkywarsPhaseListener(@NonNull T phase) {
+  public GamePhaseListener(@NonNull T phase) {
     Preconditions.checkNotNull(phase, "Phase must not be null");
     this.phase = phase;
   }
@@ -50,11 +50,11 @@ public abstract class SkywarsPhaseListener<T extends SkywarsPhase> implements Li
     HandlerList.unregisterAll(this);
   }
 
-  protected Optional<SkywarsMatch> filterMatchFromPlayer(Player entity) {
-    return SkywarsPlayer.findPlayer(entity).flatMap(playerFilter);
+  protected Optional<GameMatch> filterMatchFromPlayer(Player entity) {
+    return GamePlayer.findPlayer(entity).flatMap(playerFilter);
   }
 
-  protected Optional<SkywarsMatch> filterMatch(SkywarsMatch match) {
+  protected Optional<GameMatch> filterMatch(GameMatch match) {
     return Optional.ofNullable(match).filter((data) -> {
       return Objects.equals(data, getPhase().findMatch().orElse(null));
     });

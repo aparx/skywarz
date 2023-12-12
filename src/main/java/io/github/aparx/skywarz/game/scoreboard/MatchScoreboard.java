@@ -1,6 +1,6 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.scoreboard.playing.PlayingScoreboard;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.Getter;
@@ -20,7 +20,7 @@ import java.util.List;
 public enum MatchScoreboard {
 
   IDLE(new GameScoreboard(
-      SkywarsMatchState.IDLE, TickDuration.ofSecond(), "    §lLobby§r    ",
+      GameMatchState.IDLE, TickDuration.ofSecond(), "    §lLobby§r    ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -31,7 +31,7 @@ public enum MatchScoreboard {
       ))),
 
   PLAYING_ALIVE(new PlayingScoreboard(
-      SkywarsMatchState.PLAYING, "alive", TickDuration.ofSecond(), " §b§lSKYWARZ§r ",
+      GameMatchState.PLAYING, "alive", TickDuration.ofSecond(), " §b§lSKYWARZ§r ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -48,7 +48,7 @@ public enum MatchScoreboard {
       ))),
 
   PLAYING_DEAD(new PlayingScoreboard(
-      SkywarsMatchState.PLAYING, "dead", TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
+      GameMatchState.PLAYING, "dead", TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
       List.of(
           StringUtils.SPACE,
           "Map:",
@@ -62,7 +62,7 @@ public enum MatchScoreboard {
       ))),
 
   DONE(new GameScoreboard(
-      SkywarsMatchState.DONE, TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
+      GameMatchState.DONE, TickDuration.ofSecond(), "  §b§lSKYWARZ§r  ",
       List.of(
           StringUtils.SPACE,
           "Map:",

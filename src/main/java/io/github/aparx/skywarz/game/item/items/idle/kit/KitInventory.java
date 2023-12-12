@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.item.items.idle.kit;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.game.inventory.SpecialInventory;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
 import io.github.aparx.skywarz.game.inventory.InventoryItem;
@@ -12,7 +12,7 @@ import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
 import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryContent;
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
 import io.github.aparx.skywarz.game.kit.SkywarsKit;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
 import io.github.aparx.skywarz.language.Language;
@@ -57,10 +57,10 @@ public class KitInventory extends PaginatingInventory {
   private static final InventoryPosition KIT_BUTTON_EQUIP = InventoryPosition.ofPoint(7, 0);
   private static final InventoryPosition KIT_BUTTON_CANCEL = InventoryPosition.ofPoint(7, 2);
 
-  private final @NonNull SkywarsMatch match;
-  private final @NonNull SkywarsPlayer viewer;
+  private final @NonNull GameMatch match;
+  private final @NonNull GamePlayer viewer;
 
-  public KitInventory(@NonNull SkywarsMatch match, @NonNull SkywarsPlayer viewer, @NonNull String title) {
+  public KitInventory(@NonNull GameMatch match, @NonNull GamePlayer viewer, @NonNull String title) {
     super(null, TickDuration.ofSecond(), DIMENSION_MIN, DIMENSION_MAX, new ArrayList<>(), title);
     Preconditions.checkNotNull(match, "Match must not be null");
     Preconditions.checkNotNull(viewer, "Viewer must not be null");
@@ -144,7 +144,7 @@ public class KitInventory extends PaginatingInventory {
     }
 
     @Override
-    public void click(SkywarsPlayer player, InventoryClickEvent event) {
+    public void click(GamePlayer player, InventoryClickEvent event) {
       Preconditions.checkState(player.equals(viewer));
       event.setCancelled(true);
       SpecialInventory<PaginatableInventoryContent> kitInventory =

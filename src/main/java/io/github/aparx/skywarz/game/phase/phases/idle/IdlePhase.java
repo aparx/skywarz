@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.phase.phases.idle;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
@@ -12,10 +12,10 @@ import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
 import io.github.aparx.skywarz.game.item.items.idle.QuickstartItem;
 import io.github.aparx.skywarz.game.item.items.idle.TeamSelectorItem;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseCycler;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.game.phase.GamePhase;
+import io.github.aparx.skywarz.game.phase.GamePhaseCycler;
 import io.github.aparx.skywarz.game.phase.features.LevelAnimator;
 import io.github.aparx.skywarz.game.phase.phases.LobbyPhaseListener;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
@@ -41,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version 2023-12-04 01:58
  * @since 1.0
  */
-public class IdlePhase extends SkywarsPhase {
+public class IdlePhase extends GamePhase {
 
   private final Ticker trigger;
 
@@ -50,10 +50,10 @@ public class IdlePhase extends SkywarsPhase {
 
   private long secsLeft;
 
-  public IdlePhase(@NonNull SkywarsPhaseCycler cycler) {
-    super(SkywarsMatchState.IDLE, cycler,
+  public IdlePhase(@NonNull GamePhaseCycler cycler) {
+    super(GameMatchState.IDLE, cycler,
         !Magics.isDevelopment()
-            ? MainConfig.getInstance().getPhaseDuration(SkywarsMatchState.IDLE)
+            ? MainConfig.getInstance().getPhaseDuration(GameMatchState.IDLE)
             : Magics.DEV_IDLE_DURATION,
         /* Update all two ticks to save performance */
         TickDuration.of(TimeUnit.TICKS, 2));
@@ -62,10 +62,10 @@ public class IdlePhase extends SkywarsPhase {
   }
 
   @Override
-  public void handleJoin(SkywarsPlayer player) {
+  public void handleJoin(GamePlayer player) {
     // Manage entity
     Player entity = player.getOnline();
-    SkywarsMatch match = getMatch();
+    GameMatch match = getMatch();
     // show IDLE scoreboard
     match.getScoreboardHandlers()
         .getHandler(MatchScoreboard.IDLE)
@@ -86,8 +86,8 @@ public class IdlePhase extends SkywarsPhase {
   @Override
   protected void updateTick() {
     Ticker ticker = getTicker();
-    SkywarsMatch match = getMatch();
-    WeakGroupAudience<SkywarsPlayer> players = match.getAudience();
+    GameMatch match = getMatch();
+    WeakGroupAudience<GamePlayer> players = match.getAudience();
     final int minPlayers = match.getMinPlayerCount();
     final int playerSize = players.size();
     int missingPlayerAmount = minPlayers - playerSize;

@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
@@ -33,9 +33,9 @@ public class SkywarsMatchListener implements Listener {
 
   @EventHandler
   void onQuit(PlayerQuitEvent event) {
-    SkywarsPlayer.findPlayer(event.getPlayer()).ifPresent((player) -> {
+    GamePlayer.findPlayer(event.getPlayer()).ifPresent((player) -> {
       PlayerMatchData matchData = player.getMatchData();
-      SkywarsMatch match = matchData.getMatch();
+      GameMatch match = matchData.getMatch();
       if (matchData.isInMatch() && match != null)
         match.leave(player);
     });
@@ -45,12 +45,12 @@ public class SkywarsMatchListener implements Listener {
   void onGeneralChat(AsyncPlayerChatEvent event) {
     Player entity = event.getPlayer();
     if (event.isCancelled()) return;
-    SkywarsPlayer.findPlayer(entity).ifPresent((player) -> {
+    GamePlayer.findPlayer(entity).ifPresent((player) -> {
       PlayerMatchData matchData = player.getMatchData();
-      SkywarsMatch match = matchData.getMatch();
+      GameMatch match = matchData.getMatch();
       if (matchData.isInMatch() && match != null) {
         event.setCancelled(true);
-        if (!match.isState(SkywarsMatchState.PLAYING)) {
+        if (!match.isState(GameMatchState.PLAYING)) {
           match.getAudience().sendMessage("%s: %s", entity.getDisplayName(), event.getMessage());
         } else if (matchData.isSpectator()) {
           LazyVariableLookup lookup = new LazyVariableLookup();

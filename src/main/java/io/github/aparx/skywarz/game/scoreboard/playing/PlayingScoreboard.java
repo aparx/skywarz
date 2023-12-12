@@ -1,8 +1,8 @@
 package io.github.aparx.skywarz.game.scoreboard.playing;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.scoreboard.GameScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.ScoreboardContent;
 import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
@@ -24,7 +24,7 @@ import java.util.List;
 public class PlayingScoreboard extends GameScoreboard {
 
   public PlayingScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @Nullable String name,
       @NonNull TickDuration intervalUpdate,
       @Nullable String initialTitle) {
@@ -32,7 +32,7 @@ public class PlayingScoreboard extends GameScoreboard {
   }
 
   public PlayingScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
       @NonNull List<String> initialTemplateLines) {
@@ -40,7 +40,7 @@ public class PlayingScoreboard extends GameScoreboard {
   }
 
   public PlayingScoreboard(
-      @NonNull SkywarsMatchState state,
+      @NonNull GameMatchState state,
       @Nullable String name,
       @NonNull TickDuration updateInterval,
       @Nullable String initialTitle,
@@ -51,7 +51,7 @@ public class PlayingScoreboard extends GameScoreboard {
 
   @Override
   protected ScoreboardContent createContent(
-      @NonNull SpecialScoreboard special, @NonNull SkywarsMatch match, @Nullable Player viewer) {
+      @NonNull SpecialScoreboard special, @NonNull GameMatch match, @Nullable Player viewer) {
     Scoreboard scoreboard = special.getScoreboard();
     Preconditions.checkNotNull(scoreboard, "Scoreboard is null");
     TeamMap teamMap = match.getTeamMap();

@@ -1,8 +1,8 @@
 package io.github.aparx.skywarz.events.match;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.entity.GamePlayer;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -19,14 +19,14 @@ public class MatchLeaveEvent extends MatchEvent {
 
   private final @NonNull Player entity;
 
-  public MatchLeaveEvent(@NonNull SkywarsMatch match, @NonNull Player entity) {
+  public MatchLeaveEvent(@NonNull GameMatch match, @NonNull Player entity) {
     super(match);
     Preconditions.checkNotNull(entity, "Entity must not be null");
     this.entity = entity;
   }
 
-  public @NonNull SkywarsPlayer getPlayer() {
-    return SkywarsPlayer.getPlayer(getEntity());
+  public @NonNull GamePlayer getPlayer() {
+    return GamePlayer.getPlayer(getEntity());
   }
 
 }

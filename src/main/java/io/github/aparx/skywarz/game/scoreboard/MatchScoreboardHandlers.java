@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.game.scoreboard;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
+import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.AccessLevel;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -19,12 +19,12 @@ import java.util.Optional;
 public final class MatchScoreboardHandlers {
 
   @Getter(AccessLevel.NONE)
-  private final @NonNull WeakReference<SkywarsMatch> match;
+  private final @NonNull WeakReference<GameMatch> match;
 
   private final EnumMap<MatchScoreboard, MatchScoreboardHandler> handlers =
       new EnumMap<>(MatchScoreboard.class);
 
-  public MatchScoreboardHandlers(@NonNull SkywarsMatch match) {
+  public MatchScoreboardHandlers(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");
     this.match = new WeakReference<>(match);
   }
@@ -38,11 +38,11 @@ public final class MatchScoreboardHandlers {
     handlers.clear();
   }
 
-  public Optional<SkywarsMatch> findMatch() {
+  public Optional<GameMatch> findMatch() {
     return Optional.ofNullable(match.get());
   }
 
-  public SkywarsMatch getMatch() {
+  public GameMatch getMatch() {
     return findMatch().orElseThrow();
   }
 

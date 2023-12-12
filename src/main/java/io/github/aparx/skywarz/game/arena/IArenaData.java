@@ -11,6 +11,7 @@ import org.bukkit.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,7 +30,7 @@ public interface IArenaData extends CompletableSetup {
 
   @NonNull World getWorld();
 
-  @NonNull Map<String, SpawnGroup> getSpawns();
+  @NonNull EnumMap<TeamEnum, SpawnGroup> getSpawns();
 
   @NonNull GameSettings getSettings();
 
@@ -42,7 +43,7 @@ public interface IArenaData extends CompletableSetup {
   }
 
   default Optional<SpawnGroup> getSpawns(@NonNull TeamEnum team) {
-    return Optional.ofNullable(getSpawns().get(team.name()));
+    return Optional.ofNullable(getSpawns().get(team));
   }
 
   static @NonNull World getWorldFromReference(WeakReference<World> reference) {

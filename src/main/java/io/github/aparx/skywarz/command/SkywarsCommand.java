@@ -15,10 +15,10 @@ import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetPointComman
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetSpectatorCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetTeamSize;
 import io.github.aparx.skywarz.command.commands.stats.StatsResetCommand;
-import io.github.aparx.skywarz.command.tree.CommandBuilder;
-import io.github.aparx.skywarz.command.tree.CommandNode;
-import io.github.aparx.skywarz.command.tree.CommandNodeSet;
-import io.github.aparx.skywarz.command.tree.CommandTree;
+import io.github.aparx.skywarz.command.skeleton.CommandBuilder;
+import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.command.skeleton.CommandNodeSet;
+import io.github.aparx.skywarz.command.skeleton.CommandForest;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
@@ -27,6 +27,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.Plugin;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,10 +39,10 @@ import java.util.stream.Collectors;
  */
 public class SkywarsCommand implements CommandExecutor, TabCompleter {
 
-  public static final CommandTree tree = buildTree();
+  public static final CommandForest forest = buildForest();
 
-  private static CommandTree buildTree() {
-    CommandTree tree = new CommandTree();
+  private static CommandForest buildForest() {
+    CommandForest tree = new CommandForest();
     CommandNodeSet roots = tree.getRoots();
     // /skywars help <...>
     roots.add(new HelpCommand());
@@ -92,8 +93,11 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
   }
 
   @Override
-  public boolean onCommand(CommandSender sender, Command command, String label,
-                           String[] args) {
+  public boolean onCommand(
+      @NonNull CommandSender sender,
+      @NonNull Command command,
+      @NonNull String label,
+      String @NonNull [] args) {
     CommandArgList newArgs = CommandArgList.of(args);
     if (newArgs.isEmpty()) {
       Plugin plugin = Preconditions.checkNotNull(Skywars.plugin());
@@ -104,22 +108,25 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
           plugin.getName(),
           plugin.getDescription().getVersion()));
     }
-    tree.execute(new CommandContext(command, sender, newArgs, label), newArgs);
+    forest.execute(new CommandContext(command, sender, newArgs, label), newArgs);
     return true;
   }
 
 
   @Override
   public List<String> onTabComplete(
-      CommandSender sender, Command command, String label, String[] args) {
+      @NonNull CommandSender sender,
+      @NonNull Command command,
+      @NonNull String label,
+      String @NonNull [] args) {
     final CommandArgList newArgs = CommandArgList.of(args);
     CommandContext context = new CommandContext(command, sender, newArgs, label);
-    Optional<CommandNode> optNode = tree.locateLeaf(context, newArgs);
+    Optional<CommandNode> optNode = forest.locateLeaf(context, newArgs);
     if (context.isStatus(CommandContext.Status.ERROR_PERMISSION))
       return null;
     List<String> suggestions =
         optNode.<Collection<CommandNode>>map(CommandNode::getChildren)
-            .orElseGet(tree::getRoots).stream()
+            .orElseGet(forest::getRoots).stream()
             .filter((node) -> newArgs.length() <= 1 + node.getIndex())
             .filter((node) -> node.hasPermission(sender))
             .map((node) -> node.getInfo().getName())

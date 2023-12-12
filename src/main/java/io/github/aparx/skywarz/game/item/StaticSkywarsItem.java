@@ -2,8 +2,8 @@ package io.github.aparx.skywarz.game.item;
 
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.entity.Player;
@@ -22,15 +22,15 @@ public abstract class StaticSkywarsItem extends SkywarsItem {
   @Document("The position of the item in the inventory (0 through 8)")
   private int slot = 0;
 
-  public StaticSkywarsItem(@NonNull String name, @NonNull SkywarsMatchState[] states) {
+  public StaticSkywarsItem(@NonNull String name, @NonNull GameMatchState[] states) {
     super(name, states);
   }
 
-  public StaticSkywarsItem(@NonNull String name, @NonNull SkywarsMatchState[] states, int flags) {
+  public StaticSkywarsItem(@NonNull String name, @NonNull GameMatchState[] states, int flags) {
     super(name, states, flags);
   }
 
-  public void give(@NonNull SkywarsMatch match, @NonNull Player player) {
+  public void give(@NonNull GameMatch match, @NonNull Player player) {
     player.getInventory().setItem(getSlot(), create(match, player));
   }
 

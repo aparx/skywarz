@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.command.tree;
+package io.github.aparx.skywarz.command.skeleton;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;

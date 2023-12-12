@@ -3,14 +3,14 @@ package io.github.aparx.skywarz.game.phase.phases.playing;
 import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
-import io.github.aparx.skywarz.game.phase.SkywarsPhaseListener;
-import io.github.aparx.skywarz.game.phase.features.SkywarsSpectator;
+import io.github.aparx.skywarz.game.phase.GamePhaseListener;
+import io.github.aparx.skywarz.game.phase.features.GameSpectator;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
 import io.github.aparx.skywarz.game.team.GameTeam;
@@ -29,7 +29,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.entity.*;
 import org.bukkit.event.player.*;
-import org.bukkit.inventory.MerchantInventory;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -40,7 +39,7 @@ import java.util.Objects;
  * @version 2023-12-07 10:43
  * @since 1.0
  */
-public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
+public class PlayingListener extends GamePhaseListener<PlayingPhase> {
 
   public PlayingListener(@NonNull PlayingPhase phase) {
     super(phase);
@@ -74,7 +73,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
         SkywarsArena source = match.getArena().getSource();
         if (source == null) return;
         ArenaBox box = source.getData().getBox();
-        if (SkywarsPlayer.getPlayer(event.getPlayer()).getMatchData().isSpectator()) {
+        if (GamePlayer.getPlayer(event.getPlayer()).getMatchData().isSpectator()) {
           // disallow spectators that once entered the arena to not leave the arena
           // we only disallow spectators that have been in already, for when the spectator spawn
           // lays outside the arena (which usually is not the case)
@@ -101,7 +100,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
   void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
     filterMatchFromPlayer(player).ifPresent((match) -> {
-      PlayerMatchData data = SkywarsPlayer.getPlayer(player).getMatchData();
+      PlayerMatchData data = GamePlayer.getPlayer(player).getMatchData();
       event.setCancelled(data.isSpectator());
     });
   }
@@ -111,7 +110,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
     Entity damagee = event.getEntity();
     if (!event.isCancelled() && damagee instanceof Player)
       filterMatchFromPlayer((Player) damagee).ifPresent((match) -> {
-        PlayerMatchData data = SkywarsPlayer.getPlayer((Player) damagee).getMatchData();
+        PlayerMatchData data = GamePlayer.getPlayer((Player) damagee).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || data.isSpectator());
       });
   }
@@ -122,11 +121,11 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
     Entity damagee = event.getEntity();
     if (!event.isCancelled() && damager instanceof Player)
       filterMatchFromPlayer((Player) damager).ifPresent((match) -> {
-        PlayerMatchData damagerData = SkywarsPlayer.getPlayer((Player) damager).getMatchData();
+        PlayerMatchData damagerData = GamePlayer.getPlayer((Player) damager).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || damagerData.isSpectator());
         if (!event.isCancelled() && damagee instanceof Player)
           filterMatchFromPlayer((Player) damagee).ifPresent((__) -> {
-            PlayerMatchData damageeData = SkywarsPlayer.getPlayer((Player) damagee).getMatchData();
+            PlayerMatchData damageeData = GamePlayer.getPlayer((Player) damagee).getMatchData();
             if (damageeData.isInTeam() && damagerData.isInTeam()
                 && Objects.equals(damageeData.getTeam(), damagerData.getTeam()))
               event.setCancelled(true);
@@ -139,7 +138,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
     LivingEntity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
       filterMatchFromPlayer((Player) entity).ifPresent((match) -> {
-        event.setCancelled(SkywarsPlayer.getPlayer((Player) entity).getMatchData().isSpectator());
+        event.setCancelled(GamePlayer.getPlayer((Player) entity).getMatchData().isSpectator());
       });
   }
 
@@ -148,7 +147,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
     Entity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
       filterMatchFromPlayer((Player) entity).ifPresent((match) -> {
-        PlayerMatchData data = SkywarsPlayer.getPlayer((Player) entity).getMatchData();
+        PlayerMatchData data = GamePlayer.getPlayer((Player) entity).getMatchData();
         event.setCancelled(getPhase().isProtectionPhase() || data.isSpectator());
       });
   }
@@ -161,13 +160,13 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
       if (killer != null && filterMatchFromPlayer(killer).filter((x) -> x.equals(match)).isEmpty())
         killer = null; // killer was not participating in the same match, thus remove killer
 
-      SkywarsPlayer player = SkywarsPlayer.getPlayer(entity);
+      GamePlayer player = GamePlayer.getPlayer(entity);
       // Stats update: increment player's deaths
       player.getMatchData().getStatistics().increment(PlayerStatsKey.DEATHS);
 
       LazyVariableLookup map = new LazyVariableLookup();
       if (killer != null) {
-        SkywarsPlayer killerPlayer = SkywarsPlayer.getPlayer(killer);
+        GamePlayer killerPlayer = GamePlayer.getPlayer(killer);
         // Stats update: increment killer's kills
         killerPlayer.getMatchData().getStatistics().increment(PlayerStatsKey.KILLS);
         VariablePopulator.addPlayer(map, killer, ArrayPath.of("killer"));
@@ -184,7 +183,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
               : MessageKeys.Match.DIED,
           map);
       Bukkit.getScheduler().runTask(Skywars.plugin(), () -> {
-        SkywarsSpectator.markAsSpectator(entity);
+        GameSpectator.markAsSpectator(entity);
         entity.spigot().respawn();
         getPhase().evaluateGameEnd();
         match.applyStats(player);
@@ -225,7 +224,7 @@ public class PlayingListener extends SkywarsPhaseListener<PlayingPhase> {
     Player entity = event.getPlayer();
     filterMatchFromPlayer(entity).ifPresent((match) -> {
       event.setRespawnLocation(match.getArena().getData().getSpectator());
-      SkywarsSpectator.spawnAsSpectator(match, entity);
+      GameSpectator.spawnAsSpectator(match, entity);
     });
   }
 

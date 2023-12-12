@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.command.tree;
+package io.github.aparx.skywarz.command.skeleton;
 
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;

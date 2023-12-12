@@ -3,14 +3,14 @@ package io.github.aparx.skywarz.game.arena.reset;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
-import io.github.aparx.skywarz.entity.SkywarsPlayer;
+import io.github.aparx.skywarz.entity.GamePlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.SkywarsArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaDataSnapshot;
 import io.github.aparx.skywarz.game.arena.snapshot.ArenaSnapshot;
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.match.SkywarsMatchState;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.utils.material.MaterialTag;
 import lombok.Getter;
 import org.apache.commons.lang.ArrayUtils;
@@ -196,11 +196,11 @@ public final class DefaultArenaResetListener implements Listener {
     return contained.get();
   }
 
-  private Optional<SkywarsMatch> findMatch() {
+  private Optional<GameMatch> findMatch() {
     return Skywars.getInstance().getMatchManager().find(getArena());
   }
 
-  void handle(World world, List<Block> blocks, BiConsumer<Block, SkywarsMatch> callback) {
+  void handle(World world, List<Block> blocks, BiConsumer<Block, GameMatch> callback) {
     findMatch().ifPresent((match) -> {
       ArenaSnapshot arena = match.getArena();
       SkywarsArena source = arena.getSource();
@@ -222,12 +222,12 @@ public final class DefaultArenaResetListener implements Listener {
     });
   }
 
-  void handle(Player entity, BiConsumer<SkywarsMatch, SkywarsArena> callback) {
-    SkywarsPlayer.findPlayer(entity).ifPresent((player) -> {
+  void handle(Player entity, BiConsumer<GameMatch, SkywarsArena> callback) {
+    GamePlayer.findPlayer(entity).ifPresent((player) -> {
       PlayerMatchData data = player.getMatchData();
       findMatch()
           .filter((x) -> data.isInMatch() && x.equals(data.getMatch()))
-          .filter((x) -> x.getState().isAfterOrEqual(SkywarsMatchState.PLAYING))
+          .filter((x) -> x.getState().isAfterOrEqual(GameMatchState.PLAYING))
           .ifPresent((match) -> {
             SkywarsArena source = match.getArena().getSource();
             if (source != null) callback.accept(match, source);
@@ -235,17 +235,17 @@ public final class DefaultArenaResetListener implements Listener {
     });
   }
 
-  void handle(Location location, BiConsumer<SkywarsMatch, Location> callback) {
+  void handle(Location location, BiConsumer<GameMatch, Location> callback) {
     handle(new Location[]{location}, callback);
   }
 
-  void handle(Location[] locations, BiConsumer<SkywarsMatch, Location> callback) {
+  void handle(Location[] locations, BiConsumer<GameMatch, Location> callback) {
     if (ArrayUtils.isEmpty(locations)) return;
     findMatch().ifPresent((match) -> {
       for (Location location : locations) {
         ArenaDataSnapshot data = match.getArena().getData();
         if (data.getWorld().equals(location.getWorld()))
-          if (match.getState().isAfterOrEqual(SkywarsMatchState.PLAYING)
+          if (match.getState().isAfterOrEqual(GameMatchState.PLAYING)
               && data.getBox().isWithin(location))
             callback.accept(match, location);
       }

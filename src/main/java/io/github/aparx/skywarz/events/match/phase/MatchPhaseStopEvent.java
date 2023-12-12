@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.events.match.phase;
 
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.phase.GamePhase;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -14,12 +14,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @Getter
 public class MatchPhaseStopEvent extends MatchPhaseEvent {
 
-  private final SkywarsPhase.@NonNull StopReason reason;
+  private final GamePhase.@NonNull StopReason reason;
 
   public MatchPhaseStopEvent(
-      @Nullable SkywarsMatch match,
-      SkywarsPhase.@NonNull StopReason reason,
-      @NonNull SkywarsPhase phase) {
+      @Nullable GameMatch match,
+      GamePhase.@NonNull StopReason reason,
+      @NonNull GamePhase phase) {
     super(match, phase);
     this.reason = reason;
   }
@@ -29,7 +29,7 @@ public class MatchPhaseStopEvent extends MatchPhaseEvent {
   }
 
   @Override
-  public @Nullable SkywarsMatch getMatch() {
+  public @Nullable GameMatch getMatch() {
     return super.getMatch();
   }
 }

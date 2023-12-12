@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.events.match.phase;
 
-import io.github.aparx.skywarz.game.match.SkywarsMatch;
-import io.github.aparx.skywarz.game.phase.SkywarsPhase;
+import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.phase.GamePhase;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -13,7 +13,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Getter
 public class MatchPhaseStartEvent extends MatchPhaseEvent {
 
-  public MatchPhaseStartEvent(@NonNull SkywarsMatch match, @NonNull SkywarsPhase phase) {
+  public MatchPhaseStartEvent(@NonNull GameMatch match, @NonNull GamePhase phase) {
     super(match, phase);
   }
 }
