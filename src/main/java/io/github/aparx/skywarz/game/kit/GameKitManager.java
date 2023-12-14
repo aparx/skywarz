@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
+import io.github.aparx.skywarz.utils.collection.AbstractKeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
 import lombok.Getter;
@@ -33,8 +34,19 @@ public final class GameKitManager extends DefaultSkywarsHandler {
           .map(DefaultKits::getKit)
           .collect(Collectors.toSet());
 
-  private final KeyValueSet<String, GameKit> kits =
-      KeyValueSets.of((kit) -> transformKey(kit.getName()));
+  private final KeyValueSet<String, GameKit> kits = new AbstractKeyValueSet<>() {
+    @Override
+    public String getKey(GameKit kit) {
+      return transformKey(kit.getName());
+    }
+
+    @Override
+    public boolean remove(Object value) {
+      if (!super.remove(value)) return false;
+      kitConfigProxy.set(((GameKit) value).getName(), null);
+      return true;
+    }
+  };
 
   private GameKitManager() {}
 

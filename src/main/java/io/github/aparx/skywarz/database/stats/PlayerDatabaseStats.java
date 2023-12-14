@@ -4,10 +4,12 @@ import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.EnumMap;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,11 +21,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 @DatabaseTable(tableName = "stats")
-public class PlayerDatabaseStats {
+public class PlayerDatabaseStats implements Snowflake<UUID> {
 
   @DatabaseField(id = true)
   private UUID id;
 
+  // TODO ORMLite 6.1 index on `createTablesIfNotExisting` causes exception
   @DatabaseField
   private int points;
 
@@ -38,6 +41,17 @@ public class PlayerDatabaseStats {
 
   @DatabaseField
   private int matchesWon;
+
+  public static PlayerDatabaseStats fromAccumulator(PlayerStatsAccumulator accumulator) {
+    PlayerDatabaseStats playerDatabaseStats = new PlayerDatabaseStats();
+    playerDatabaseStats.setId(accumulator.getId());
+    playerDatabaseStats.setKills(accumulator.findGet(PlayerStatsKey.KILLS));
+    playerDatabaseStats.setDeaths(accumulator.findGet(PlayerStatsKey.DEATHS));
+    playerDatabaseStats.setMatchesWon(accumulator.findGet(PlayerStatsKey.WON));
+    playerDatabaseStats.setMatchesPlayed(accumulator.findGet(PlayerStatsKey.PLAYED));
+    playerDatabaseStats.setPoints(accumulator.findGet(PlayerStatsKey.POINTS));
+    return playerDatabaseStats;
+  }
 
   public PlayerStatsAccumulator accumulate() {
     EnumMap<PlayerStatsKey, AtomicInteger> map = new EnumMap<>(PlayerStatsKey.class);
@@ -66,5 +80,18 @@ public class PlayerDatabaseStats {
         ", matchesPlayed=" + matchesPlayed +
         ", matchesWon=" + matchesWon +
         '}';
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    if (this == object) return true;
+    if (object == null || getClass() != object.getClass()) return false;
+    PlayerDatabaseStats that = (PlayerDatabaseStats) object;
+    return Objects.equals(id, that.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
   }
 }

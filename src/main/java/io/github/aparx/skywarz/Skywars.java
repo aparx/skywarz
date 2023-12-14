@@ -3,7 +3,8 @@ package io.github.aparx.skywarz;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
-import io.github.aparx.skywarz.database.GameDatabase;
+import io.github.aparx.skywarz.bungeecord.BungeeHandler;
+import io.github.aparx.skywarz.database.SkywarsDatabase;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.arena.*;
@@ -13,7 +14,6 @@ import io.github.aparx.skywarz.game.chest.ChestItem;
 import io.github.aparx.skywarz.game.item.GameItemManager;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.kit.GameKitManager;
-import io.github.aparx.skywarz.game.listener.BungeeListener;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
@@ -60,7 +60,7 @@ public final class Skywars {
   @Getter
   private static final Skywars instance = new Skywars();
 
-  private final GameDatabase database = new GameDatabase();
+  private final SkywarsDatabase database = new SkywarsDatabase();
 
   private final KeyedByClassSet<SkywarsHandler> handlers = new HandlerSet();
 
@@ -86,7 +86,7 @@ public final class Skywars {
         new ArenaManager(),
         new GameMatchManager(),
         new GameItemManager(),
-        new BungeeListener(),
+        new BungeeHandler(),
         GameKitManager.getInstance()
     ));
   }
@@ -164,6 +164,10 @@ public final class Skywars {
 
   public @NonNull GameKitManager getKitManager() {
     return getHandlers().require(GameKitManager.class);
+  }
+
+  public @NonNull BungeeHandler getBungeeHandler() {
+    return getHandlers().require(BungeeHandler.class);
   }
 
   private final class HandlerSet extends KeyedByClassSet<SkywarsHandler> {

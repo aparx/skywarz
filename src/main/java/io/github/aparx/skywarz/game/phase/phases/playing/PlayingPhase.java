@@ -22,11 +22,14 @@ import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.game.team.TeamMap;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
+import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -46,9 +49,6 @@ public class PlayingPhase extends GamePhase {
   private static final SoundRecord SPAWN_SOUND =
       SoundRecord.of(Sound.ENTITY_PLAYER_LEVELUP, .25f, .75f);
 
-  // TODO move to game settings
-  private static final TickDuration PROTECTION_PHASE_TIME = TickDuration.of(TimeUnit.SECONDS, 60);
-
   public PlayingPhase(@NonNull GamePhaseCycler cycler) {
     super(GameMatchState.PLAYING, cycler,
         !Magics.isDevelopment()
@@ -66,7 +66,8 @@ public class PlayingPhase extends GamePhase {
   }
 
   public boolean isProtectionPhase() {
-    return hasProtectionPhase() && getTicker().hasElapsed(PROTECTION_PHASE_TIME);
+    return hasProtectionPhase() && !getTicker().hasElapsed(
+        MainConfig.getInstance().getProtectionDuration());
   }
 
   @Override
@@ -115,22 +116,65 @@ public class PlayingPhase extends GamePhase {
         .show(player);
   }
 
+  boolean wasProtecting = false;
+
   @Override
   protected void updateTick() {
     // (1) determine all teams that are alive
     if (evaluateGameEnd()) return;
     GameMatch match = getMatch();
     TimeTicker ticker = getTicker();
-    long duration = getDuration().toSeconds();
-    long secsLeft = duration - ticker.getElapsed(TimeUnit.SECONDS);
-    if (ticker.isCycling(TimeUnit.SECONDS) && (ticker.isCycling(5, TimeUnit.MINUTES)
-        || secsLeft % 60 == 0 || (secsLeft <= 60 && (secsLeft % 15 == 0 || secsLeft <= 10)))) {
+    boolean wasProtecting = this.wasProtecting;
+    this.wasProtecting = isProtectionPhase();
+    if (this.wasProtecting) {
+      TickDuration duration = MainConfig.getInstance().getProtectionDuration();
+      long secsLeft = duration.toSeconds() - ticker.getElapsed(TimeUnit.SECONDS);
+      if (ticker.isCycling(TimeUnit.SECONDS) && (
+          (secsLeft <= 10 && secsLeft % 5 == 0)
+              || secsLeft % 15 == 0 || secsLeft <= 3)) {
+        LazyVariableLookup lookup = new LazyVariableLookup();
+        VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
+        VariablePopulator.addFiniteTicker(lookup, ticker, duration, ArrayPath.of("time"));
+        String message = Language.getInstance().substitute(
+            MessageKeys.Match.COUNTDOWN_PROTECTION, lookup);
+        match.getAudience().forEach((member) -> {
+          member.sendMessage(message);
+          SoundRecord.PROTECTION_TICK.play(member);
+        });
+      }
+    } else if (wasProtecting) {
+      LazyVariableLookup lookup = new LazyVariableLookup();
+      VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
+      String message = Language.getInstance().substitute(
+          MessageKeys.Match.PROTECTION_ENDED, lookup);
       match.getAudience().forEach((member) -> {
-        SoundRecord.TIMER_TICK.play(member);
-        if (secsLeft <= 60)
-          member.playActionbar(ChatColor.RED + String.valueOf(secsLeft));
+        member.sendMessage(message);
+        SoundRecord.PROTECTION_END.play(member);
       });
+    } else {
+      long duration = getDuration().toSeconds();
+      long secsLeft = duration - ticker.getElapsed(TimeUnit.SECONDS);
+      if (ticker.isCycling(TimeUnit.SECONDS) && (ticker.isCycling(5, TimeUnit.MINUTES)
+          || secsLeft % 60 == 0 || (secsLeft <= 60 && (secsLeft % 15 == 0 || secsLeft <= 10)))) {
+        match.getAudience().forEach((member) -> {
+          SoundRecord.TIMER_TICK.play(member);
+          if (secsLeft <= 60)
+            member.playTitle(StringUtils.SPACE, getColorForTimeLeft(secsLeft) + String.valueOf(secsLeft), 0, 30, 5);
+        });
+      }
     }
+  }
+
+  private ChatColor getColorForTimeLeft(long secsLeft) {
+    if (secsLeft >= 60)
+      return ChatColor.AQUA;
+    if (secsLeft >= 45)
+      return ChatColor.GREEN;
+    if (secsLeft >= 30)
+      return ChatColor.YELLOW;
+    if (secsLeft >= 15)
+      return ChatColor.GOLD;
+    return ChatColor.RED;
   }
 
   @CanIgnoreReturnValue

@@ -109,7 +109,7 @@ public class DonePhase extends GamePhase {
       if (secsLeft != duration && (secsLeft % 5 == 0 || secsLeft <= 3)) {
         LazyVariableLookup lookup = new LazyVariableLookup();
         VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
-        match.getAudience().sendFormattedMessage(MessageKeys.Match.BROADCAST_CLOSING, lookup);
+        match.getAudience().sendFormattedMessage(MessageKeys.Match.COUNTDOWN_CLOSING, lookup);
       }
     }
     LevelAnimator.animate(this, (int) secsLeft);

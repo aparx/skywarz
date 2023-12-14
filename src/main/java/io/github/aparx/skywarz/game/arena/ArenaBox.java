@@ -27,6 +27,8 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   private final Vector @NonNull [] points;
 
+  private final Vector @NonNull [] minmax;
+
   public ArenaBox() {
     this(new Vector[Point.values().length]);
   }
@@ -36,12 +38,13 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
         ArrayUtils.getLength(points) == Point.values().length,
         "Given points array length is not equal to what is required");
     this.points = points;
+    this.minmax = new Vector[points.length];
+    if (isCompleted()) recalculateMinMax();
   }
 
   @SuppressWarnings("unchecked")
   public static ArenaBox deserialize(@NonNull Map<?, ?> data) {
-    return new ArenaBox(((Collection<Vector>) data.get("points"))
-        .toArray(new Vector[0]));
+    return new ArenaBox(((Collection<Vector>) data.get("points")).toArray(new Vector[0]));
   }
 
   @Override
@@ -49,11 +52,18 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
     return !ArrayUtils.contains(points, null);
   }
 
+  public void recalculateMinMax() {
+    Preconditions.checkState(isCompleted());
+    Vector minVector = points[Point.MIN.ordinal()];
+    Vector maxVector = points[Point.MAX.ordinal()];
+    minmax[Point.MIN.ordinal()] = Vector.getMinimum(minVector, maxVector);
+    minmax[Point.MAX.ordinal()] = Vector.getMaximum(minVector, maxVector);
+  }
+
   public void setPoint(@NonNull Point point, Vector vector) {
     Preconditions.checkNotNull(point, "Corner must not be null");
-    Vector other = points[point.other().ordinal()];
-    points[point.ordinal()] = other != null && vector != null
-        ? minmax(point, vector, other) : vector;
+    points[point.ordinal()] = vector;
+    if (isCompleted()) recalculateMinMax();
   }
 
   public Optional<Vector> getPoint(@NonNull Point point) {
@@ -68,8 +78,9 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   public boolean isWithin(@NonNull Location location) {
     Preconditions.checkNotNull(location, "Location must not be null");
-    Vector min = points[Point.MIN.ordinal()];
-    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkState(isCompleted(), "Box must be completed");
+    Vector min = minmax[Point.MIN.ordinal()];
+    Vector max = minmax[Point.MAX.ordinal()];
     Preconditions.checkNotNull(min);
     Preconditions.checkNotNull(max);
     return location.getBlockX() >= min.getBlockX()
@@ -82,8 +93,9 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   public boolean isWithinHorizontally(@NonNull Location location) {
     Preconditions.checkNotNull(location, "Location must not be null");
-    Vector min = points[Point.MIN.ordinal()];
-    Vector max = points[Point.MAX.ordinal()];
+    Preconditions.checkState(isCompleted(), "Box must be completed");
+    Vector min = minmax[Point.MIN.ordinal()];
+    Vector max = minmax[Point.MAX.ordinal()];
     Preconditions.checkNotNull(min);
     Preconditions.checkNotNull(max);
     return location.getBlockX() >= min.getBlockX()
@@ -94,10 +106,9 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
 
   public boolean isWithin(@NonNull BoundingBox boundingBox) {
     Preconditions.checkNotNull(boundingBox, "BoundingBox must not be null");
-    Vector min = points[Point.MIN.ordinal()];
-    Vector max = points[Point.MAX.ordinal()];
-    Preconditions.checkNotNull(min);
-    Preconditions.checkNotNull(max);
+    Preconditions.checkState(isCompleted(), "Box must be completed");
+    Vector min = minmax[Point.MIN.ordinal()];
+    Vector max = minmax[Point.MAX.ordinal()];
     return boundingBox.getMinX() >= min.getBlockX()
         && boundingBox.getMinZ() >= min.getBlockZ()
         && boundingBox.getMinY() >= min.getBlockY()
@@ -107,21 +118,16 @@ public final class ArenaBox implements ConfigurationSerializable, CompletableSet
   }
 
   public BoundingBox toBoundingBox() {
+    Preconditions.checkState(isCompleted(), "Box must be completed");
     Vector min = points[Point.MIN.ordinal()];
     Vector max = points[Point.MAX.ordinal()];
-    Preconditions.checkNotNull(min);
-    Preconditions.checkNotNull(max);
     return new BoundingBox(
         min.getX(), min.getY(), min.getZ(),
         max.getX(), max.getY(), max.getZ());
   }
 
-  private Vector minmax(Point point, Vector vec1, Vector vec2) {
-    return point == Point.MAX ? Vector.getMaximum(vec1, vec2) : Vector.getMinimum(vec1, vec2);
-  }
-
   @Override
-  public Map<String, Object> serialize() {
+  public @NonNull Map<String, Object> serialize() {
     return Map.of("points", points);
   }
 

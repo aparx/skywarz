@@ -23,7 +23,7 @@ import java.util.logging.Level;
 @Getter
 public final class CommandForest implements CommandNodeExecutor {
 
-  private final CommandNodeSet roots = new CommandNodeSet(null);
+  private final CommandNodeSet trees = new CommandNodeSet(null);
 
   public static Map<String, Object> createCommandSubstitutorContext(CommandContext context) {
     HashMap<String, Object> valueMap = new HashMap<>();
@@ -70,7 +70,7 @@ public final class CommandForest implements CommandNodeExecutor {
   public Optional<CommandNode> locateLeaf(CommandContext context, CommandArgList args) {
     if (args.isEmpty()) return Optional.empty();
     String command = args.first().get();
-    for (CommandNode root : roots) {
+    for (CommandNode root : trees) {
       if (!root.isMatching(command)) continue;
       return Optional.of(locateLeaf0(context, args.subargs(1), root));
     }

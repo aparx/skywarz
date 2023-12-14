@@ -52,9 +52,11 @@ public final class MessageKeys {
 
     public final ArrayPath TEAM_SWITCH_ERROR = createKey("match.team switch.error");
 
-    public final ArrayPath BROADCAST_START = createKey("match.broadcast.start");
-    public final ArrayPath BROADCAST_REQUIRE = createKey("match.broadcast.require players");
-    public final ArrayPath BROADCAST_CLOSING = createKey("match.broadcast.closing");
+    public final ArrayPath PLAYERS_REQUIRED = createKey("match.broadcast.require players");
+    public final ArrayPath COUNTDOWN_START = createKey("match.broadcast.idle.countdown");
+    public final ArrayPath COUNTDOWN_CLOSING = createKey("match.broadcast.done.countdown");
+    public final ArrayPath COUNTDOWN_PROTECTION = createKey("match.broadcast.protection.countdown");
+    public final ArrayPath PROTECTION_ENDED = createKey("match.broadcast.protection.ended");
 
     public final ArrayPath PRIORITY_ERROR = createKey("match.priority.error");
     public final ArrayPath PRIORITY_KICK = createKey("match.priority.kick");
@@ -90,6 +92,9 @@ public final class MessageKeys {
     public final ArrayPath NONE_SELF = createKey("stats.none self");
 
     public final ArrayPath OVERVIEW = createKey("stats.overview");
+
+    public final ArrayPath LEADERBOARD_OVERVIEW = createKey("stats.leaderboard.overview");
+    public final ArrayPath LEADERBOARD_LINE = createKey("stats.leaderboard.line");
 
   }
 
@@ -168,9 +173,11 @@ public final class MessageKeys {
     map.put(Match.PRIORITY_KICK, "{warningPrefix} You have been kicked for someone that is VIP.");
     map.put(Match.ERROR_DEQUEUED, "{warningPrefix} An error occurred. You have been dequeued.");
 
-    map.put(Match.BROADCAST_START, "{prefix}§7 The game starts in §8{match.time.left.literal}§7!");
-    map.put(Match.BROADCAST_REQUIRE, "{prefix}§7 Require §c{match.missing}§7 more players to start!");
-    map.put(Match.BROADCAST_CLOSING, "{prefix}§7 The match closes in {match.time.left.literal}!");
+    map.put(Match.COUNTDOWN_START, "{prefix}§7 The game starts in §8{match.time.left.literal}§7!");
+    map.put(Match.PLAYERS_REQUIRED, "{prefix}§7 Require §c{match.missing}§7 more players to start!");
+    map.put(Match.COUNTDOWN_CLOSING, "{prefix}§7 The match closes in {match.time.left.literal}!");
+    map.put(Match.COUNTDOWN_PROTECTION, "{prefix}§7 Protection phase ends in {time.left.literal}!");
+    map.put(Match.PROTECTION_ENDED, "{prefix} Protection has ended, you are now vulnerable!");
 
     map.put(Match.QUICKSTART_SUCCESS, "{successPrefix} The game will start shortly.");
     map.put(Match.QUICKSTART_ERROR, "{warningPrefix} Cannot quickstart your match.");
@@ -193,7 +200,7 @@ public final class MessageKeys {
     map.put(Match.CHAT_ALL, "§8[ALL] {sender.team.color}{sender.name}: §7{message}");
     map.put(Match.CHAT_SPECTATOR, "§8§o[DEAD] §7{sender.name}: §7{message}");
 
-    map.put(Stats.FETCHING, "{prefix} §7Fetching player's stats...");
+    map.put(Stats.FETCHING, "{prefix} §7Fetching statistics...");
     map.put(Stats.NONE_OTHER, "{warningPrefix} Player {target.name} has no stats in Skywarz");
     map.put(Stats.NONE_SELF, "{warningPrefix} You have stats in Skywarz");
     map.put(Stats.OVERVIEW, List.of(
@@ -206,6 +213,14 @@ public final class MessageKeys {
         "{prefix} §8• §7K/D: §b{target.total.kd}",
         "{prefix} §8• §7Win%: §b{target.total.winChance}"
     ));
+
+    map.put(Stats.LEADERBOARD_OVERVIEW, List.of(
+        "{prefix} §7The top §e10§7 of Skywarz:",
+        "{content}",
+        "{prefix} §7It can take up to §81h§7 to refresh."
+    ));
+    map.put(Stats.LEADERBOARD_LINE,
+        "{prefix} §e#{place}§r {player.name}§7 - {player.stats.points} Points - {player.stats.kd} K/D");
 
     for (TimeUnit unit : TimeUnit.values()) {
       final String name = unit.name().toLowerCase();

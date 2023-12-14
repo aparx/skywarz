@@ -7,6 +7,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.SkywarsPlayerData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.kit.GameKit;
+import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -14,11 +15,20 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -28,7 +38,7 @@ import java.util.Optional;
  */
 @Getter
 @Setter
-public class PlayerKitEditMode extends SkywarsPlayerData {
+public class PlayerKitEditMode extends SkywarsPlayerData implements Listener {
 
   private final @NonNull SkywarsPlayer player;
 
@@ -57,11 +67,12 @@ public class PlayerKitEditMode extends SkywarsPlayerData {
     kit.apply(entity); // apply current kit to player
     updateTask = Bukkit.getScheduler().runTaskTimer(Skywars.plugin(), () -> {
       try {
-        player.playActionbar("§7Modifying kit: §e" + getKit().getName());
+        player.playActionbar(ChatColor.GRAY + "Modifying kit: " + getKit().getDisplayName());
       } catch (Exception e) {
         leave();
       }
     }, 0, TickDuration.ofSecond().toTicks());
+    Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
     return true;
   }
 
@@ -76,6 +87,7 @@ public class PlayerKitEditMode extends SkywarsPlayerData {
       if (snapshot != null)
         snapshot.restore(online);
     });
+    HandlerList.unregisterAll(this);
     return true;
   }
 
@@ -92,6 +104,24 @@ public class PlayerKitEditMode extends SkywarsPlayerData {
   @Override
   public void notifyRemoval() {
     leave();
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  void onTeleport(PlayerTeleportEvent event) {
+    Player entity = event.getPlayer();
+    Location to = event.getTo();
+    Location from = event.getFrom();
+    if (to != null && !to.equals(from) && !event.isCancelled())
+      SkywarsPlayer.findPlayer(entity)
+          .filter((p) -> p.equals(player))
+          .map(SkywarsPlayer::getPlayerData)
+          .flatMap((data) -> data.find(PlayerKitEditMode.class))
+          .filter(PlayerKitEditMode::isInMode)
+          .ifPresent((editMode) -> {
+            editMode.leave();
+            entity.sendMessage(Language.getInstance().substitute(
+                "{successPrefix} Left kit edit mode due to teleport."));
+          });
   }
 
 }

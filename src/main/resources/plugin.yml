@@ -5,10 +5,14 @@ author: "aparx (@bonedfps)"
 api-version: 1.14
 description: "An intriguing Skywars minigame plugin"
 
+libraries:
+  - org.apache.commons:commons-text:1.11.0
+
 commands:
   skywarz:
     usage: "/skywarz <...>"
     aliases: [ "sw", "skywars" ]
+
 permissions:
   skywarz.play:
     description: "Allows a player to join a match (required for bungeecord)"
@@ -43,6 +47,3 @@ permissions:
       skywarz.play: true
       skywarz.quickstart: true
       skywarz.stats.*: true
-
-libraries:
-  - org.apache.commons:commons-text:1.11.0

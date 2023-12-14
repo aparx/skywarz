@@ -54,7 +54,7 @@ public class ArenaAddSpawnCommand extends AbstractArenaSpawnCommand {
       TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
       int spawnId = arena.getData().createSpawnsIfAbsent(team).add(location);
       player.sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Added spawn with ID {0} in arena '{1}' to team {2}. (unsaved)",
+          "{successPrefix} Added spawn with ID {0} in arena '{1}' to team {2}§a. (unsaved)",
           spawnId, arena.getName(), team.getChatColor() + team.getDefaultName()
       ));
     }

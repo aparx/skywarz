@@ -15,9 +15,9 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public abstract class DatabaseObjectManager {
 
-  private final @NonNull GameDatabase database;
+  private final @NonNull SkywarsDatabase database;
 
-  public DatabaseObjectManager(@NonNull GameDatabase database) {
+  public DatabaseObjectManager(@NonNull SkywarsDatabase database) {
     Preconditions.checkNotNull(database, "Database must not be null");
     this.database = database;
   }

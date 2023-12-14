@@ -50,7 +50,7 @@ public final class LeaveItem extends SkywarsItem {
   @Override
   protected void handleClick(@NonNull GameMatch match, PlayerInteractEvent event) {
     Player player = event.getPlayer();
-    SkywarsCommand.forest.getRoots().stream()
+    SkywarsCommand.forest.getTrees().stream()
         .filter((node) -> node instanceof LeaveCommand)
         .map((node) -> node.createCommand(Main.FULL_COMMAND))
         .findFirst()

@@ -7,10 +7,12 @@ import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.bufig.defaults.yaml.YamlConfig;
 import io.github.aparx.skywarz.Magics;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.arena.reset.DefaultArenaReset;
 import io.github.aparx.skywarz.game.arena.sign.ArenaSignHandler;
 import io.github.aparx.skywarz.game.match.GameMatch;
+import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
@@ -22,6 +24,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -68,6 +71,16 @@ public final class GameArena extends ConfigObject implements CompletableSetup {
 
   public static int getMaxPlayerCount(@NonNull GameSettings settings, int teamCount) {
     return teamCount * settings.getTeamSize();
+  }
+
+  public static int getAvailableTeamCount(@NonNull GameArena arena) {
+    int teamCount = 0; // approximate max team count (may change until match is created!)
+    for (TeamEnum teamEnum : TeamEnum.values())
+      if (arena.getData().getSpawns(teamEnum)
+          .filter(Predicate.not(SpawnGroup::isEmpty))
+          .isPresent())
+        ++teamCount;
+    return teamCount;
   }
 
   @Override

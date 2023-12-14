@@ -36,7 +36,8 @@ public class StatsCommand extends CommandNode {
   public StatsCommand() {
     super(CommandInfo.builder("stats")
         .description("Show statistics of a player")
-        .permission(SkywarsPermission.merge(SkywarsPermission.STATS_SELF,
+        .permission(SkywarsPermission.merge(
+            SkywarsPermission.STATS_SELF,
             SkywarsPermission.STATS_OTHER))
         .args("(<player>)")
         .build());
@@ -45,7 +46,6 @@ public class StatsCommand extends CommandNode {
 
   @Override
   public void execute(CommandContext context, CommandArgList args) {
-
     if (args.length() > 1 + OTHER_ARGUMENT_INDEX)
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {

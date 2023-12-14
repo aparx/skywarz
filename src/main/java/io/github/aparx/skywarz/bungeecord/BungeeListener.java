@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.game.listener;
+package io.github.aparx.skywarz.bungeecord;
 
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.skywarz.Skywars;
@@ -13,6 +13,7 @@ import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.*;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
+import io.github.aparx.skywarz.utils.tick.TickDuration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -36,25 +37,21 @@ import java.util.stream.Collectors;
  * @version 2023-12-11 22:03
  * @since 1.0
  */
-public class BungeeListener extends DefaultSkywarsHandler implements Listener {
+public class BungeeListener implements Listener {
 
   public final boolean isBungeecord() {
-    return MainConfig.getInstance().isDedicated();
+    return MainConfig.getInstance().isBungeeEnabled();
   }
 
   public final GameArena getBungeeArena() {
-    return Skywars.getInstance().getArenaManager().get(
-        MainConfig.getInstance().getDedicatedArena());
+    return findBungeeArena().orElseThrow(() -> {
+      return new IllegalStateException("Default arena could not be found");
+    });
   }
 
-  @Override
-  protected void onLoad() {
-    Bukkit.getPluginManager().registerEvents(this, Skywars.plugin());
-  }
-
-  @Override
-  protected void onUnload() {
-    HandlerList.unregisterAll(this);
+  public final Optional<GameArena> findBungeeArena() {
+    return Skywars.getInstance().getArenaManager().find(
+        MainConfig.getInstance().getBungeeArena());
   }
 
   @SuppressWarnings("DataFlowIssue") // OK, IDE static analysis bug
@@ -81,14 +78,16 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
       if (SkywarsPermission.SETUP.has(player)) {
         player.sendMessage(errorMessage);
         player.sendMessage(ChatColor.RED + "Reason: " + e.getMessage());
-      } else player.kickPlayer(errorMessage);
+      } else Skywars.getInstance().getBungeeHandler().sendToFallback(player);
     }
   }
 
-  @EventHandler(priority = EventPriority.LOW)
+  @EventHandler(priority = EventPriority.MONITOR)
   void onLeave(MatchLeaveEvent event) {
     if (isBungeecord())
-      event.getPlayer().findOnline().ifPresent((online) -> online.kickPlayer(null));
+      event.getPlayer().findOnline().ifPresent((online) -> {
+        Skywars.getInstance().getBungeeHandler().sendToFallback(online);
+      });
   }
 
   @EventHandler(priority = EventPriority.LOW)
@@ -100,12 +99,16 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.LOW)
+  @EventHandler(priority = EventPriority.MONITOR)
   void onEnd(MatchPhaseStopEvent event) {
     if (isBungeecord() && GameMatchState.DONE.equals(event.getPhase().getState())) {
-      Bukkit.getServer().shutdown();
+      if (Skywars.plugin().isEnabled())
+        Bukkit.getScheduler().runTaskLater(Skywars.plugin(), () -> {
+          // delayed shutdown, so players are sent to fallback servers first
+          Bukkit.getServer().shutdown();
+        }, TickDuration.ofSecond().toTicks());
       Skywars.logger().log(Level.INFO,
-          "Match {0} completed, shutting down server",
+          "Match {0} completed, shutting down server soon (...)",
           Optional.ofNullable(event.getMatch()).map(GameMatch::getId));
     }
   }
@@ -117,9 +120,15 @@ public class BungeeListener extends DefaultSkywarsHandler implements Listener {
       GameArena bungeeArena = getBungeeArena();
       LazyVariableLookup lookup = new LazyVariableLookup();
       VariablePopulator.addArenaOrAcquiree(lookup, bungeeArena, ArrayPath.of());
-      if (iterator.hasNext())
-        VariablePopulator.addMatch(lookup, iterator.next(), ArrayPath.of());
-      event.setMotd(MainConfig.getInstance().getDedicatedMotd().stream().limit(2)
+      if (iterator.hasNext()) {
+        GameMatch match = iterator.next();
+        VariablePopulator.addMatch(lookup, match, ArrayPath.of());
+        event.setMaxPlayers(match.getMaxPlayerCount());
+      } else
+        event.setMaxPlayers(GameArena.getMaxPlayerCount(
+            bungeeArena.getData().getSettings(),
+            GameArena.getAvailableTeamCount(bungeeArena)));
+      event.setMotd(MainConfig.getInstance().getBungeeMotd().stream().limit(2)
           .map((line) -> Language.getInstance().substitute(line, lookup))
           .collect(Collectors.joining("\n")));
     } catch (Exception ignored) {}

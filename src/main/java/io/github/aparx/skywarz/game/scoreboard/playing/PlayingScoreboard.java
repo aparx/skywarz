@@ -65,7 +65,7 @@ public class PlayingScoreboard extends GameScoreboard {
       finalTeam.setCanSeeFriendlyInvisibles(false);
       finalTeam.getEntries().forEach(finalTeam::removeEntry);
       gameTeam.alive().forEach((member) -> finalTeam.addEntry(member.getName()));
-      finalTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.NEVER);
+      finalTeam.setOption(Team.Option.COLLISION_RULE, Team.OptionStatus.FOR_OTHER_TEAMS);
     });
     return super.createContent(special, match, viewer);
   }

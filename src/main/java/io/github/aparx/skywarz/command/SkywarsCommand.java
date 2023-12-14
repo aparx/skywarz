@@ -45,7 +45,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
 
   private static CommandForest buildForest() {
     CommandForest tree = new CommandForest();
-    CommandNodeSet roots = tree.getRoots();
+    CommandNodeSet roots = tree.getTrees();
     // /skywars help <...>
     roots.add(new HelpCommand());
 
@@ -87,6 +87,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
     roots.add(new LeaveCommand());
     roots.add(new StartCommand());
     roots.add(new StatsCommand());
+    roots.add(new LeaderboardCommand());
 
     roots.add(CommandBuilder.builder("bungee")
         .permission(SkywarsPermission.SETUP)
@@ -101,7 +102,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
         .build()
         .add(KitCreateCommand::new)
         .add(KitDeleteCommand::new)
-        .add(KitEditMode::new)
+        .add(KitEditCommand::new)
         .add(KitSaveCommand::new)
         .add(KitCancelCommand::new));
 
@@ -142,7 +143,7 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
       return null;
     List<String> suggestions =
         optNode.<Collection<CommandNode>>map(CommandNode::getChildren)
-            .orElseGet(forest::getRoots).stream()
+            .orElseGet(forest::getTrees).stream()
             .filter((node) -> newArgs.length() == 1 + node.getIndex())
             .filter((node) -> node.hasPermission(sender))
             .map((node) -> node.getInfo().getName())

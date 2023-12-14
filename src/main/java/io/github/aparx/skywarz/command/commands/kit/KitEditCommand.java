@@ -26,9 +26,9 @@ import java.util.stream.Collectors;
  * @version 2023-12-12 17:55
  * @since 1.0
  */
-public class KitEditMode extends CommandNode {
+public class KitEditCommand extends CommandNode {
 
-  public KitEditMode(@Nullable CommandNode parent) {
+  public KitEditCommand(@Nullable CommandNode parent) {
     super(CommandInfo.builder("edit")
         .permission(SkywarsPermission.SETUP)
         .args("<Kit...>")
@@ -58,6 +58,7 @@ public class KitEditMode extends CommandNode {
           "Could not enter kit edit mode");
       entity.sendMessage(Language.getInstance().substitute(List.of(
           "{successPrefix} You have entered the kit edit mode.",
+          "{successPrefix} The kit will reflect your inventory when saved.",
           "{successPrefix} Use {0}'/{1} save'§a or {0}'/{1} cancel'§a to leave."
       ), ChatColor.GRAY, getParent().createCommand(Main.SHORT_COMMAND)));
       SoundRecord.ACTION_SUCCESS.play(player);

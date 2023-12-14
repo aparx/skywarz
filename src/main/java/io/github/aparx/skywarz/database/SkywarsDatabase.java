@@ -28,7 +28,7 @@ import java.util.logging.Level;
  */
 @Getter
 @RequiredArgsConstructor
-public final class GameDatabase {
+public final class SkywarsDatabase {
 
   static {
     Logger.setGlobalLogLevel(com.j256.ormlite.logger.Level.ERROR);
@@ -45,11 +45,11 @@ public final class GameDatabase {
 
   /** Queue defining consumers that are executed when the database is loaded */
   @Getter(AccessLevel.NONE)
-  private final Queue<Consumer<GameDatabase>> queue = new LinkedList<>();
+  private final Queue<Consumer<SkywarsDatabase>> queue = new LinkedList<>();
 
   /** Queues given {@code operation} and returns true if the operation is actually executable. */
   @CanIgnoreReturnValue
-  public boolean queue(Consumer<GameDatabase> operation) {
+  public boolean queue(Consumer<SkywarsDatabase> operation) {
     if (!getState().isEnabled())
       return false; // discard database queue: database is not enabled
     if (isLoaded()) operation.accept(this);
@@ -58,7 +58,7 @@ public final class GameDatabase {
   }
 
   private void executeQueue() {
-    for (Consumer<GameDatabase> c; (c = queue.poll()) != null; )
+    for (Consumer<SkywarsDatabase> c; (c = queue.poll()) != null; )
       c.accept(this);
   }
 

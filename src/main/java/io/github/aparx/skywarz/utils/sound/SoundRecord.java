@@ -26,6 +26,8 @@ public final class SoundRecord {
   public static final SoundRecord ACTION_ERROR = of(Sound.BLOCK_ANVIL_LAND, .33f, .75f);
   public static final SoundRecord OPEN_INVENTORY = of(Sound.BLOCK_LEVER_CLICK);
   public static final SoundRecord TIMER_TICK = of(Sound.BLOCK_DISPENSER_DISPENSE, .5f, 1.5f);
+  public static final SoundRecord PROTECTION_TICK = of(Sound.BLOCK_NOTE_BLOCK_BASS, .5f, 1.3f);
+  public static final SoundRecord PROTECTION_END = of(Sound.ENTITY_ENDER_DRAGON_GROWL, .5f, 1.1f);
 
   public static final SoundRecord KIT_BUILT = of(Sound.BLOCK_ANVIL_USE, .75f);
 

@@ -7,6 +7,7 @@ import io.github.aparx.skywarz.RegisterNotifiable;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
+import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.events.match.MatchPointsCalculateEvent;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
@@ -204,6 +205,7 @@ public class GameMatch implements Snowflake<UUID>, RegisterNotifiable {
       snapshot.restore(entity);
     });
     Objects.requireNonNull(arena.getSource()).getSignHandler().update();
+    Bukkit.getPluginManager().callEvent(new MatchLeaveEvent(this, player));
     return true;
   }
 

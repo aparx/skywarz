@@ -14,6 +14,7 @@ import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Arrays;
@@ -45,8 +46,9 @@ public class KitSaveCommand extends CommandNode {
           .orElseThrow(() -> new IllegalStateException("Not in edit mode"));
       GameKit kit = modify.getKit();
       GameKitManager kitManager = Skywars.getInstance().getKitManager();
-      ItemStack[] contents = entity.getInventory().getStorageContents();
-      ItemStack[] armor = entity.getInventory().getArmorContents();
+      PlayerInventory inventory = entity.getInventory();
+      ItemStack[] contents = inventory.getStorageContents();
+      ItemStack[] armor = inventory.getArmorContents();
       WrappedItemStack icon = kit.getIcon();
       GameKit.KitBuilder kitBuilder = GameKit.builder(kit.getName())
           .icon(icon != null ? icon.copy() : null);
@@ -56,7 +58,7 @@ public class KitSaveCommand extends CommandNode {
           .toArray(WrappedItemStack[]::new));
 
       for (GameKit.ArmorSlot slot : GameKit.ArmorSlot.values())
-        kitBuilder.slot(slot, WrappedItemStack.parse(armor[slot.ordinal()]));
+        kitBuilder.slot(slot, armor[slot.ordinal()]);
 
       GameKit rebuilt = kitBuilder.build(); // new to be replacing kit instance
       kitManager.getKits().remove(kit);

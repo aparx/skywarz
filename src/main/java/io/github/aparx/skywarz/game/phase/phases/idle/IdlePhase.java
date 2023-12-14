@@ -111,13 +111,13 @@ public class IdlePhase extends GamePhase {
           LazyVariableLookup lookup = new LazyVariableLookup();
           VariablePopulator.addMatch(lookup, match, ArrayPath.of("match"));
           players.forEach((player) -> {
-            player.sendFormattedMessage(MessageKeys.Match.BROADCAST_START, lookup);
+            player.sendFormattedMessage(MessageKeys.Match.COUNTDOWN_START, lookup);
             SoundRecord.TIMER_TICK.play(player);
           });
         }
       } else if (playerSize != lastPlayerSize || trigger.isCycling(30, TimeUnit.SECONDS))
         players.sendMessage(Language.getInstance()
-            .get(MessageKeys.Match.BROADCAST_REQUIRE)
+            .get(MessageKeys.Match.PLAYERS_REQUIRED)
             .substitute(match, ArrayPath.of("match")));
     }
     if (hasMinimumPlayers) LevelAnimator.animate(this, (int) secsLeft);

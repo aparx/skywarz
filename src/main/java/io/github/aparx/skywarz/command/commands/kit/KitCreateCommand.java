@@ -11,7 +11,9 @@ import io.github.aparx.skywarz.game.kit.GameKitManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
 import io.github.aparx.skywarz.startup.Main;
+import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -26,7 +28,7 @@ public class KitCreateCommand extends CommandNode {
   public KitCreateCommand(@Nullable CommandNode parent) {
     super(CommandInfo.builder("create")
         .permission(SkywarsPermission.SETUP)
-        .args("<Kit...>")
+        .args("<DisplayName...>")
         .description("Create a new empty kit")
         .build(), parent);
   }
@@ -36,15 +38,21 @@ public class KitCreateCommand extends CommandNode {
     if (args.isEmpty())
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
-      String kitName = args.join();
+      String displayName = ChatColor.translateAlternateColorCodes('&', args.join());
+      String kitName = ChatColor.stripColor(displayName);
       GameKitManager kitManager = Skywars.getInstance().getKitManager();
       Preconditions.checkState(!kitManager.contains(kitName), "Kit already exists");
-      kitManager.getKits().add(GameKit.builder(kitName).build());
+      kitManager.getKits().add(GameKit.builder(kitName)
+          .icon(ItemBuilder.builder()
+              .name(ChatColor.RESET + displayName)
+              .material(Material.CHEST)
+              .wrap())
+          .build());
       kitManager.save();
       context.getSender().sendMessage(Language.getInstance().substitute(List.of(
-          "{successPrefix} Created an empty kit named '{2}'.",
+          "{successPrefix} Kit '{2}' was created with the display '{3}§a'.",
           "{successPrefix} Use {0}'/{1} edit {2}'§a to edit the kit!"
-      ), ChatColor.GRAY, getParent().createCommand(Main.SHORT_COMMAND), kitName));
+      ), ChatColor.GRAY, getParent().createCommand(Main.SHORT_COMMAND), kitName, displayName));
     }
   }
 }

@@ -1,10 +1,12 @@
 package io.github.aparx.skywarz.command.commands;
 
 import com.google.common.base.Preconditions;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
+import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
@@ -36,8 +38,13 @@ public class LeaveCommand extends CommandNode {
       throw new LocalizableError((lang) -> lang.substitute(MessageKeys.Errors.NOT_IN_A_MATCH));
     GameMatch match = data.getMatch();
     Preconditions.checkNotNull(match, "Already left the match");
-    Preconditions.checkState(match.leave(player), "Cannot leave match");
-    Bukkit.getPluginManager().callEvent(new MatchLeaveEvent(match, entity));
-    player.sendFormattedMessage(MessageKeys.Match.LEAVE_SUCCESS);
+    if (MainConfig.getInstance().isBungeeEnabled()) {
+      // send player back to the fallback *before* announcing the leave (to avoid the player
+      // being able to do anything while connecting to the fallback server!)
+      Skywars.getInstance().getBungeeHandler().sendToFallback(entity);
+    } else {
+      Preconditions.checkState(match.leave(player), "Cannot leave match");
+      player.sendFormattedMessage(MessageKeys.Match.LEAVE_SUCCESS);
+    }
   }
 }

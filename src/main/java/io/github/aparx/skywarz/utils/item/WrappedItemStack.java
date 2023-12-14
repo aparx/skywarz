@@ -118,6 +118,13 @@ public class WrappedItemStack implements ConfigurationSerializable {
     return new WrappedItemStack(getStack().clone());
   }
 
+  @Override
+  public String toString() {
+    return "WrappedItemStack{" +
+        "stack=" + stack +
+        '}';
+  }
+
   // DESERIALIZATION UTILITES
 
   private static Material deserializeType(String type) {

@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -81,6 +82,10 @@ public final class SkywarsPlayer implements Snowflake<UUID>, Audience, RegisterN
   public static Optional<SkywarsPlayer> findPlayer(@NonNull Player player) {
     Preconditions.checkNotNull(player, "Player must not be null");
     return findPlayer(player.getUniqueId());
+  }
+
+  public static void forPlayers(Consumer<SkywarsPlayer> action) {
+    playerMap.forEach(action);
   }
 
   @CanIgnoreReturnValue

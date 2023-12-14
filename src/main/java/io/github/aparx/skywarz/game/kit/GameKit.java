@@ -131,8 +131,7 @@ public final class GameKit implements ConfigurationSerializable {
     });
     inventory.setArmorContents(armor.length != 0
         ? Arrays.stream(armor)
-        .filter(Objects::nonNull)
-        .map(WrappedItemStack::getStack)
+        .map((x) -> x != null ? x.getStack() : null)
         .toArray(ItemStack[]::new)
         : null);
   }
@@ -145,6 +144,14 @@ public final class GameKit implements ConfigurationSerializable {
   public GameKit copy() {
     return new GameKit(getName(), (icon != null ? icon.copy() : null),
         ArrayUtils.clone(armor), contents);
+  }
+
+  @Override
+  public String toString() {
+    return "GameKit{" +
+        "name='" + name + '\'' +
+        ", icon=" + icon +
+        '}';
   }
 
   public enum ArmorSlot {

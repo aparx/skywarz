@@ -8,7 +8,6 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
-import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.GameSettings;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.kit.GameKit;
@@ -16,7 +15,7 @@ import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchManager;
 import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.GameTeam;
-import io.github.aparx.skywarz.game.team.TeamEnum;
+import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.Ticker;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
@@ -29,7 +28,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Locale;
-import java.util.function.Predicate;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -53,6 +51,14 @@ public final class VariablePopulator {
           addTeam(lookup, data.getTeam(), prefix.add("team"), nullValue);
           addStats(lookup, data.getStatistics(), prefix.add(ArrayPath.of("match", "stats")));
         });
+  }
+
+
+  public static void addPlayer(
+      @NonNull LazyVariableLookup lookup,
+      @NonNull OfflinePlayer entity,
+      @NonNull ArrayPath prefix) {
+    addPlayer(lookup, entity, prefix, null);
   }
 
   public static void addPlayer(
@@ -141,6 +147,15 @@ public final class VariablePopulator {
     lookup.set(prefix.add("literal"), Suppliers.memoize(() -> formatLiteral(ticker)));
   }
 
+  public static void addFiniteTicker(
+      LazyVariableLookup lookup, Ticker ticker, TickDuration duration, ArrayPath prefix) {
+    addTicker(lookup, ticker, prefix.add("elapsed"));
+    // create a new dummy ticker to invert the phase's ticker to represent time left
+    TimeTicker left = new TimeTicker(TimeUnit.TICKS);
+    left.set(duration.toTicks() - ticker.getElapsed(TimeUnit.TICKS));
+    addTicker(lookup, left, prefix.add("left"));
+  }
+
   public static void addMatch(LazyVariableLookup lookup, GameMatch match, ArrayPath prefix) {
     addMatch(lookup, match, prefix, null);
   }
@@ -158,11 +173,7 @@ public final class VariablePopulator {
     addState(lookup, match.getState(), prefix.add("state"));
     addTeam(lookup, match.getWinner(), prefix.add("winner"), nullValue);
     match.getCycler().getPhase().ifPresent((phase) -> {
-      addTicker(lookup, phase.getTicker(), prefix.add(ArrayPath.of("time", "elapsed")));
-      // create a new dummy ticker to invert the phase's ticker to represent time left
-      TimeTicker left = new TimeTicker(TimeUnit.TICKS);
-      left.set(phase.getDuration().toTicks() - phase.getTicker().getElapsed(TimeUnit.TICKS));
-      addTicker(lookup, left, prefix.add(ArrayPath.of("time", "left")));
+      addFiniteTicker(lookup, phase.getTicker(), phase.getDuration(), prefix.add("time"));
     });
   }
 
@@ -176,12 +187,7 @@ public final class VariablePopulator {
     }, () -> {
       // Fill with values known when no match is associated to `arena`
       GameSettings settings = arena.getData().getSettings();
-      int teamCount = 0; // approximate max team count (may change until match is created!)
-      for (TeamEnum teamEnum : TeamEnum.values())
-        if (arena.getData().getSpawns(teamEnum)
-            .filter(Predicate.not(SpawnGroup::isEmpty))
-            .isPresent())
-          ++teamCount;
+
       int minPlayerCount = GameArena.getMinPlayerCount(settings);
       addState(lookup, arena.isCompleted()
               ? GameMatchState.IDLE
@@ -189,7 +195,9 @@ public final class VariablePopulator {
           ArrayPath.of("state"));
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
       lookup.set(ArrayPath.of("minPlayers"), minPlayerCount);
-      lookup.set(ArrayPath.of("maxPlayers"), GameArena.getMaxPlayerCount(settings, teamCount));
+      lookup.set(ArrayPath.of("maxPlayers"), Suppliers.memoize(() -> {
+        return GameArena.getMaxPlayerCount(settings, GameArena.getAvailableTeamCount(arena));
+      }));
       lookup.set(ArrayPath.of("missing"), minPlayerCount);
       lookup.set(ArrayPath.of("players"), 0);
       lookup.set(ArrayPath.of("alive"), 0);

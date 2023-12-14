@@ -8,7 +8,6 @@ import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
-import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -32,12 +31,12 @@ public class BungeeUpdateCommand extends AbstractArenaCommand {
     else {
       CommandSender sender = context.getSender();
       MainConfig mainConfig = MainConfig.getInstance();
-      mainConfig.setDedicatedArena(arena.getName());
+      mainConfig.setBungeeArena(arena.getName());
       mainConfig.save();
       sender.sendMessage(Language.getInstance().substitute(
           "{successPrefix} Updated the bungee auto join arena to '{0}'",
           arena.getName()));
-      if (!mainConfig.isDedicated())
+      if (!mainConfig.isBungeeEnabled())
         sender.sendMessage(Language.getInstance().substitute(
             "{successPrefix} You still need to enable the bungeecord mode (/sw bungee toggle)"));
     }

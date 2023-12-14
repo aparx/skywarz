@@ -17,16 +17,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Setter
 public class MatchLeaveEvent extends MatchEvent {
 
-  private final @NonNull Player entity;
+  private final @NonNull SkywarsPlayer player;
 
-  public MatchLeaveEvent(@NonNull GameMatch match, @NonNull Player entity) {
+  public MatchLeaveEvent(@NonNull GameMatch match, @NonNull SkywarsPlayer player) {
     super(match);
-    Preconditions.checkNotNull(entity, "Entity must not be null");
-    this.entity = entity;
-  }
-
-  public @NonNull SkywarsPlayer getPlayer() {
-    return SkywarsPlayer.getPlayer(getEntity());
+    Preconditions.checkNotNull(player, "Player must not be null");
+    this.player = player;
   }
 
 }

@@ -33,7 +33,7 @@ public class MainConfig extends ConfigObject {
       "If true, this server is seen as a dedicated Skywarz server.",
       "This implies that only one arena is active at once for this server."
   })
-  private boolean isDedicated = false;
+  private boolean bungeeEnabled = false;
 
   @Setter
   @ConfigMapping("bungeecord.arena")
@@ -42,14 +42,18 @@ public class MainConfig extends ConfigObject {
       "If the above boolean is true, a player will be put into a match for this arena.",
       "If the arena does not exist and the player has no setup permission, they are kicked."
   })
-  private String dedicatedArena = "<Arena>";
+  private String bungeeArena = "<Arena>";
 
   @ConfigMapping("bungeecord.motd")
   @Document("The Motd when the Bungeecord mode is enabled (can be used for external analysis)")
-  private List<String> dedicatedMotd = List.of(
+  private List<String> bungeeMotd = List.of(
       "{name}",
       "{state.color}{state.name}"
   );
+
+  @ConfigMapping("bungeecord.fallback")
+  @Document("The fallback server players are teleported when a match ends or they leave")
+  private String bungeeFallback = "lobby";
 
   @ConfigMapping("celebration.enabled")
   @Document({
@@ -87,7 +91,7 @@ public class MainConfig extends ConfigObject {
 
   @ConfigMapping("duration.protection")
   @Document("How long players cannot take damage (protection time)")
-  private TickDuration protectionDuration = TickDuration.of(TimeUnit.SECONDS, 30);
+  private TickDuration protectionDuration = TickDuration.of(TimeUnit.SECONDS, 15);
 
   private MainConfig() {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("main"));

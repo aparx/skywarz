@@ -31,7 +31,7 @@ public final class HelpCommand extends CommandNode {
       Suppliers.memoize(new Supplier<ImmutableList<CommandNode>>() {
         @Override
         public ImmutableList<CommandNode> get() {
-          CommandNodeSet roots = SkywarsCommand.forest.getRoots();
+          CommandNodeSet roots = SkywarsCommand.forest.getTrees();
           ImmutableList.Builder<CommandNode> builder = ImmutableList.builder();
           for (CommandNode root : roots) accumulate(builder, root);
           return builder.build();

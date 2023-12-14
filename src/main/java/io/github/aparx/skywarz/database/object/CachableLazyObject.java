@@ -27,7 +27,6 @@ public final class CachableLazyObject<T> implements FetchableLazyObject<T> {
 
   private volatile long lastCacheTime;
 
-  @Getter(onMethod_ = {@Synchronized})
   private volatile FetchableObjectState state = FetchableObjectState.LOADING;
 
   public static <T> CachableLazyObject<T> of(
@@ -53,11 +52,16 @@ public final class CachableLazyObject<T> implements FetchableLazyObject<T> {
     return cached;
   }
 
+  @Synchronized
+  public @NonNull FetchableObjectState getState() {
+    updateState();
+    return state;
+  }
+
   @Override
   @Synchronized
   @CanIgnoreReturnValue
   public CompletableFuture<? extends T> fetch() {
-    updateState();
     if (getState() == FetchableObjectState.FRESH)
       return CompletableFuture.completedFuture(cached);
     // STALE: thus force refresh
