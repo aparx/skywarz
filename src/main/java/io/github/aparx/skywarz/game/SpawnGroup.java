@@ -15,7 +15,7 @@ import java.util.stream.Stream;
  * @version 2023-12-03 08:28
  * @since 1.0
  */
-public interface SpawnGroup {
+public interface SpawnGroup extends Iterable<Location> {
 
   int size();
 

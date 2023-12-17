@@ -1,7 +1,7 @@
 package io.github.aparx.skywarz.entity.data.stats;
 
 import com.google.common.base.Preconditions;
-import io.github.aparx.skywarz.database.stats.PlayerDatabaseStats;
+import io.github.aparx.skywarz.database.stats.PlayerStatsEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Synchronized;
@@ -50,7 +50,7 @@ public class PlayerStatsAccumulator {
     return statsMap.isEmpty();
   }
 
-  public void add(PlayerDatabaseStats databaseObject) {
+  public void add(PlayerStatsEntity databaseObject) {
     update(PlayerStatsKey.POINTS, (val) -> val.addAndGet(databaseObject.getPoints()));
     update(PlayerStatsKey.KILLS, (val) -> val.addAndGet(databaseObject.getKills()));
     update(PlayerStatsKey.DEATHS, (val) -> val.addAndGet(databaseObject.getDeaths()));

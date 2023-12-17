@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.game.arena;
+package io.github.aparx.skywarz.game.arena.settings;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;
@@ -24,6 +24,9 @@ public final class GameSettings implements ConfigurationSerializable {
 
   private static final GameSettings DEFAULT_SETTINGS = of(1, Flag.of(
       Flag.PROTECTION_PHASE, Flag.CHEST_RESET));
+
+  // TODO replace with SkywarsGameRule instances
+  // TODO add other rules such as weather, time, etc.
 
   @With
   private final int teamSize;
@@ -52,7 +55,7 @@ public final class GameSettings implements ConfigurationSerializable {
   }
 
   @Override
-  public Map<String, Object> serialize() {
+  public @NonNull Map<String, Object> serialize() {
     return Map.of("teamSize", teamSize, "flags", getFlags());
   }
 

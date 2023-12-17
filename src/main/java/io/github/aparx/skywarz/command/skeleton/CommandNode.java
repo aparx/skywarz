@@ -98,7 +98,7 @@ public abstract class CommandNode implements CommandNodeExecutor {
           .filter((node) -> node.hasPermission(context.getSender()))
           .map(CommandNode::getInfo)
           .map(CommandInfo::getName)
-          .filter((str) -> str.toLowerCase().startsWith(arg0))
+          .filter((str) -> StringUtils.startsWithIgnoreCase(str, arg0))
           .collect(Collectors.toList());
     }
     return null;

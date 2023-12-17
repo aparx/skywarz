@@ -10,6 +10,7 @@ import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.kit.GameKitManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
@@ -51,10 +52,10 @@ public class KitDeleteCommand extends CommandNode {
   @Override
   public List<String> onTabComplete(CommandContext context, CommandArgList args) {
     if (args.isEmpty()) return null;
-    final String targetName = args.join().toLowerCase();
+    final String targetName = args.join();
     return Skywars.getInstance().getKitManager().getKits().stream()
         .map(GameKit::getName)
-        .filter((name) -> name.toLowerCase().startsWith(targetName))
+        .filter((name) -> StringUtils.startsWithIgnoreCase(name, targetName))
         .collect(Collectors.toList());
   }
 }

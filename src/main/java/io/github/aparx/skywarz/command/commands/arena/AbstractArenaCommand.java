@@ -8,6 +8,7 @@ import io.github.aparx.skywarz.language.LocalizableError;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.MessageKeys;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -57,7 +58,7 @@ public abstract class AbstractArenaCommand extends CommandNode {
     String join = args.join(arenaArgumentIndex);
     return Skywars.getInstance().getArenaManager().stream()
         .map(GameArena::getName)
-        .filter(name -> join.isEmpty() || name.toLowerCase().startsWith(join.toLowerCase()))
+        .filter((name) -> StringUtils.startsWithIgnoreCase(name, join))
         .collect(Collectors.toList());
   }
 

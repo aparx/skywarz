@@ -5,6 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.utils.ConversionUtils;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.SpawnList;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.SerializableAs;
-import org.bukkit.util.BoundingBox;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

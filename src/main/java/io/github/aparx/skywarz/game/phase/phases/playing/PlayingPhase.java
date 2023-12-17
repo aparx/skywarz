@@ -9,7 +9,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.game.arena.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -59,6 +59,7 @@ public class PlayingPhase extends GamePhase {
   }
 
   public boolean hasProtectionPhase() {
+    // TODO complexity cleanup
     return findMatch()
         .map((match) -> match.getArena().getData().getSettings().getFlags())
         .filter(GameSettings.Flag.PROTECTION_PHASE::isFlagged)
@@ -159,7 +160,8 @@ public class PlayingPhase extends GamePhase {
         match.getAudience().forEach((member) -> {
           SoundRecord.TIMER_TICK.play(member);
           if (secsLeft <= 60)
-            member.playTitle(StringUtils.SPACE, getColorForTimeLeft(secsLeft) + String.valueOf(secsLeft), 0, 30, 5);
+            member.playTitle(StringUtils.SPACE,
+                getColorForTimeLeft(secsLeft) + String.valueOf(secsLeft), 0, 30, 5);
         });
       }
     }

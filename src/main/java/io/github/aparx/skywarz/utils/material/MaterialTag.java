@@ -33,8 +33,6 @@ public final class MaterialTag implements Predicate<Material> {
       .add((x) -> x != Material.MILK_BUCKET && ArrayUtils.contains(splitToSegments(x), "BUCKET"))
       .register();
 
-  public static final MaterialTag painting = new MaterialTag().addAll(Material.PAINTING);
-
   private final Set<Material> involved = new HashSet<>();
   private final List<Predicate<Material>> predicates = new ArrayList<>();
 
@@ -70,23 +68,27 @@ public final class MaterialTag implements Predicate<Material> {
 
   @CanIgnoreReturnValue
   public MaterialTag addAll(Material... materials) {
-    involved.addAll(Arrays.asList((Material[]) ArrayUtils.nullToEmpty(materials)));
+    if (ArrayUtils.isNotEmpty(materials))
+      involved.addAll(Arrays.asList(materials));
     return this;
   }
 
   @CanIgnoreReturnValue
   @SuppressWarnings("unchecked")
   public MaterialTag addAll(Predicate<Material>... predicates) {
-    this.predicates.addAll(Arrays.asList((Predicate<Material>[]) ArrayUtils.nullToEmpty(predicates)));
+    if (ArrayUtils.isNotEmpty(predicates))
+      this.predicates.addAll(Arrays.asList(predicates));
     return this;
   }
 
   @CanIgnoreReturnValue
   @SuppressWarnings("unchecked")
   public MaterialTag addAll(String... materialSegments) {
-    return addAll(Arrays.stream(ArrayUtils.nullToEmpty(materialSegments))
-        .map(MaterialTag::newPredicate)
-        .toArray(Predicate[]::new));
+    if (ArrayUtils.isNotEmpty(materialSegments))
+      return addAll(Arrays.stream(materialSegments)
+          .map(MaterialTag::newPredicate)
+          .toArray(Predicate[]::new));
+    return this;
   }
 
   @CanIgnoreReturnValue

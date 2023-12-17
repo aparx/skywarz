@@ -4,8 +4,10 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.RegisterNotifiable;
 import io.github.aparx.skywarz.utils.Snowflake;
 import lombok.experimental.UtilityClass;
+import org.apache.commons.lang.ArrayUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,6 +29,15 @@ public final class KeyValueSets {
         return keyMapper.apply(v);
       }
     };
+  }
+
+  @SafeVarargs
+  public static <K, E> KeyValueSet<K, E> of(@NonNull Function<E, K> keyMapper, E... elements) {
+    KeyValueSet<K, E> valueSet = KeyValueSets.of(keyMapper);
+    if (ArrayUtils.getLength(elements) == 0)
+      return valueSet;
+    valueSet.addAll(Arrays.asList(elements));
+    return valueSet;
   }
 
   public static <K, V extends Snowflake<? extends K>> KeyValueSet<K, V> ofSnowflake() {
@@ -95,7 +106,6 @@ public final class KeyValueSets {
   public static <K, E> KeyValueSet<K, E> copyOf(@NonNull KeyValueSet<K, E> source) {
     return copyOf(source, source::getKey);
   }
-
 
   public static <E extends @NonNull Object> KeyedByClassSet<E> ofClass() {
     return new KeyedByClassSet<>();

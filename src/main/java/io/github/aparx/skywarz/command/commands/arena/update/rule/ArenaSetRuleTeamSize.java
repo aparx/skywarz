@@ -1,4 +1,4 @@
-package io.github.aparx.skywarz.command.commands.arena.update;
+package io.github.aparx.skywarz.command.commands.arena.update.rule;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.command.CommandContext;
@@ -8,7 +8,6 @@ import io.github.aparx.skywarz.command.commands.arena.AbstractArenaCommand;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.language.Language;
-import io.github.aparx.skywarz.language.MessageKeys;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
@@ -16,12 +15,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
  * @version 2023-12-02 06:27
  * @since 1.0
  */
-public class ArenaSetTeamSize extends AbstractArenaCommand {
+public class ArenaSetRuleTeamSize extends AbstractArenaCommand {
 
   private static final int ARENA_PARAMETER_INDEX = 0;
   private static final int NUMBER_PARAMETER_INDEX = 1;
 
-  public ArenaSetTeamSize(@NonNull CommandNode parent) {
+  public ArenaSetRuleTeamSize(@NonNull CommandNode parent) {
     super(CommandInfo.builder()
             .name("size")
             .args("<Arena> <TeamSize>")

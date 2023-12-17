@@ -17,12 +17,18 @@ import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
+import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -42,6 +48,17 @@ public class StatsCommand extends CommandNode {
         .args("(<player>)")
         .build());
     add(new StatsResetCommand(this));
+  }
+
+  public Optional<OfflinePlayer> getTarget(
+      Player executor, CommandContext context, CommandArgList args) {
+    boolean hasTargetDefined = args.length() == 1 + OTHER_ARGUMENT_INDEX;
+    if (!hasTargetDefined && SkywarsPermission.STATS_SELF.has(executor))
+      return Optional.of(executor);
+    else if (hasTargetDefined && SkywarsPermission.STATS_OTHER.has(executor))
+      return Optional.of(args.get(OTHER_ARGUMENT_INDEX).getOfflinePlayer());
+    context.setStatus(CommandContext.Status.ERROR_PERMISSION);
+    return Optional.empty();
   }
 
   @Override
@@ -79,14 +96,19 @@ public class StatsCommand extends CommandNode {
     }
   }
 
-  public static Optional<OfflinePlayer> getTarget(
-      Player executor, CommandContext context, CommandArgList args) {
-    boolean hasTargetDefined = args.length() == 1 + OTHER_ARGUMENT_INDEX;
-    if (!hasTargetDefined && SkywarsPermission.STATS_SELF.has(executor))
-      return Optional.of(executor);
-    else if (hasTargetDefined && SkywarsPermission.STATS_OTHER.has(executor))
-      return Optional.of(args.get(OTHER_ARGUMENT_INDEX).getOfflinePlayer());
-    context.setStatus(CommandContext.Status.ERROR_PERMISSION);
-    return Optional.empty();
+  @Override
+  public List<String> onTabComplete(CommandContext context, CommandArgList args) {
+    List<String> suggestions = super.onTabComplete(context, args);
+    CommandSender sender = context.getSender();
+    if (SkywarsPermission.STATS_OTHER.has(sender) && args.length() == 1) {
+      if (suggestions == null) suggestions = new ArrayList<>();
+      boolean isPlayer = context.isPlayer();
+      suggestions.addAll(Bukkit.getOnlinePlayers().stream()
+          .filter((x) -> !isPlayer || ((Player) sender).canSee(x))
+          .map(Player::getName)
+          .filter((x) -> StringUtils.startsWithIgnoreCase(x, args.getString(0)))
+          .collect(Collectors.toList()));
+    }
+    return suggestions;
   }
 }

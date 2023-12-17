@@ -16,6 +16,11 @@ public final class TimedProcedure {
   private long nanosPassed;
 
   @CanIgnoreReturnValue
+  public static long executeProcedure(Consumer<TimedProcedure> action) {
+    return new TimedProcedure().execute(action);
+  }
+
+  @CanIgnoreReturnValue
   public long execute(Consumer<TimedProcedure> action) {
     nanosPassed = System.nanoTime();
     action.accept(this);

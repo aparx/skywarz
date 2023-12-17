@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Getter
 @Setter
 @DatabaseTable(tableName = "stats")
-public class PlayerDatabaseStats implements Snowflake<UUID> {
+public class PlayerStatsEntity implements Snowflake<UUID> {
 
   @DatabaseField(id = true)
   private UUID id;
@@ -42,15 +42,15 @@ public class PlayerDatabaseStats implements Snowflake<UUID> {
   @DatabaseField
   private int matchesWon;
 
-  public static PlayerDatabaseStats fromAccumulator(PlayerStatsAccumulator accumulator) {
-    PlayerDatabaseStats playerDatabaseStats = new PlayerDatabaseStats();
-    playerDatabaseStats.setId(accumulator.getId());
-    playerDatabaseStats.setKills(accumulator.findGet(PlayerStatsKey.KILLS));
-    playerDatabaseStats.setDeaths(accumulator.findGet(PlayerStatsKey.DEATHS));
-    playerDatabaseStats.setMatchesWon(accumulator.findGet(PlayerStatsKey.WON));
-    playerDatabaseStats.setMatchesPlayed(accumulator.findGet(PlayerStatsKey.PLAYED));
-    playerDatabaseStats.setPoints(accumulator.findGet(PlayerStatsKey.POINTS));
-    return playerDatabaseStats;
+  public static PlayerStatsEntity fromAccumulator(PlayerStatsAccumulator accumulator) {
+    PlayerStatsEntity playerStatsEntity = new PlayerStatsEntity();
+    playerStatsEntity.setId(accumulator.getId());
+    playerStatsEntity.setKills(accumulator.findGet(PlayerStatsKey.KILLS));
+    playerStatsEntity.setDeaths(accumulator.findGet(PlayerStatsKey.DEATHS));
+    playerStatsEntity.setMatchesWon(accumulator.findGet(PlayerStatsKey.WON));
+    playerStatsEntity.setMatchesPlayed(accumulator.findGet(PlayerStatsKey.PLAYED));
+    playerStatsEntity.setPoints(accumulator.findGet(PlayerStatsKey.POINTS));
+    return playerStatsEntity;
   }
 
   public PlayerStatsAccumulator accumulate() {
@@ -86,7 +86,7 @@ public class PlayerDatabaseStats implements Snowflake<UUID> {
   public boolean equals(Object object) {
     if (this == object) return true;
     if (object == null || getClass() != object.getClass()) return false;
-    PlayerDatabaseStats that = (PlayerDatabaseStats) object;
+    PlayerStatsEntity that = (PlayerStatsEntity) object;
     return Objects.equals(id, that.id);
   }
 

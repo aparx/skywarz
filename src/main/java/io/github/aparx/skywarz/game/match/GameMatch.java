@@ -9,6 +9,7 @@ import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import io.github.aparx.skywarz.events.match.MatchLeaveEvent;
 import io.github.aparx.skywarz.events.match.MatchPointsCalculateEvent;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
@@ -122,7 +123,9 @@ public class GameMatch implements Snowflake<UUID>, RegisterNotifiable {
       // Stops the lobby
       getWatchTask().stop();
       getAudience().forEach(this::leave);
-      getChestHandler().reset();
+      GameSettings settings = getArena().getData().getSettings();
+      if (GameSettings.Flag.CHEST_RESET.isFlagged(settings.getFlags()))
+        getChestHandler().reset();
       Objects.requireNonNull(arena.getSource()).getSignHandler().update();
     } finally {
       // enforce map reset

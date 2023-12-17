@@ -15,10 +15,12 @@ import io.github.aparx.skywarz.language.MessageKeys;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Vector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -60,6 +62,7 @@ public class ArenaSetPointCommand extends AbstractArenaCommand {
             other.getName()));
     ArenaBox.Point point = ArenaBox.Point.ofIndex(numericalPoint - 1);
     ArenaBox thisBox = data.getBox();
+    Optional<Vector> previousPoint = thisBox.getPoint(point);
     thisBox.setPoint(point, location.toVector());
     if (thisBox.isCompleted()) try {
       Location lobby = data.getLobby();
@@ -71,7 +74,7 @@ public class ArenaSetPointCommand extends AbstractArenaCommand {
               "Cannot set point: playground overlaps with the one of arena",
               other.getName()));
     } catch (Exception e) {
-      thisBox.setPoint(point, null);
+      thisBox.setPoint(point, previousPoint.orElse(null));
       throw e;
     }
     data.setWorld(player.getWorld());

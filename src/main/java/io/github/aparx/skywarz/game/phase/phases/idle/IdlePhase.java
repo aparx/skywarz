@@ -7,6 +7,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.WeakGroupAudience;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.item.SkywarsItem;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
@@ -74,10 +75,12 @@ public class IdlePhase extends GamePhase {
     PlayerSnapshot.ofReset(entity,
         match.getArena().getData().getLobby(),
         GameMode.ADVENTURE).restore(entity);
+    GameSettings settings = match.getArena().getData().getSettings();
     KeyedByClassSet<SkywarsItem> items = Skywars.getInstance().getItemManager().getItems();
     entity.getInventory().setItem(LeaveItem.SLOT, items
         .require(LeaveItem.class).create(match, entity));
-    items.require(TeamSelectorItem.class).give(match, entity);
+    if (settings.getTeamSize() > 1)
+      items.require(TeamSelectorItem.class).give(match, entity);
     items.require(KitSelectorItem.class).give(match, entity);
     if (SkywarsPermission.QUICKSTART.has(entity))
       items.require(QuickstartItem.class).give(match, entity);

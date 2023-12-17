@@ -128,4 +128,8 @@ public class SpawnList implements SpawnGroup, ConfigurationSerializable {
     return new SpawnList(new HashMap<>(map));
   }
 
+  @Override
+  public Iterator<Location> iterator() {
+    return map.values().iterator();
+  }
 }

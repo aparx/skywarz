@@ -8,7 +8,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
-import io.github.aparx.skywarz.game.arena.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;

@@ -13,7 +13,7 @@ import io.github.aparx.skywarz.command.commands.arena.remove.ArenaRemoveSpawnCom
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetLobbyCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetPointCommand;
 import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetSpectatorCommand;
-import io.github.aparx.skywarz.command.commands.arena.update.ArenaSetTeamSize;
+import io.github.aparx.skywarz.command.commands.arena.update.rule.ArenaSetRuleTeamSize;
 import io.github.aparx.skywarz.command.commands.bungee.BungeeToggleCommand;
 import io.github.aparx.skywarz.command.commands.bungee.BungeeUpdateCommand;
 import io.github.aparx.skywarz.command.commands.kit.*;
@@ -69,7 +69,10 @@ public class SkywarsCommand implements CommandExecutor, TabCompleter {
         .add(ArenaSetSpectatorCommand::new)
         .add(ArenaSetLobbyCommand::new)
         .add(ArenaSetPointCommand::new)
-        .add(ArenaSetTeamSize::new));
+        .add((p) -> CommandBuilder.builder(p, "rule")
+            .args("<{children}> <Arena> <Value>")
+            .build()
+            .add(ArenaSetRuleTeamSize::new)));
 
     arena.add(CommandBuilder.builder(arena, "add")
         .permission(SkywarsPermission.SETUP)

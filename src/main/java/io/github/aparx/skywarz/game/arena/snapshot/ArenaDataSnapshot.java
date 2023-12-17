@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.arena.snapshot;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
-import io.github.aparx.skywarz.game.arena.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.arena.IArenaData;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
@@ -13,7 +13,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

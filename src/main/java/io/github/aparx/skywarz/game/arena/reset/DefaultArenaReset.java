@@ -56,7 +56,7 @@ public class DefaultArenaReset extends ArenaReset {
   @Override
   public void reset() {
     HandlerList.unregisterAll(listener);
-    new TimedProcedure().execute((time) -> {
+    TimedProcedure.executeProcedure((time) -> {
       GameArena arena = getArena();
       Skywars.logger().log(Level.INFO, "Resetting {0} (...)", arena.getName());
       blocks.forEach((snapshot) -> {

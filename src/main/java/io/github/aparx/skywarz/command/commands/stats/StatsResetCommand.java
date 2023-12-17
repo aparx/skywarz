@@ -12,6 +12,8 @@ import io.github.aparx.skywarz.permission.SkywarsPermission;
 import org.bukkit.OfflinePlayer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.List;
+
 /**
  * @author aparx (Vinzent Z.)
  * @version 2023-12-11 12:04
@@ -55,5 +57,10 @@ public class StatsResetCommand extends CommandNode {
             return null;
           });
     }
+  }
+
+  @Override
+  public List<String> onTabComplete(CommandContext context, CommandArgList args) {
+    return super.onTabComplete(context, args);
   }
 }

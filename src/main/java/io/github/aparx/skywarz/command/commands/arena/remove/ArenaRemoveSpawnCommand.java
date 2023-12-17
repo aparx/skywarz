@@ -12,6 +12,7 @@ import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
+import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
@@ -75,7 +76,7 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
       return suggestions;
     if (args.length() == 1 + TEAM_ARGUMENT_INDEX)
       return Arrays.stream(TeamEnum.values())
-          .filter((x) -> x.name().startsWith(args.getString(TEAM_ARGUMENT_INDEX).toUpperCase()))
+          .filter((x) -> StringUtils.startsWithIgnoreCase(x.name(), args.getString(TEAM_ARGUMENT_INDEX)))
           .map(TeamEnum::getDefaultName)
           .collect(Collectors.toList());
     if (args.length() == 1 + SPAWN_ARGUMENT_INDEX)

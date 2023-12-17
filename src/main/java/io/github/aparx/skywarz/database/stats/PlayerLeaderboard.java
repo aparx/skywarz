@@ -1,11 +1,10 @@
-package io.github.aparx.skywarz.database.leaderboard;
+package io.github.aparx.skywarz.database.stats;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.j256.ormlite.stmt.QueryBuilder;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
-import io.github.aparx.skywarz.database.stats.PlayerDatabaseStats;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -21,32 +20,32 @@ import java.util.concurrent.CompletableFuture;
  * @since 1.0
  */
 @RequiredArgsConstructor
-public final class Leaderboard {
+public final class PlayerLeaderboard {
 
   /** The main leaderboard contains up to ten entries (meaning the Top 10) by default. */
   @Getter
-  private static final Leaderboard mainLeaderboard = new Leaderboard(0, 10L);
+  private static final PlayerLeaderboard mainLeaderboard = new PlayerLeaderboard(0, 10L);
 
   @Getter
   private final CachableLazyObject<List<PlayerStatsAccumulator>> content =
       CachableLazyObject.of(Duration.ofHours(1), () ->
               executeQuery().thenApply((list) -> list.stream()
-                  .map(PlayerDatabaseStats::accumulate)
+                  .map(PlayerStatsEntity::accumulate)
                   .collect(ImmutableList.toImmutableList())),
           ImmutableList.of());
 
   private final long offset;
   private final long limit;
 
-  public CompletableFuture<List<PlayerDatabaseStats>> executeQuery() {
+  public CompletableFuture<List<PlayerStatsEntity>> executeQuery() {
     return Skywars.getInstance().getDatabase().executeAsync(() -> {
-      QueryBuilder<PlayerDatabaseStats, UUID> queryBuilder = createQuery();
+      QueryBuilder<PlayerStatsEntity, UUID> queryBuilder = createQuery();
       if (offset >= 1) queryBuilder.offset(offset);
       return queryBuilder.limit(limit).query();
     });
   }
 
-  public QueryBuilder<PlayerDatabaseStats, UUID> createQuery() {
+  public QueryBuilder<PlayerStatsEntity, UUID> createQuery() {
     return Skywars.getInstance().getDatabase().getStatsManager().getStatsDao()
         .queryBuilder().orderBy("points", false);
   }

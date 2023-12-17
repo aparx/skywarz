@@ -6,7 +6,7 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
-import io.github.aparx.skywarz.database.leaderboard.Leaderboard;
+import io.github.aparx.skywarz.database.stats.PlayerLeaderboard;
 import io.github.aparx.skywarz.database.object.CachableLazyObject;
 import io.github.aparx.skywarz.database.object.FetchableObjectState;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
@@ -36,7 +36,7 @@ public class LeaderboardCommand extends CommandNode {
   @Override
   public void execute(CommandContext context, CommandArgList args) {
     CachableLazyObject<List<PlayerStatsAccumulator>> leaderboardContent =
-        Leaderboard.getMainLeaderboard().getContent();
+        PlayerLeaderboard.getMainLeaderboard().getContent();
     CommandSender sender = context.getSender();
     Language language = Language.getInstance();
     if (leaderboardContent.getState() != FetchableObjectState.FRESH)

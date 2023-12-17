@@ -53,9 +53,9 @@ public final class PlayerStatsManager extends DatabaseObjectManager {
     SkywarsDatabase database = getDatabase();
     Preconditions.checkState(database.isEnabled(), "Database is not enabled");
     registry.register();
-    DaoManager.createDao(database.getSource(), PlayerDatabaseStats.class);
+    DaoManager.createDao(database.getSource(), PlayerStatsEntity.class);
     return database.executeAsync(() -> {
-      TableUtils.createTableIfNotExists(database.getSource(), PlayerDatabaseStats.class);
+      TableUtils.createTableIfNotExists(database.getSource(), PlayerStatsEntity.class);
     });
   }
 
@@ -64,8 +64,8 @@ public final class PlayerStatsManager extends DatabaseObjectManager {
     registry.unregister();
   }
 
-  public Dao<PlayerDatabaseStats, UUID> getStatsDao() {
-    return DaoManager.lookupDao(getDatabase().getSource(), PlayerDatabaseStats.class);
+  public Dao<PlayerStatsEntity, UUID> getStatsDao() {
+    return DaoManager.lookupDao(getDatabase().getSource(), PlayerStatsEntity.class);
   }
 
   public CompletableFuture<Integer> delete(@NonNull UUID uuid) {
@@ -78,7 +78,7 @@ public final class PlayerStatsManager extends DatabaseObjectManager {
 
   public CompletableFuture<Dao.CreateOrUpdateStatus> apply(@NonNull PlayerStatsAccumulator data) {
     return query(data.getId()).thenCompose((stats) -> {
-      stats = stats != null ? stats : new PlayerDatabaseStats();
+      stats = stats != null ? stats : new PlayerStatsEntity();
       stats.setId(data.getId());
       stats.add(data);
       return update(stats);
@@ -89,19 +89,19 @@ public final class PlayerStatsManager extends DatabaseObjectManager {
     });
   }
 
-  public CompletableFuture<Dao.CreateOrUpdateStatus> update(@NonNull PlayerDatabaseStats stats) {
+  public CompletableFuture<Dao.CreateOrUpdateStatus> update(@NonNull PlayerStatsEntity stats) {
     Preconditions.checkNotNull(stats, "Stats must not be null");
     Preconditions.checkState(getDatabase().isEnabled(), "Database is not enabled");
     return getDatabase().executeAsync(() -> getStatsDao().createOrUpdate(stats));
   }
 
-  public CompletableFuture<PlayerDatabaseStats> createIfNotExists(@NonNull PlayerDatabaseStats stats) {
+  public CompletableFuture<PlayerStatsEntity> createIfNotExists(@NonNull PlayerStatsEntity stats) {
     Preconditions.checkNotNull(stats, "Stats must not be null");
     Preconditions.checkState(getDatabase().isEnabled(), "Database is not enabled");
     return getDatabase().executeAsync(() -> getStatsDao().createIfNotExists(stats));
   }
 
-  public CompletableFuture<@Nullable PlayerDatabaseStats> query(@NonNull UUID uuid) {
+  public CompletableFuture<@Nullable PlayerStatsEntity> query(@NonNull UUID uuid) {
     Preconditions.checkState(getDatabase().isEnabled(), "Database is not enabled");
     return getDatabase().executeAsync(() -> getStatsDao().queryForId(uuid));
   }

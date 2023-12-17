@@ -10,6 +10,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.arena.reset.DefaultArenaReset;
+import io.github.aparx.skywarz.game.arena.settings.GameSettings;
 import io.github.aparx.skywarz.game.arena.sign.ArenaSignHandler;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.TeamEnum;
@@ -120,7 +121,7 @@ public final class GameArena extends ConfigObject implements CompletableSetup {
     return data.getBox().isCompleted()
         && data.getLobby() != null
         && data.getSpectator() != null
-        && !data.getSpawns().isEmpty();
+        && getAvailableTeamCount(this) > 0;
   }
 
   @Override
