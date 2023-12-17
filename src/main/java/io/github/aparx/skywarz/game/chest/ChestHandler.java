@@ -6,6 +6,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.VariablePopulator;
+import io.github.aparx.skywarz.utils.sound.SoundRecord;
 import io.github.aparx.skywarz.utils.tick.TickDuration;
 import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
@@ -160,7 +161,7 @@ public class ChestHandler {
           Location center = getHorizontalCenter().add(0, 1.05, 0);
           World world = Objects.requireNonNull(location.getWorld());
           world.spawnParticle(Particle.FLAME, center, 3, 0, 0, 0, 0, null);
-          world.playSound(center, Sound.BLOCK_NOTE_BLOCK_PLING, .1f, 1.25f);
+          SoundRecord.CHEST_REFILLED.play(center);
         }
         ticker.tick();
       }, 0, ticker.getInterval().toTicks());

@@ -16,6 +16,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -112,7 +113,9 @@ public final class ArenaSignHandler implements Listener {
   @EventHandler(priority = EventPriority.HIGH)
   void onSignCreate(PlayerInteractEvent event) {
     Block clickedBlock = event.getClickedBlock();
-    if (event.useInteractedBlock() == Event.Result.DENY || clickedBlock == null) return;
+    if (event.useInteractedBlock() == Event.Result.DENY || clickedBlock == null
+        || event.getAction() != Action.RIGHT_CLICK_BLOCK)
+      return;
     BlockState state = clickedBlock.getState();
     if (!(state instanceof Sign)) return;
     findArena().ifPresentOrElse((arena) -> {

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.With;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -28,7 +29,7 @@ public final class SoundRecord {
   public static final SoundRecord TIMER_TICK = of(Sound.BLOCK_DISPENSER_DISPENSE, .5f, 1.5f);
   public static final SoundRecord PROTECTION_TICK = of(Sound.BLOCK_NOTE_BLOCK_BASS, .5f, 1.3f);
   public static final SoundRecord PROTECTION_END = of(Sound.ENTITY_ENDER_DRAGON_GROWL, .5f, 1.1f);
-
+  public static final SoundRecord CHEST_REFILLED = of(Sound.BLOCK_NOTE_BLOCK_PLING, .1f, 1.25f);
   public static final SoundRecord KIT_BUILT = of(Sound.BLOCK_ANVIL_USE, .75f);
 
   private final @NonNull Sound sound;
@@ -56,6 +57,12 @@ public final class SoundRecord {
 
   public static SoundRecord of(@NonNull Sound sound) {
     return of(sound, 1.0F, 1.0F);
+  }
+
+  public void play(@NonNull Location location) {
+    World world = location.getWorld();
+    Preconditions.checkNotNull(world, "World is invalid");
+    world.playSound(location, sound, volume, pitch);
   }
 
   public void play(@NonNull Audience audience, Location location) {
