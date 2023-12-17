@@ -9,7 +9,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
@@ -32,6 +32,7 @@ import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
+import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -61,14 +62,13 @@ public class PlayingPhase extends GamePhase {
   public boolean hasProtectionPhase() {
     // TODO complexity cleanup
     return findMatch()
-        .map((match) -> match.getArena().getData().getSettings().getFlags())
-        .filter(GameSettings.Flag.PROTECTION_PHASE::isFlagged)
+        .filter((match) -> match.getArena().getData().getSettings().getProtectionPhase())
         .isPresent();
   }
 
   public boolean isProtectionPhase() {
     return hasProtectionPhase() && !getTicker().hasElapsed(
-        MainConfig.getInstance().getProtectionDuration());
+        MainConfig.getInstance().getDurationProtection());
   }
 
   @Override
@@ -76,7 +76,10 @@ public class PlayingPhase extends GamePhase {
     PlayerMatchData data = player.getMatchData();
     data.setSpectator(true);
     // Handle spectator join
-    player.findOnline().ifPresent((e) -> GameSpectator.spawnAsSpectator(getMatch(), e));
+    player.findOnline().ifPresent((online) -> {
+      GameSpectator.spawnAsSpectator(getMatch(), online);
+      applyWorldView(getMatch(), online);
+    });
     updateScoreboard(player);
   }
 
@@ -128,7 +131,7 @@ public class PlayingPhase extends GamePhase {
     boolean wasProtecting = this.wasProtecting;
     this.wasProtecting = isProtectionPhase();
     if (this.wasProtecting) {
-      TickDuration duration = MainConfig.getInstance().getProtectionDuration();
+      TickDuration duration = MainConfig.getInstance().getDurationProtection();
       long secsLeft = duration.toSeconds() - ticker.getElapsed(TimeUnit.SECONDS);
       if (ticker.isCycling(TimeUnit.SECONDS) && (
           (secsLeft <= 10 && secsLeft % 5 == 0)
@@ -165,6 +168,18 @@ public class PlayingPhase extends GamePhase {
         });
       }
     }
+  }
+
+  private void applyWorldView(GameMatch match, Player player) {
+    ArenaSettings settings = match.getArena().getData().getSettings();
+    WeatherType weather = settings.getWorldWeather();
+    Integer time = settings.getWorldTime();
+    if (weather != null)
+      player.setPlayerWeather(weather);
+    else player.resetPlayerWeather();
+    if (time != null)
+      player.setPlayerTime(time, false);
+    else player.resetPlayerTime();
   }
 
   private ChatColor getColorForTimeLeft(long secsLeft) {
@@ -252,6 +267,7 @@ public class PlayingPhase extends GamePhase {
         //  this causes IllegalStateException: Missing key in ResourceKey for some reason?
         // online.setDisplayName(team.getTeamEnum().getChatColor() + player.getName());
         online.setPlayerListName(displayName);
+        applyWorldView(match, online);
       }));
     });
   }

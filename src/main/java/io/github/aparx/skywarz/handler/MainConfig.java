@@ -91,7 +91,11 @@ public class MainConfig extends ConfigObject {
 
   @ConfigMapping("duration.protection")
   @Document("How long players cannot take damage (protection time)")
-  private TickDuration protectionDuration = TickDuration.of(TimeUnit.SECONDS, 15);
+  private TickDuration durationProtection = TickDuration.of(TimeUnit.SECONDS, 15);
+
+  @ConfigMapping("duration.chest refill")
+  @Document("The interval in which an opened chest is refilled")
+  private TickDuration durationRefill = TickDuration.of(TimeUnit.MINUTES, 3);
 
   private MainConfig() {
     super((proxy) -> Skywars.getInstance().getConfigHandler().getOrCreate("main"));

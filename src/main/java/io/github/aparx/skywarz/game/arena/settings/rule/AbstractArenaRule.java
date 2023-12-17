@@ -13,12 +13,12 @@ import java.util.List;
  * @since 1.0
  */
 @Getter
-public abstract class SkywarsGameRule<T> {
+public abstract class AbstractArenaRule<T> {
 
   private final @NonNull String name;
   private final T defaultValue;
 
-  public SkywarsGameRule(@NonNull String name, T defaultValue) {
+  public AbstractArenaRule(@NonNull String name, T defaultValue) {
     Preconditions.checkNotNull(name, "Name must not be null");
     this.name = name;
     this.defaultValue = defaultValue;

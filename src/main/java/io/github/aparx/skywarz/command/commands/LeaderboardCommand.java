@@ -1,7 +1,9 @@
 package io.github.aparx.skywarz.command.commands;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
@@ -35,10 +37,12 @@ public class LeaderboardCommand extends CommandNode {
 
   @Override
   public void execute(CommandContext context, CommandArgList args) {
-    CachableLazyObject<List<PlayerStatsAccumulator>> leaderboardContent =
-        PlayerLeaderboard.getMainLeaderboard().getContent();
     CommandSender sender = context.getSender();
     Language language = Language.getInstance();
+    Preconditions.checkState(Skywars.getInstance().getDatabase().isEnabled(),
+        "Not possible: Database is not active");
+    CachableLazyObject<List<PlayerStatsAccumulator>> leaderboardContent =
+        PlayerLeaderboard.getMainLeaderboard().getContent();
     if (leaderboardContent.getState() != FetchableObjectState.FRESH)
       sender.sendMessage(language.substitute(MessageKeys.Stats.FETCHING));
     leaderboardContent.fetch().thenAccept((stats) -> {

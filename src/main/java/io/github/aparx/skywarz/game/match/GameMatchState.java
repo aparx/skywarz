@@ -22,7 +22,7 @@ public enum GameMatchState {
   /** Players wait for others to join */
   IDLE(TickDuration.of(TimeUnit.SECONDS, 45)),
   /** Players are in the midst of playing */
-  PLAYING(TickDuration.of(TimeUnit.MINUTES, 15)),
+  PLAYING(TickDuration.of(TimeUnit.MINUTES, 25)),
   /** Match is done and players are sent back to lobby to celebrate the winner */
   DONE(TickDuration.of(TimeUnit.SECONDS, 15));
 

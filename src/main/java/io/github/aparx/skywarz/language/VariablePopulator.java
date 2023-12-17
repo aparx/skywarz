@@ -8,7 +8,7 @@ import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.entity.data.stats.PlayerStatsAccumulator;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
@@ -186,7 +186,7 @@ public final class VariablePopulator {
       addMatch(lookup, match, ArrayPath.of(), null);
     }, () -> {
       // Fill with values known when no match is associated to `arena`
-      GameSettings settings = arena.getData().getSettings();
+      ArenaSettings settings = arena.getData().getSettings();
 
       int minPlayerCount = GameArena.getMinPlayerCount(settings);
       addState(lookup, arena.isCompleted()

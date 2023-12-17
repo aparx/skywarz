@@ -3,7 +3,7 @@ package io.github.aparx.skywarz.game.arena.snapshot;
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.arena.IArenaData;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
@@ -32,7 +32,7 @@ public class ArenaDataSnapshot implements IArenaData {
   private final Location lobby;
   private final WeakReference<World> world;
   private final @NonNull EnumMap<TeamEnum, SpawnGroup> spawns;
-  private final @NonNull GameSettings settings;
+  private final @NonNull ArenaSettings settings;
 
   public ArenaDataSnapshot(@NonNull IArenaData data) {
     Preconditions.checkNotNull(data, "Data must not be null");

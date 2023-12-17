@@ -4,10 +4,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.*;
 import org.apache.commons.lang.ArrayUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -149,6 +146,8 @@ public final class PlayerSnapshot {
     if (scoreboard != null && Bukkit.getScoreboardManager() != null)
       player.setScoreboard(Optional.ofNullable(scoreboard.get())
           .orElse(Bukkit.getScoreboardManager().getMainScoreboard()));
+    player.resetPlayerTime();
+    player.resetPlayerWeather();
   }
 
 }

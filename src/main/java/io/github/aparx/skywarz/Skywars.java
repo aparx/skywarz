@@ -8,7 +8,7 @@ import io.github.aparx.skywarz.database.SkywarsDatabase;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.SpawnList;
 import io.github.aparx.skywarz.game.arena.*;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.arena.sign.ArenaSign;
 import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestItem;
@@ -49,7 +49,7 @@ public final class Skywars {
     ConfigurationSerialization.registerClass(TickDuration.class);
     ConfigurationSerialization.registerClass(ArenaBox.class);
     ConfigurationSerialization.registerClass(SpawnList.class);
-    ConfigurationSerialization.registerClass(GameSettings.class);
+    ConfigurationSerialization.registerClass(ArenaSettings.class);
     ConfigurationSerialization.registerClass(ArenaData.class);
     ConfigurationSerialization.registerClass(WrappedItemStack.class);
     ConfigurationSerialization.registerClass(ChestItem.class);

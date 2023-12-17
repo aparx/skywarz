@@ -2,13 +2,10 @@ package io.github.aparx.skywarz.game.arena.settings.rule;
 
 import com.google.common.base.Preconditions;
 import lombok.Getter;
-import org.apache.commons.lang3.StringUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.nio.IntBuffer;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -16,22 +13,22 @@ import java.util.stream.Collectors;
  * @since 1.0
  */
 @Getter
-public class IntGameRule extends SkywarsGameRule<Integer> {
+public class IntArenaRule extends AbstractArenaRule<Integer> {
 
   private @Nullable Integer fromInclusive, toExclusive;
 
-  public IntGameRule(@NonNull String name, Integer defaultValue) {
+  public IntArenaRule(@NonNull String name, Integer defaultValue) {
     this(name, defaultValue, null, null);
   }
 
-  public IntGameRule(@NonNull String name, Integer defaultValue, @Nullable Integer fromInclusive) {
+  public IntArenaRule(@NonNull String name, Integer defaultValue, @Nullable Integer fromInclusive) {
     this(name, defaultValue, fromInclusive, null);
   }
 
-  public IntGameRule(@NonNull String name,
-                     Integer defaultValue,
-                     @Nullable Integer fromInclusive,
-                     @Nullable Integer toExclusive) {
+  public IntArenaRule(@NonNull String name,
+                      Integer defaultValue,
+                      @Nullable Integer fromInclusive,
+                      @Nullable Integer toExclusive) {
     super(name, defaultValue);
     this.fromInclusive = fromInclusive;
     this.toExclusive = toExclusive;
@@ -62,10 +59,12 @@ public class IntGameRule extends SkywarsGameRule<Integer> {
   public Integer validate(@Nullable Object object) {
     Preconditions.checkNotNull(object, "Object must not be null");
     int value = Integer.parseInt(object.toString());
-    if (isLowerBound() && value > fromInclusive)
-      throw new IndexOutOfBoundsException(value);
+    if (isLowerBound() && value < fromInclusive)
+      throw new IllegalArgumentException(String.format(
+          "Value must be greater or equal to %s", fromInclusive));
     if (isHigherBound() && value >= toExclusive)
-      throw new IndexOutOfBoundsException(value);
+      throw new IllegalArgumentException(String.format(
+          "Value must be less than %s", toExclusive));
     return value;
   }
 

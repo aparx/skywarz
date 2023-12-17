@@ -2,7 +2,7 @@ package io.github.aparx.skywarz.game.arena;
 
 import com.google.common.base.Preconditions;
 import io.github.aparx.skywarz.game.SpawnGroup;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import io.github.aparx.skywarz.setup.CompletableSetup;
 import org.bukkit.Location;
@@ -30,7 +30,7 @@ public interface IArenaData extends CompletableSetup {
 
   @NonNull EnumMap<TeamEnum, SpawnGroup> getSpawns();
 
-  @NonNull GameSettings getSettings();
+  @NonNull ArenaSettings getSettings();
 
   @Override
   default boolean isCompleted() {

@@ -5,7 +5,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.bufig.utils.ConversionUtils;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.SpawnList;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.team.TeamEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,16 +37,16 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
   private @Nullable Location lobby;
   private @Nullable WeakReference<World> world;
   private @NonNull EnumMap<TeamEnum, SpawnGroup> spawns;
-  private @NonNull GameSettings settings;
+  private @NonNull ArenaSettings settings;
 
   public ArenaData() {
-    this(new ArenaBox(), new EnumMap<>(TeamEnum.class), GameSettings.of());
+    this(new ArenaBox(), new EnumMap<>(TeamEnum.class), ArenaSettings.of());
   }
 
   public ArenaData(
       @NonNull ArenaBox box,
       @NonNull EnumMap<TeamEnum, SpawnGroup> spawns,
-      @NonNull GameSettings settings) {
+      @NonNull ArenaSettings settings) {
     Preconditions.checkNotNull(box, "Box must not be null");
     this.box = box;
     setSpawns(spawns);
@@ -57,7 +57,7 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     ArenaData newData = new ArenaData((ArenaBox) data.get("box"),
         ConversionUtils.toEnumMap(ConversionUtils.toSpecificStringMap(data.get("spawns"),
             SpawnGroup.class::cast), TeamEnum.class),
-        (GameSettings) data.get("settings"));
+        (ArenaSettings) data.get("settings"));
     newData.setLobby((Location) data.get("lobby"));
     newData.setSpectator((Location) data.get("spectator"));
     if (data.containsKey("world")) {
@@ -95,7 +95,7 @@ public class ArenaData implements IArenaData, ConfigurationSerializable {
     this.world = new WeakReference<>(world);
   }
 
-  public void setSettings(@NonNull GameSettings settings) {
+  public void setSettings(@NonNull ArenaSettings settings) {
     Preconditions.checkNotNull(settings, "Settings must not be null");
     this.settings = settings;
   }

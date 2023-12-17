@@ -3,7 +3,9 @@ package io.github.aparx.skywarz.game.arena.reset;
 import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.game.arena.ArenaData;
 import io.github.aparx.skywarz.game.arena.GameArena;
+import io.github.aparx.skywarz.game.chest.ChestHandler;
 import io.github.aparx.skywarz.utils.TimedProcedure;
 import io.github.aparx.skywarz.utils.material.MaterialTag;
 import lombok.Getter;
@@ -15,6 +17,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.event.HandlerList;
@@ -23,6 +26,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -51,6 +55,12 @@ public class DefaultArenaReset extends ArenaReset {
   public void capture() {
     blocks.clear();
     Bukkit.getPluginManager().registerEvents(listener, Skywars.plugin());
+    ArenaData data = getArena().getData();
+    data.getWorld().getEntitiesByClass(ArmorStand.class).stream()
+        .filter((as) -> data.getBox().isWithin(as.getBoundingBox()))
+        .filter((as) -> as.getCustomName() != null)
+        .filter((as) -> ChestHandler.HOLOGRAM_NAME_PATTERN.matcher(as.getCustomName()).matches())
+        .forEach(Entity::remove);
   }
 
   @Override

@@ -47,15 +47,14 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
 
   // Chest fill
   @EventHandler(priority = EventPriority.HIGHEST)
-  void onBlockExplode(PlayerInteractEvent event) {
+  void onChestInteract(PlayerInteractEvent event) {
     Block clickedBlock = event.getClickedBlock();
     if (clickedBlock == null) return;
     BlockState state = clickedBlock.getState();
     if (!(state instanceof Chest)) return;
     Chest chest = (Chest) state;
     filterMatchFromPlayer(event.getPlayer()).ifPresent((match) -> {
-      ChestHandler chestHandler = match.getChestHandler();
-      chestHandler.fill(chest.getLocation(), chest.getInventory());
+      match.getChestHandler().open(chest.getLocation(), chest.getInventory());
     });
   }
 

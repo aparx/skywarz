@@ -10,7 +10,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.SpawnGroup;
 import io.github.aparx.skywarz.game.arena.reset.ArenaReset;
 import io.github.aparx.skywarz.game.arena.reset.DefaultArenaReset;
-import io.github.aparx.skywarz.game.arena.settings.GameSettings;
+import io.github.aparx.skywarz.game.arena.settings.ArenaSettings;
 import io.github.aparx.skywarz.game.arena.sign.ArenaSignHandler;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.TeamEnum;
@@ -66,11 +66,11 @@ public final class GameArena extends ConfigObject implements CompletableSetup {
     return new File(Skywars.getInstance().getArenaManager().getDirectory(), pureName + ".yml");
   }
 
-  public static int getMinPlayerCount(@NonNull GameSettings settings) {
+  public static int getMinPlayerCount(@NonNull ArenaSettings settings) {
     return (Magics.isDevelopment() ? 0 : 1) + settings.getTeamSize();
   }
 
-  public static int getMaxPlayerCount(@NonNull GameSettings settings, int teamCount) {
+  public static int getMaxPlayerCount(@NonNull ArenaSettings settings, int teamCount) {
     return teamCount * settings.getTeamSize();
   }
 
