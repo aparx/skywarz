@@ -127,6 +127,9 @@ public final class PlayerSnapshot {
     player.setExp(exp);
     player.setLevel(level);
     restoreWorldDependant(player);
+    if (scoreboard != null && Bukkit.getScoreboardManager() != null)
+      player.setScoreboard(Optional.ofNullable(scoreboard.get())
+          .orElse(Bukkit.getScoreboardManager().getMainScoreboard()));
     if (location != null
         && !Objects.equals(thisWorld, location.getWorld())
         && Skywars.plugin().isEnabled())
@@ -143,9 +146,6 @@ public final class PlayerSnapshot {
     player.setFlying(isFlying);
     if (flySpeed != null)
       player.setFlySpeed(flySpeed);
-    if (scoreboard != null && Bukkit.getScoreboardManager() != null)
-      player.setScoreboard(Optional.ofNullable(scoreboard.get())
-          .orElse(Bukkit.getScoreboardManager().getMainScoreboard()));
     player.resetPlayerTime();
     player.resetPlayerWeather();
   }

@@ -57,10 +57,10 @@ public class SpecialScoreboard implements Listener {
   @CanIgnoreReturnValue
   public boolean show(@NonNull SkywarsPlayer viewer) {
     Preconditions.checkNotNull(viewer, "Viewer must not be null");
-    if (!viewers.add(viewer)) return false;
     createScoreboardIfNeeded();
     Preconditions.checkNotNull(scoreboard, "Scoreboard is null");
     viewer.findOnline().ifPresent((player) -> player.setScoreboard(scoreboard));
+    if (!viewers.add(viewer)) return false;
     if (task != null) return true;
     task = Bukkit.getScheduler().runTaskTimer(Skywars.plugin(), () -> {
       // remove viewers from which the scoreboard differs

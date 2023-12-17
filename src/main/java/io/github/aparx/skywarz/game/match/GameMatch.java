@@ -15,6 +15,7 @@ import io.github.aparx.skywarz.game.chest.ChestConfig;
 import io.github.aparx.skywarz.game.chest.ChestHandler;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.kit.GameKitManager;
+import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboardHandlers;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.language.LocalizableError;
