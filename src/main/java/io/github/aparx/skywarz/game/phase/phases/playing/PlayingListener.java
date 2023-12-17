@@ -46,8 +46,10 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
   }
 
   // Chest fill
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @SuppressWarnings("deprecation")
+  @EventHandler(priority = EventPriority.MONITOR)
   void onChestInteract(PlayerInteractEvent event) {
+    if (event.isCancelled()) return;
     Block clickedBlock = event.getClickedBlock();
     if (clickedBlock == null) return;
     BlockState state = clickedBlock.getState();
@@ -95,7 +97,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.HIGHEST)
   void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
     filterMatchFromPlayer(player).ifPresent((match) -> {

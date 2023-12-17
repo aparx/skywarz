@@ -25,9 +25,6 @@ public final class ArenaSettings implements ConfigurationSerializable {
 
   private static final ArenaSettings DEFAULT_SETTINGS = ArenaSettings.builder().build();
 
-  // TODO replace with SkywarsGameRule instances
-  // TODO add other rules such as weather, time, etc.
-
   private final EnumMap<ArenaRule, Object> ruleMap;
 
   private ArenaSettings(EnumMap<ArenaRule, Object> delegateRuleMap) {

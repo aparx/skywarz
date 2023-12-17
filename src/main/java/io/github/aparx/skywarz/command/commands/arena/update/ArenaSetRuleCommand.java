@@ -10,11 +10,13 @@ import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.settings.ArenaRule;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.entity.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -67,9 +69,12 @@ public class ArenaSetRuleCommand extends CommandNode {
 
     @Override
     public List<String> onTabComplete(CommandContext context, CommandArgList args) {
-      if (args.length() < 2)
-        return super.onTabComplete(context, args);
-      return rule.getRule().getSuggestions();
+      final List<String> ruleArgs;
+      if (args.length() == 2 && (ruleArgs = rule.getRule().getSuggestions()) != null)
+        return ruleArgs.stream()
+            .filter((x) -> StringUtils.startsWithIgnoreCase(x, args.getString(1)))
+            .collect(Collectors.toList());
+      return super.onTabComplete(context, args);
     }
   }
 }

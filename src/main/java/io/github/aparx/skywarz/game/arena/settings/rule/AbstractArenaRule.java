@@ -26,6 +26,5 @@ public abstract class AbstractArenaRule<T> {
 
   public abstract T validate(Object object);
 
-  // TODO filter after argument
   public abstract @Nullable List<String> getSuggestions();
 }

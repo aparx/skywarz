@@ -5,6 +5,8 @@ author: "aparx (@bonedfps)"
 api-version: 1.14
 description: "An intriguing Skywars minigame plugin"
 
+website: "https://www.spigotmc.org/resources/skywarz.42739/"
+
 libraries:
   - org.apache.commons:commons-text:1.11.0
 
