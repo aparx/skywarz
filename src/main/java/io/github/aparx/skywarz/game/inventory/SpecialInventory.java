@@ -149,10 +149,13 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
   public void open(Player player) {
     if (inventory == null)
       recreateInventory();
+    if (!viewers.add(player)) {
+      player.openInventory(inventory);
+      return;
+    }
+    updateInventory(0);
     player.openInventory(inventory);
-    if (!viewers.add(player)) return;
     start(getUpdateInterval());
-    updateInventory();
   }
 
   @Synchronized
@@ -188,13 +191,15 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
       if (!shouldPersist(newItem, inventory.getItem(index)))
         inventory.setItem(index, newItem);
     });
-    List<Player> remove = new ArrayList<>(1);
-    viewers.forEach((entity) -> {
-      Inventory topInventory = entity.getOpenInventory().getTopInventory();
-      if (!Objects.equals(inventory, topInventory))
-        remove.add(entity);
-    });
-    remove.forEach(this::removeViewer);
+    if (ticks > 1) {
+      List<Player> remove = new ArrayList<>(1);
+      viewers.forEach((entity) -> {
+        Inventory topInventory = entity.getOpenInventory().getTopInventory();
+        if (!Objects.equals(inventory, topInventory))
+          remove.add(entity);
+      });
+      remove.forEach(this::removeViewer);
+    }
   }
 
   @Synchronized
@@ -229,6 +234,7 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
   protected boolean stop() {
     if (task == null) return false;
     HandlerList.unregisterAll(this);
+    getUpdateTicker().reset();
     viewers.clear();
     task.cancel();
     task = null;
