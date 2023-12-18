@@ -17,6 +17,7 @@ import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
 import io.github.aparx.skywarz.game.scoreboard.SpecialScoreboard;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
+import io.github.aparx.skywarz.utils.array.IndexMap;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -153,14 +154,13 @@ public class KitInventory extends PaginatingInventory {
             // new paginatable inventory content will be modified further down
             return new PaginatableInventoryContent((x) -> inv.updateInventory(), KIT_DIMENSION);
           }, "Kit " + kit.getDisplayName());
-      kitInventory.getOpenConnected().add(KitInventory.this);
       PaginatableInventoryContent content = kitInventory.getContent();
       int maxPerPage = (KIT_DIMENSION.getHeight() - 1) * MAX_CONTENT_ROW_LENGTH;
       List<List<WrappedItemStack>> itemLists = new ArrayList<>();
       List<WrappedItemStack> listBuilder = new ArrayList<>();
-      Iterator<WrappedItemStack> iterator = kit.getContents().iterator();
+      Iterator<IndexMap.Entry<WrappedItemStack>> iterator = kit.getContents().iterator();
       for (int cursor = 0; iterator.hasNext(); ++cursor) {
-        listBuilder.add(iterator.next());
+        listBuilder.add(iterator.next().getValue());
         if (cursor != 0 && cursor % (maxPerPage - 1) == 0) {
           itemLists.add(listBuilder);
           listBuilder = new ArrayList<>();

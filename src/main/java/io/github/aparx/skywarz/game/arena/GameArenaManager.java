@@ -20,7 +20,7 @@ import java.util.stream.Stream;
  * @version 2023-12-01 02:51
  * @since 1.0
  */
-public final class ArenaManager extends DefaultSkywarsHandler implements Iterable<GameArena> {
+public final class GameArenaManager extends DefaultSkywarsHandler implements Iterable<GameArena> {
 
   public static final File STORAGE_DIRECTORY_OFFSET = new File(".arenas");
 

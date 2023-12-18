@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.handler.DefaultSkywarsHandler;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.utils.collection.AbstractKeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import io.github.aparx.skywarz.utils.collection.KeyValueSets;
@@ -58,6 +59,12 @@ public final class GameKitManager extends DefaultSkywarsHandler {
   @Override
   protected void onLoad() {
     kitConfigProxy.load();
+    kitConfigProxy.setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Kits configuration",
+        "Edit this config manually to create, delete and manage kits!",
+        "Note: every kit has an icon. Currently, it is only possible to edit the icon of a kit",
+        "via this configuration, but you can create kits and their content with '/sw kit' in-game!"
+    ));
     for (Object value : kitConfigProxy.getValues(false).values())
       if (value instanceof GameKit)
         kits.add((GameKit) value);

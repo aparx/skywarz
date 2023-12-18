@@ -21,7 +21,7 @@ public final class TeamMap implements Iterable<GameTeam> {
 
   private final WeakReference<GameMatch> match;
 
-  private @NonNull Map<TeamEnum, GameTeam> teams = new HashMap<>();
+  private @NonNull Map<TeamEnum, GameTeam> teams = new LinkedHashMap<>();
 
   public TeamMap(@NonNull GameMatch match) {
     Preconditions.checkNotNull(match, "Match must not be null");

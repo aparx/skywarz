@@ -106,7 +106,7 @@ public class PlayerKitEditMode extends SkywarsPlayerData implements Listener {
     leave();
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onTeleport(PlayerTeleportEvent event) {
     Player entity = event.getPlayer();
     Location to = event.getTo();

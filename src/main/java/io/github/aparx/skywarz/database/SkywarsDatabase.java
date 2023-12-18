@@ -170,13 +170,13 @@ public final class SkywarsDatabase {
     }
 
     @Override
-    public void load() {
-      setHeader(SkywarsConfigHandler.createHeader(
-          "The primary database configuration.",
+    public void save() {
+      setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+          "Primary database configuration",
           "Change the values to have Skywarz connected to your database.",
           "Supported: MySQL, Postgres, Microsoft SQL, H2, Derby, HSQLDB and Sqlite."
       ));
-      super.load();
+      super.save();
     }
   }
 

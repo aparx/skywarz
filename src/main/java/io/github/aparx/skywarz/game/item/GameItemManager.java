@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.item.items.idle.QuickstartItem;
-import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
+import io.github.aparx.skywarz.game.item.items.playing.TeleporterItem;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
 import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
 import io.github.aparx.skywarz.game.item.items.idle.TeamSelectorItem;
@@ -67,7 +67,7 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
     if (items.isEmpty()) {
       add(new LeaveItem());
       add(new TeamSelectorItem());
-      add(new TeleportItem());
+      add(new TeleporterItem());
       add(new KitSelectorItem());
       add(new QuickstartItem());
     }
@@ -91,7 +91,7 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
               .ifPresent((match) -> item.handleClick(match, event)));
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onDrop(PlayerDropItemEvent event) {
     if (!event.isCancelled())
       items.stream()
@@ -101,7 +101,7 @@ public final class GameItemManager extends DefaultSkywarsHandler implements List
               .ifPresent((match) -> item.handleDrop(match, event)));
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onInventory(InventoryClickEvent event) {
     HumanEntity whoClicked = event.getWhoClicked();
     if (!(whoClicked instanceof Player)) return;

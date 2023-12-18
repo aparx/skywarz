@@ -4,6 +4,7 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,6 +39,11 @@ public final class Language implements MessageStorage<ArrayPath> {
   }
 
   public void load() {
+    config.setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Language configuration",
+        "The primary message definitions in your target language.",
+        "This configuration does *not* contain all translations."
+    ));
     config.load();
     // copy over message values set in the config to the register
     for (String key : config.getKeys(true)) {

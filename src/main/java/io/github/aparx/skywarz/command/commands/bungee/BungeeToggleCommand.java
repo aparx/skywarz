@@ -6,6 +6,8 @@ import io.github.aparx.skywarz.command.CommandContext;
 import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
+import io.github.aparx.skywarz.game.arena.GameArenaManager;
+import io.github.aparx.skywarz.game.match.GameMatchManager;
 import io.github.aparx.skywarz.handler.MainConfig;
 import io.github.aparx.skywarz.language.Language;
 import org.bukkit.command.CommandSender;
@@ -32,6 +34,9 @@ public class BungeeToggleCommand extends CommandNode {
     if (args.length() > 1)
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
     else {
+      GameMatchManager matchManager = Skywars.getInstance().getMatchManager();
+      Preconditions.checkState(matchManager.isEmpty(), "Cannot toggle Bungeecord: a match is " +
+          "currently ongoing. Wait for the lobby to be closed.");
       CommandSender sender = context.getSender();
       MainConfig mainConfig = MainConfig.getInstance();
       String name = Objects.toString(mainConfig.getBungeeArena());

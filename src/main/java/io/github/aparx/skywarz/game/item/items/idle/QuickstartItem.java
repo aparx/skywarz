@@ -5,6 +5,7 @@ import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.startup.Main;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -34,6 +35,15 @@ public class QuickstartItem extends StaticSkywarsItem {
   public QuickstartItem() {
     super("quickstart", new GameMatchState[]{GameMatchState.IDLE});
     setSlot(7);
+  }
+
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Quickstart item configuration",
+        "Edit to update the item."
+    ));
+    super.save();
   }
 
   @Override

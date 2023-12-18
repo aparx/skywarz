@@ -60,7 +60,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onMove(PlayerMoveEvent event) {
     if (event.isCancelled()) return;
     Location target = event.getTo();
@@ -97,7 +97,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onInteract(PlayerInteractEvent event) {
     Player player = event.getPlayer();
     filterMatchFromPlayer(player).ifPresent((match) -> {
@@ -106,7 +106,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onPassiveDamage(EntityDamageEvent event) {
     Entity damagee = event.getEntity();
     if (!event.isCancelled() && damagee instanceof Player)
@@ -116,7 +116,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onActiveDamage(EntityDamageByEntityEvent event) {
     Entity damager = event.getDamager();
     Entity damagee = event.getEntity();
@@ -134,7 +134,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onPickup(EntityPickupItemEvent event) {
     LivingEntity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
@@ -143,7 +143,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onFoodChange(FoodLevelChangeEvent event) {
     Entity entity = event.getEntity();
     if (!event.isCancelled() && entity instanceof Player)
@@ -153,7 +153,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onDie(PlayerDeathEvent event) {
     Player entity = event.getEntity();
     filterMatchFromPlayer(entity).ifPresent((match) -> {
@@ -220,7 +220,7 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     }
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onRespawn(PlayerRespawnEvent event) {
     Player entity = event.getPlayer();
     filterMatchFromPlayer(entity).ifPresent((match) -> {

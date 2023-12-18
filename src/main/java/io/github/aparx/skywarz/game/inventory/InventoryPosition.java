@@ -27,6 +27,10 @@ public final class InventoryPosition {
     this.row = row;
   }
 
+  public static int toIndex(int column, int row, int rowLength) {
+    return column + Math.max(row * rowLength, 0);
+  }
+
   public static InventoryPosition ofPoint(@NonNegative int column, @NonNegative int row) {
     if (column == 0 && row == 0)
       return ZERO;
@@ -68,7 +72,12 @@ public final class InventoryPosition {
     return (column == 0 || column == columnLength - 1) && (row == 0 || row == rowLength);
   }
 
-  public static int toIndex(int column, int row, int rowLength) {
-    return column + Math.max(row * rowLength, 0);
+
+  @Override
+  public String toString() {
+    return "InventoryPosition{" +
+        "column=" + column +
+        ", row=" + row +
+        '}';
   }
 }

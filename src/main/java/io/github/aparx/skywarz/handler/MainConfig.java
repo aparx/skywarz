@@ -108,9 +108,9 @@ public class MainConfig extends ConfigObject {
 
   @Override
   public void save() {
-    setHeader(SkywarsConfigHandler.createHeader(
-        "The main configuration of Skywarz (by @bonedfps)",
-        "Here contained are general purpose settings"
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Main configuration",
+        "Here contained are general purpose settings."
     ));
     setDocsIfAbsent("duration", "Valid units: 'ticks', 'seconds', 'minutes', 'hours' and 'days'");
     super.save();

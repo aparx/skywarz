@@ -2,11 +2,13 @@ package io.github.aparx.skywarz.game.item.items.idle;
 
 import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
 import io.github.aparx.skywarz.game.item.items.idle.kit.KitInventory;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
@@ -26,7 +28,6 @@ import java.util.Map;
  * @version 2023-12-06 23:00
  * @since 1.0
  */
-@Document("Kit Selector")
 public class KitSelectorItem extends StaticSkywarsItem {
 
   @ConfigMapping
@@ -40,12 +41,21 @@ public class KitSelectorItem extends StaticSkywarsItem {
       .wrap();
 
   @ConfigMapping("menu.title")
-  @Document("The title of the selector inventory")
+  @Document("The title of the kit selector inventory")
   private String menuTitle = "Kit Selector";
 
   public KitSelectorItem() {
     super("kit selector", new GameMatchState[]{GameMatchState.IDLE});
     setSlot(0);
+  }
+
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Kit Selector configuration",
+        "Edit to update the item and menu."
+    ));
+    super.save();
   }
 
   @Override

@@ -9,6 +9,7 @@ import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.VariablePopulator;
@@ -110,4 +111,13 @@ public class GameScoreboard extends ConfigObject {
     return ArrayPath.of(getState().name().toLowerCase(), getName());
   }
 
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Scoreboard configuration",
+        "Edit to modify the in-game scoreboards shown to participants."
+    ));
+    setDocsIfAbsent(ArrayPath.of(), String.format("Scoreboard shown during %s state", getState()));
+    super.save();
+  }
 }

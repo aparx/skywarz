@@ -4,7 +4,7 @@ import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.item.items.LeaveItem;
-import io.github.aparx.skywarz.game.item.items.playing.TeleportItem;
+import io.github.aparx.skywarz.game.item.items.playing.TeleporterItem;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
@@ -36,7 +36,7 @@ public final class GameSpectator {
     Skywars.getInstance()
         .getItemManager()
         .getItems()
-        .require(TeleportItem.class)
+        .require(TeleporterItem.class)
         .give(match, entity);
     entity.getInventory().setItem(LeaveItem.SLOT, Skywars.getInstance()
         .getItemManager()

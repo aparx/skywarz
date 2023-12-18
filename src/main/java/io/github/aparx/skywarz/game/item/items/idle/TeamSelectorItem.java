@@ -14,6 +14,7 @@ import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
 import io.github.aparx.skywarz.game.team.GameTeam;
 import io.github.aparx.skywarz.game.team.TeamMap;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
@@ -43,7 +44,6 @@ import java.util.stream.IntStream;
  * @version 2023-12-04 06:57
  * @since 1.0
  */
-@Document("Team Selector")
 public final class TeamSelectorItem extends StaticSkywarsItem {
 
   private static final ColoredMaterial REPLACEABLE_MATERIAL = ColoredMaterial.CONCRETE;
@@ -86,6 +86,15 @@ public final class TeamSelectorItem extends StaticSkywarsItem {
   public TeamSelectorItem() {
     super("team selector", new GameMatchState[]{GameMatchState.IDLE});
     setSlot(1);
+  }
+
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Team selector configuration",
+        "Edit to update the item and menu."
+    ));
+    super.save();
   }
 
   @Override

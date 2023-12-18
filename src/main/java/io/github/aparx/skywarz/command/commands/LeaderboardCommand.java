@@ -16,6 +16,7 @@ import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.MessageKeys;
 import io.github.aparx.skywarz.language.VariablePopulator;
+import io.github.aparx.skywarz.permission.SkywarsPermission;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
@@ -31,6 +32,7 @@ public class LeaderboardCommand extends CommandNode {
 
   public LeaderboardCommand() {
     super(CommandInfo.builder("leaderboard")
+        .permission(SkywarsPermission.STATS_OTHER)
         .aliases("lb", "top")
         .build());
   }

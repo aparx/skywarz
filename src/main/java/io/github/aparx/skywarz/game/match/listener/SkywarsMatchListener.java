@@ -41,7 +41,7 @@ public class SkywarsMatchListener implements Listener {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onGeneralChat(AsyncPlayerChatEvent event) {
     Player entity = event.getPlayer();
     if (event.isCancelled()) return;

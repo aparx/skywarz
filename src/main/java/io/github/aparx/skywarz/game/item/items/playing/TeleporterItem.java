@@ -8,6 +8,7 @@ import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
 import io.github.aparx.skywarz.game.item.StaticSkywarsItem;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.SkullItem;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -31,8 +32,7 @@ import java.util.Map;
  * @version 2023-12-04 06:57
  * @since 1.0
  */
-@Document("Teleporter used from spectators")
-public final class TeleportItem extends StaticSkywarsItem {
+public final class TeleporterItem extends StaticSkywarsItem {
 
   @ConfigMapping
   @Document("The item with which a player can interact")
@@ -44,9 +44,24 @@ public final class TeleportItem extends StaticSkywarsItem {
       .flags(ItemFlag.HIDE_ENCHANTS)
       .wrap();
 
-  public TeleportItem() {
+  @ConfigMapping("menu.title")
+  @Document("The title of the teleporter inventory")
+  private String menuTitle = "Teleporter";
+
+  public TeleporterItem() {
     super("teleporter", new GameMatchState[]{GameMatchState.PLAYING});
     setSlot(0);
+  }
+
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Teleporter item configuration",
+        "Edit to update the item and menu.",
+        "The teleporter is a menu with which a spectator",
+        "can teleport to other living participants."
+    ));
+    super.save();
   }
 
   @Override
@@ -59,7 +74,7 @@ public final class TeleportItem extends StaticSkywarsItem {
     ArrayList<InventoryItem> items = new ArrayList<>();
     Player player = event.getPlayer();
     PaginatingInventory inventory = new PaginatingInventory(null, TickDuration.ofSecond(),
-        InventoryDimensions.ofRows(2), items, "Teleporter") {
+        InventoryDimensions.ofRows(2), items, menuTitle) {
       @Override
       public void updateInventory(long ticks) {
         items.clear();

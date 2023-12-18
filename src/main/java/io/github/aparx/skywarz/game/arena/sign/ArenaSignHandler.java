@@ -5,18 +5,24 @@ import io.github.aparx.bufig.ArrayPath;
 import io.github.aparx.bufig.handler.ConfigProxy;
 import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.game.arena.GameArena;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.language.LazyVariableLookup;
 import io.github.aparx.skywarz.language.VariablePopulator;
 import io.github.aparx.skywarz.permission.SkywarsPermission;
 import io.github.aparx.skywarz.startup.Main;
+import io.github.aparx.skywarz.utils.collection.KeyValueSet;
 import lombok.Getter;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -70,6 +76,11 @@ public final class ArenaSignHandler implements Listener {
 
   public void load() {
     templateConfigProxy.load();
+    templateConfigProxy.setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Sign configuration",
+        "Edit to update the sign layout of Skywarz signs.",
+        "Note: as of the version (see below) these signs only work for multi-arena."
+    ));
     // load sign lines
     Object linesObject = templateConfigProxy.get("lines");
     this.template = linesObject instanceof Collection
@@ -82,6 +93,7 @@ public final class ArenaSignHandler implements Listener {
     this.register = registerObject instanceof SkywarsSignRegister
         ? (SkywarsSignRegister) registerObject
         : new SkywarsSignRegister();
+    templateConfigProxy.save();
   }
 
   public void save() {
@@ -110,7 +122,7 @@ public final class ArenaSignHandler implements Listener {
     return skywarsArena;
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.HIGHEST)
   void onSignCreate(PlayerInteractEvent event) {
     Block clickedBlock = event.getClickedBlock();
     if (event.useInteractedBlock() == Event.Result.DENY || clickedBlock == null
@@ -130,7 +142,7 @@ public final class ArenaSignHandler implements Listener {
     }, () -> HandlerList.unregisterAll(this));
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.HIGHEST)
   void onSignCreate(SignChangeEvent event) {
     Player player = event.getPlayer();
     if (event.isCancelled()) return;
@@ -145,5 +157,35 @@ public final class ArenaSignHandler implements Listener {
         newSign.update(createLookup(), arena);
       }
     }, () -> HandlerList.unregisterAll(this));
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  void onSignBreak(BlockBreakEvent event) {
+    Player player = event.getPlayer();
+    if (event.isCancelled()) return;
+    BlockState state = event.getBlock().getState();
+    if (!(state instanceof Sign)) return;
+    Location location = state.getLocation();
+    KeyValueSet<Location, ArenaSign> collection = getRegister().getCollection();
+    findArena()
+        .filter((pass) -> collection.containsKey(location))
+        .ifPresent((arena) -> {
+          if (SkywarsPermission.SETUP.has(player)
+              && collection.remove(collection.get(location))) {
+            Objects.requireNonNull(state.getWorld()).spawnParticle(
+                Particle.SMOKE_NORMAL, location.clone().add(0.5, 0.5, 0.5),
+                4, 0, 0, 0, 0);
+            save();
+          } else event.setCancelled(true);
+        });
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  void onExplode(BlockExplodeEvent event) {
+    if (event.isCancelled()) return;
+    BlockState state = event.getBlock().getState();
+    if (state instanceof Sign) findArena()
+        .filter((pass) -> getRegister().getCollection().containsKey(state.getLocation()))
+        .ifPresent((arena) -> event.setCancelled(true));
   }
 }

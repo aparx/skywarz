@@ -7,7 +7,6 @@ import io.github.aparx.skywarz.command.CommandInfo;
 import io.github.aparx.skywarz.command.arguments.CommandArgList;
 import io.github.aparx.skywarz.command.skeleton.CommandNode;
 import io.github.aparx.skywarz.game.arena.GameArena;
-import io.github.aparx.skywarz.game.arena.ArenaManager;
 import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import net.md_5.bungee.api.chat.ClickEvent;

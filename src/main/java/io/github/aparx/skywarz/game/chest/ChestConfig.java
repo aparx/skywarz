@@ -4,6 +4,7 @@ import io.github.aparx.bufig.configurable.field.ConfigMapping;
 import io.github.aparx.bufig.configurable.field.Document;
 import io.github.aparx.bufig.configurable.object.ConfigObject;
 import io.github.aparx.skywarz.Skywars;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import lombok.Getter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -72,9 +73,13 @@ public final class ChestConfig extends ConfigObject {
   }
 
   @Override
-  public void load() {
-    super.load();
-    save(); // force update
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Chest configuration",
+        "Edit the items and their possibility of appearing in chests!",
+        "The higher the weight, the higher the chance the item is put into a chest."
+    ));
+    super.save();
   }
 
   private Set<ChestItem> getTiers() {

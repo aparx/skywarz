@@ -28,46 +28,46 @@ public class LobbyPhaseListener extends GamePhaseListener<GamePhase> {
     super(phase);
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onInteract(PlayerInteractEvent event) {
     if (event.useItemInHand() != Event.Result.DENY)
       event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onPassiveDamage(EntityDamageEvent event) {
     Entity damagee = event.getEntity();
     if (event.isCancelled() || !(damagee instanceof Player)) return;
     event.setCancelled(filterMatchFromPlayer((Player) damagee).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onActiveDamage(EntityDamageByEntityEvent event) {
     Entity damager = event.getDamager();
     if (event.isCancelled() || !(damager instanceof Player)) return;
     event.setCancelled(filterMatchFromPlayer((Player) damager).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onHunger(FoodLevelChangeEvent event) {
     HumanEntity entity = event.getEntity();
     if (event.isCancelled() || !(entity instanceof Player)) return;
     event.setCancelled(filterMatchFromPlayer((Player) entity).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onBreak(BlockBreakEvent event) {
     if (event.isCancelled()) return;
     event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onPlace(BlockPlaceEvent event) {
     if (event.isCancelled()) return;
     event.setCancelled(filterMatchFromPlayer(event.getPlayer()).isPresent());
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onPickup(EntityPickupItemEvent event) {
     if (event.isCancelled()) return;
     if (event.getEntity() instanceof Player)

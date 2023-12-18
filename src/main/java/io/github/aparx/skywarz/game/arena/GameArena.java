@@ -58,7 +58,7 @@ public final class GameArena extends ConfigObject implements CompletableSetup {
     if (data == null) data = new ArenaData();
     this.name = Objects.toString(get("name"), initialName);
     Preconditions.checkState(data != null, "Data is null");
-    setHeader(SkywarsConfigHandler.createHeader(String.format("Arena %s (do not touch!)", name)));
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(String.format("Arena %s (do not touch!)", name)));
     this.save();
   }
 

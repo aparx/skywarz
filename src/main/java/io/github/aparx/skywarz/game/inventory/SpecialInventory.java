@@ -19,7 +19,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -28,7 +27,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 /**
@@ -53,10 +52,7 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
 
   private final TimeTicker updateTicker = new TimeTicker();
 
-  private final WeakHashSet<HumanEntity> viewers = new WeakHashSet<>();
-
-  /** WeakHashSet of inventories that should be closed when this inventory closes. */
-  private final WeakHashSet<SpecialInventory<?>> openConnected = new WeakHashSet<>();
+  private final WeakHashSet<Player> viewers = new WeakHashSet<>();
 
   public SpecialInventory(
       @Nullable InventoryHolder holder,
@@ -85,7 +81,8 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
       @NonNull TickDuration updateInterval,
       @NonNull Function<SpecialInventory<T>, T> contentFactory,
       @NonNull Function<SpecialInventory<T>, String> titleFactory) {
-    SpecialInventory<T> inventory = new SpecialInventory<>(null, updateInterval, titleFactory, null);
+    SpecialInventory<T> inventory = new SpecialInventory<>(null, updateInterval, titleFactory,
+        null);
     inventory.setContent(contentFactory.apply(inventory));
     return inventory;
   }
@@ -138,36 +135,40 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
 
   @Synchronized
   public void recreateInventory() {
+    WeakHashSet<Player> viewers = new WeakHashSet<>(this.viewers);
     Preconditions.checkNotNull(content, "Content is not defined");
-    this.inventory = Bukkit.createInventory(holder,
+    inventory = Bukkit.createInventory(holder,
         getDimensions().size(),
         titleFactory.apply(this));
     updateInventory();
     if (!viewers.isEmpty())
-      viewers.forEach((viewer) -> {
-        viewer.openInventory(inventory);
-        viewers.add(viewer); // enforce viewer
-      });
+      viewers.forEach(this::open);
   }
 
   @Synchronized
   public void open(Player player) {
     if (inventory == null)
       recreateInventory();
+    player.openInventory(inventory);
     if (!viewers.add(player)) return;
     start(getUpdateInterval());
     updateInventory();
-    player.openInventory(inventory);
   }
 
   @Synchronized
   @CanIgnoreReturnValue
   public boolean close(Player player) {
-    if (!viewers.remove(player)) return false;
-    for (SpecialInventory<?> subInventory : openConnected)
-      subInventory.close(player);
-    openConnected.clear();
+    if (!removeViewer(player))
+      return false;
     player.closeInventory();
+    return true;
+  }
+
+  @Synchronized
+  @CanIgnoreReturnValue
+  public boolean removeViewer(Player viewer) {
+    if (!viewers.remove(viewer)) return false;
+    if (viewers.isEmpty()) stop();
     return true;
   }
 
@@ -187,6 +188,13 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
       if (!shouldPersist(newItem, inventory.getItem(index)))
         inventory.setItem(index, newItem);
     });
+    List<Player> remove = new ArrayList<>(1);
+    viewers.forEach((entity) -> {
+      Inventory topInventory = entity.getOpenInventory().getTopInventory();
+      if (!Objects.equals(inventory, topInventory))
+        remove.add(entity);
+    });
+    remove.forEach(this::removeViewer);
   }
 
   @Synchronized
@@ -211,19 +219,6 @@ public class SpecialInventory<T extends InventoryContentView> implements Listene
             SkywarsPlayer player = SkywarsPlayer.getPlayer((Player) whoClicked);
             content.find(slot).ifPresent((item) -> item.click(player, event));
           }
-        },
-        Skywars.plugin());
-
-    Bukkit.getPluginManager().registerEvent(
-        InventoryCloseEvent.class, this, EventPriority.NORMAL,
-        (listener, e) -> {
-          InventoryCloseEvent event = (InventoryCloseEvent) e;
-          for (SpecialInventory<?> subInventory : openConnected)
-            if (event.getInventory().equals(subInventory.getInventory()))
-              subInventory.close((Player) event.getPlayer());
-          openConnected.clear();
-          if (event.getInventory().equals(inventory))
-            close((Player) event.getPlayer());
         },
         Skywars.plugin());
     return true;

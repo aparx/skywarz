@@ -4,9 +4,12 @@ import com.google.common.base.Preconditions;
 import io.github.aparx.bufig.Config;
 import io.github.aparx.bufig.defaults.yaml.YamlConfig;
 import io.github.aparx.bufig.handler.ConfigMap;
+import io.github.aparx.skywarz.Skywars;
 import lombok.Getter;
+import org.apache.commons.lang3.ArrayUtils;
 import org.bukkit.plugin.Plugin;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.File;
 
@@ -31,6 +34,7 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
   public static String[] createHeader(@NonNull String @NonNull [] content, int padding) {
     Preconditions.checkNotNull(content, "Header content must not be null");
     Preconditions.checkArgument(padding >= 0, "Padding must be positive");
+    content = ArrayUtils.add(content, createHeaderVersion());
     int maxLength = 0;
     for (String line : content)
       maxLength = Math.max(maxLength, line.length());
@@ -43,6 +47,11 @@ public final class SkywarsConfigHandler extends ConfigMap<Config> {
     newArray[0] = '<' + "=".repeat(2 * Math.max((padding - 1), 0) + maxLength) + '>';
     newArray[newArray.length - 1] = newArray[0];
     return newArray;
+  }
+
+  private static String createHeaderVersion() {
+    String version = Skywars.getInstance().getPlugin().getDescription().getVersion();
+    return String.format("[[ Skywarz %s by ~aparx ]]", version);
   }
 
   public @NonNull Config getArenas() {

@@ -84,7 +84,7 @@ public final class Skywars {
 
   private Skywars() {
     handlers.addAll(Set.of(
-        new ArenaManager(),
+        new GameArenaManager(),
         new GameMatchManager(),
         new GameItemManager(),
         new BungeeHandler(),
@@ -151,8 +151,8 @@ public final class Skywars {
     return true;
   }
 
-  public @NonNull ArenaManager getArenaManager() {
-    return getHandlers().require(ArenaManager.class);
+  public @NonNull GameArenaManager getArenaManager() {
+    return getHandlers().require(GameArenaManager.class);
   }
 
   public @NonNull GameMatchManager getMatchManager() {

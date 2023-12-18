@@ -30,6 +30,7 @@ permissions:
     default: true
   skywarz.stats.other:
     description: "Allows to see other people's Skywarz statistics"
+    default: true
   skywarz.stats.modify:
     description: "Allows to modify the statistics of people"
   skywarz.stats.*:
@@ -37,7 +38,7 @@ permissions:
     children:
       skywarz.stats.self: true
       skywarz.stats.other: true
-      skywarz.stats:other: true
+      skywarz.stats.modify: true
   # Admin permissions
   skywarz.setup:
     description: "Allows to create, delete and manage Skywarz matches, arenas and more"

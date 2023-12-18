@@ -34,7 +34,7 @@ public class DoneListener extends GamePhaseListener<DonePhase> {
     lobbyPhaseListener.unload();
   }
 
-  @EventHandler(priority = EventPriority.HIGH)
+  @EventHandler(priority = EventPriority.NORMAL)
   void onRespawn(PlayerRespawnEvent event) {
     // handle late respawns in case a player was not able to respawn in time
     Player entity = event.getPlayer();

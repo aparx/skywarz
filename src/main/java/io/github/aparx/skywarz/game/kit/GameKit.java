@@ -126,8 +126,8 @@ public final class GameKit implements ConfigurationSerializable {
   public void apply(@NonNull Player player) {
     PlayerInventory inventory = player.getInventory();
     inventory.clear();
-    contents.forEach((item, index) -> {
-      inventory.setItem(index, item.getStack());
+    contents.forEach((entry) -> {
+      inventory.setItem(entry.getIndex(), entry.getValue().getStack());
     });
     inventory.setArmorContents(armor.length != 0
         ? Arrays.stream(armor)

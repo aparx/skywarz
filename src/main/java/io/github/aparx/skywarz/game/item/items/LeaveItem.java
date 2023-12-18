@@ -6,6 +6,7 @@ import io.github.aparx.skywarz.command.commands.LeaveCommand;
 import io.github.aparx.skywarz.game.item.SkywarsItem;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.match.GameMatchState;
+import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.startup.Main;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
@@ -40,6 +41,15 @@ public final class LeaveItem extends SkywarsItem {
 
   public LeaveItem() {
     super("leave", new GameMatchState[]{GameMatchState.IDLE, GameMatchState.PLAYING, GameMatchState.DONE});
+  }
+
+  @Override
+  public void save() {
+    setHeaderIfAbsent(SkywarsConfigHandler.createHeader(
+        "Leave item configuration",
+        "Edit to update the item."
+    ));
+    super.save();
   }
 
   @Override

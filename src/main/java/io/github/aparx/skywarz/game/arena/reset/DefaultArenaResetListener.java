@@ -64,7 +64,7 @@ public final class DefaultArenaResetListener implements Listener {
     }
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onEntityChange(EntityChangeBlockEvent event) {
     if (!event.isCancelled())
       // this only captures entity/block changes within the arena. If a block falls out of
@@ -74,13 +74,13 @@ public final class DefaultArenaResetListener implements Listener {
       });
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onBlockExplode(BlockExplodeEvent event) {
     if (!event.isCancelled())
       addResetHandle(event.getBlock());
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onEntityExplode(EntityExplodeEvent event) {
     if (event.isCancelled()) return;
     List<Location> added = new ArrayList<>();
@@ -99,7 +99,7 @@ public final class DefaultArenaResetListener implements Listener {
           .collect(Collectors.toList()));
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onBlockBreak(BlockBreakEvent event) {
     if (event.isCancelled()) return;
     handle(event.getPlayer(), (match, arena) -> {
@@ -113,7 +113,7 @@ public final class DefaultArenaResetListener implements Listener {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onBlockPlace(BlockPlaceEvent event) {
     if (event.isCancelled()) return;
     BlockState blockReplacedState = event.getBlockReplacedState();
@@ -131,7 +131,7 @@ public final class DefaultArenaResetListener implements Listener {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onInteract(PlayerInteractEvent event) {
     Block clickedBlock = event.getClickedBlock();
     if (clickedBlock == null) return;
@@ -154,13 +154,13 @@ public final class DefaultArenaResetListener implements Listener {
     });
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onInteract(PlayerInteractEntityEvent event) {
     if (event.getRightClicked() instanceof ItemFrame)
       handle(event.getPlayer(), (match, arena) -> event.setCancelled(true));
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onBlockTravel(BlockFromToEvent event) {
     if (!event.isCancelled())
       event.setCancelled(addResetHandle(event.getBlock())
@@ -185,7 +185,7 @@ public final class DefaultArenaResetListener implements Listener {
       addResetHandle(event.getBlock());
   }
 
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   void onDestroyHanging(HangingBreakByEntityEvent event) {
     Entity remover = event.getRemover();
     Hanging entity = event.getEntity();

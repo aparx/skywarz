@@ -68,7 +68,7 @@ public class PaginatingInventory extends SpecialInventory<PaginatableInventoryCo
     ArrayList<@NonNull InventoryPage> pages = content.getPages();
     final int count = elements.size();
     if (!getMaxDimensions().equals(getDimensions())) {
-      int calculatedHeight = Math.min(1 + count / (dimensions.getWidth() - 2),
+      int calculatedHeight = Math.min(1 + count / (dimensions.getWidth() - 1),
           getMaxDimensions().getHeight());
       if (dimensions.getHeight() < calculatedHeight) {
         updateDimensions(dimensions.withHeight(calculatedHeight));
@@ -78,21 +78,22 @@ public class PaginatingInventory extends SpecialInventory<PaginatableInventoryCo
     final int columnLength = dimensions.getWidth();
     final int rowLength = dimensions.getHeight();
     final int columnMod = columnLength - 2;
-    if (pages.size() != Math.ceil((double) count / (rowLength * columnMod))) {
+    int expectedPageSize = (int) (1 + Math.floor((double) count / (rowLength * (1 + columnMod))));
+    if (pages.size() != expectedPageSize) {
       pages.clear();
       InventoryPage page = new InventoryPage(dimensions);
       page.fillSides(getContent().getNoPageItem());
-      int pageAccumulate = 0;
+      int pageItemCount = 0;
       for (int i = 0; i < count; ++i) {
-        page.set(InventoryPosition.ofPoint(1 + (i % columnMod), pageAccumulate), elements.get(i));
-        if ((1 + i) % columnMod == 0 && ++pageAccumulate >= rowLength) {
+        page.set(InventoryPosition.ofPoint(1 + (i % columnMod), pageItemCount), elements.get(i));
+        if ((1 + i) % columnMod == 0 && ++pageItemCount >= rowLength) {
           pages.add(page);
           page.fillSides(getContent().getNoPageItem());
           page = new InventoryPage(dimensions);
-          pageAccumulate = 0;
+          pageItemCount = 0;
         }
       }
-      if (count % columnMod != 0) {
+      if (pageItemCount != 0) {
         page.fillSides(getContent().getNoPageItem());
         pages.add(page);
       }
