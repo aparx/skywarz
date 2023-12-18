@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.errorprone.annotations.CheckReturnValue;
 import lombok.Getter;
 import org.checkerframework.checker.index.qual.NonNegative;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.Iterator;
 
 /**
  * @author aparx (Vinzent Z.)
@@ -15,8 +18,6 @@ public final class InventoryPosition {
 
   private static final InventoryPosition ZERO = new InventoryPosition(0, 0);
 
-  private static final int DEFAULT_LENGTH_X = 9;
-
   private final @NonNegative int column;
   private final @NonNegative int row;
 
@@ -27,8 +28,21 @@ public final class InventoryPosition {
     this.row = row;
   }
 
-  public static int toIndex(int column, int row, int rowLength) {
-    return column + Math.max(row * rowLength, 0);
+  public static InventoryPositionInterpolator interpolate(
+      @NonNull InventoryPosition begin, @NonNull InventoryPosition end) {
+    return new InventoryPositionInterpolator(begin, end);
+  }
+
+  public static InventoryPosition getMin(InventoryPosition a, InventoryPosition b) {
+    return a.toIndex() <= b.toIndex() ? a : b;
+  }
+
+  public static InventoryPosition getMax(InventoryPosition a, InventoryPosition b) {
+    return a.toIndex() >= b.toIndex() ? a : b;
+  }
+
+  public static int toIndex(int column, int row, int columnLength) {
+    return column + Math.max(row * columnLength, 0);
   }
 
   public static InventoryPosition ofPoint(@NonNegative int column, @NonNegative int row) {
@@ -37,26 +51,26 @@ public final class InventoryPosition {
     return new InventoryPosition(column, row);
   }
 
-  public static InventoryPosition ofIndex(@NonNegative int index, int rowLength) {
-    return ofPoint(index % (rowLength - 1), index / (rowLength - 1));
+  public static InventoryPosition ofIndex(@NonNegative int index, int columnLength) {
+    return ofPoint(index % columnLength, index / columnLength);
   }
 
   public static InventoryPosition ofIndex(@NonNegative int index) {
-    return ofIndex(index, DEFAULT_LENGTH_X);
+    return ofIndex(index, InventoryDimensions.DEFAULT_COLUMN_COUNT);
   }
 
   @CheckReturnValue
-  public InventoryPosition shift(@NonNegative int offset, @NonNegative int columnLength) {
+  public InventoryPosition shift(int offset, int columnLength) {
     return ofIndex(toIndex(columnLength) + offset);
   }
 
   @CheckReturnValue
-  public InventoryPosition shift(@NonNegative int offset) {
-    return shift(offset, DEFAULT_LENGTH_X);
+  public InventoryPosition shift(int offset) {
+    return shift(offset, InventoryDimensions.DEFAULT_COLUMN_COUNT);
   }
 
   @CheckReturnValue
-  public InventoryPosition add(@NonNegative int columnOffset, @NonNegative int rowOffset) {
+  public InventoryPosition add(int columnOffset, int rowOffset) {
     return new InventoryPosition(this.column + columnOffset, this.row + rowOffset);
   }
 
@@ -65,7 +79,7 @@ public final class InventoryPosition {
   }
 
   public int toIndex() {
-    return toIndex(column, row, DEFAULT_LENGTH_X);
+    return toIndex(column, row, InventoryDimensions.DEFAULT_COLUMN_COUNT);
   }
 
   public boolean isEdge(@NonNegative int columnLength, @NonNegative int rowLength) {

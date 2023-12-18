@@ -114,6 +114,12 @@ public class KitInventory extends PaginatingInventory {
                   .ifPresent(SpecialScoreboard::render);
             }));
 
+    private final InventoryItem altNoPaginationItem = InventoryItem.ofCancelling(
+        ItemBuilder.builder()
+            .material(Material.BLACK_STAINED_GLASS_PANE)
+            .name(StringUtils.SPACE)
+            .wrap());
+
     private final Supplier<InventoryItem> cancelFactory =
         Suppliers.memoize(() -> InventoryItem.of(
             ItemBuilder.builder()
@@ -201,6 +207,12 @@ public class KitInventory extends PaginatingInventory {
       for (int i = 0; i < content.size(); ++i)
         page.set(begin.add(i / maxReference, i % maxReference),
             InventoryItem.ofCancelling(content.get(i)));
+      if (hasPagination)
+        InventoryPosition.interpolate(PREVIOUS_PAGE, NEXT_PAGE).expand(1, 0)
+            .forEach((pos) -> page.set(pos, altNoPaginationItem));
+      /* (Below) is effectively equivalent to the above interpolate + expand
+        for (int i = PREVIOUS_PAGE.getColumn() - 1, n = 1 + NEXT_PAGE.getColumn(); i <= n; ++i)
+          page.set(InventoryPosition.ofPoint(i, PREVIOUS_PAGE.getRow()), altNoPaginationItem); */
       return page;
     }
 
