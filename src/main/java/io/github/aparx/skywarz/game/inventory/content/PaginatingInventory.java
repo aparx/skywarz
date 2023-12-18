@@ -83,13 +83,15 @@ public class PaginatingInventory extends SpecialInventory<PaginatableInventoryCo
       pages.clear();
       InventoryPage page = new InventoryPage(dimensions);
       page.fillSides(getContent().getNoPageItem());
-      int pageItemCount = 0;
+      int pageHeightPos = 0, pageItemCount = 0;
       for (int i = 0; i < count; ++i) {
-        page.set(InventoryPosition.ofPoint(1 + (i % columnMod), pageItemCount), elements.get(i));
-        if ((1 + i) % columnMod == 0 && ++pageItemCount >= rowLength) {
+        page.set(InventoryPosition.ofPoint(1 + (i % columnMod), pageHeightPos), elements.get(i));
+        ++pageItemCount;
+        if ((1 + i) % columnMod == 0 && ++pageHeightPos >= rowLength) {
           pages.add(page);
           page.fillSides(getContent().getNoPageItem());
           page = new InventoryPage(dimensions);
+          pageHeightPos = 0;
           pageItemCount = 0;
         }
       }
