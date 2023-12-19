@@ -3,6 +3,7 @@ package io.github.aparx.skywarz.game.item.items.idle.kit;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Suppliers;
 import io.github.aparx.bufig.ArrayPath;
+import io.github.aparx.skywarz.Skywars;
 import io.github.aparx.skywarz.entity.SkywarsPlayer;
 import io.github.aparx.skywarz.game.inventory.SpecialInventory;
 import io.github.aparx.skywarz.game.inventory.InventoryDimensions;
@@ -11,6 +12,7 @@ import io.github.aparx.skywarz.game.inventory.InventoryPosition;
 import io.github.aparx.skywarz.game.inventory.content.InventoryPage;
 import io.github.aparx.skywarz.game.inventory.content.PaginatableInventoryContent;
 import io.github.aparx.skywarz.game.inventory.content.PaginatingInventory;
+import io.github.aparx.skywarz.game.item.items.idle.KitSelectorItem;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
@@ -97,7 +99,9 @@ public class KitInventory extends PaginatingInventory {
         Suppliers.memoize(() -> InventoryItem.of(
             ItemBuilder.builder()
                 .material(Material.LIME_CONCRETE)
-                .name("§aEquip") // TODO
+                .name(Skywars.getInstance().getItemManager()
+                    .getItems().require(KitSelectorItem.class)
+                    .getKitEquip())
                 .build(),
             (whoClicked, event) -> {
               event.setCancelled(true);
@@ -124,7 +128,9 @@ public class KitInventory extends PaginatingInventory {
         Suppliers.memoize(() -> InventoryItem.of(
             ItemBuilder.builder()
                 .material(Material.LIGHT_GRAY_CONCRETE)
-                .name("§7Cancel") // TODO
+                .name(Skywars.getInstance().getItemManager()
+                    .getItems().require(KitSelectorItem.class)
+                    .getKitCancel())
                 .build(),
             (whoClicked, event) -> {
               event.setCancelled(true);

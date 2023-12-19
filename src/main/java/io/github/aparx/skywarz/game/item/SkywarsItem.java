@@ -82,7 +82,6 @@ public abstract class SkywarsItem extends ConfigObject {
     return stack;
   }
 
-  // TODO find a more fitting name
   @CanIgnoreReturnValue
   public final ItemStack createDummy(@NonNull GameMatch match, @NonNull Player initiator) {
     Preconditions.checkNotNull(match, "Match must not be null");

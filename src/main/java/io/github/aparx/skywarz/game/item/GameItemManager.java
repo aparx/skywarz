@@ -28,6 +28,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @Getter
 public final class GameItemManager extends DefaultSkywarsHandler implements Listener {
 
+  // TODO convert to keyed by name
   private final KeyedByClassSet<SkywarsItem> items = new KeyedByClassSet<>() {
 
     @Override

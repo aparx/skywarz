@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 /**
  * @author aparx (Vinzent Z.)

@@ -44,7 +44,7 @@ public class SpawnList implements SpawnGroup, ConfigurationSerializable {
   }
 
   @Override
-  public Map<String, Object> serialize() {
+  public @NonNull Map<String, Object> serialize() {
     Map<String, Object> dataMap = new HashMap<>(map.size());
     for (Map.Entry<Integer, Location> entry : this.map.entrySet())
       dataMap.put(entry.getKey().toString(), entry.getValue());

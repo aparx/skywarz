@@ -12,6 +12,7 @@ import io.github.aparx.skywarz.handler.SkywarsConfigHandler;
 import io.github.aparx.skywarz.utils.item.ItemBuilder;
 import io.github.aparx.skywarz.utils.item.WrappedItemStack;
 import io.github.aparx.skywarz.utils.sound.SoundRecord;
+import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -43,6 +44,16 @@ public class KitSelectorItem extends StaticSkywarsItem {
   @ConfigMapping("menu.title")
   @Document("The title of the kit selector inventory")
   private String menuTitle = "Kit Selector";
+
+  @Getter
+  @ConfigMapping("menu.introspect.equip")
+  @Document("The kit equip button name")
+  private String kitEquip = ChatColor.GREEN + "Equip";
+
+  @Getter
+  @ConfigMapping("menu.introspect.cancel")
+  @Document("The kit cancel button name")
+  private String kitCancel = ChatColor.GRAY + "Cancel";
 
   public KitSelectorItem() {
     super("kit selector", new GameMatchState[]{GameMatchState.IDLE});
