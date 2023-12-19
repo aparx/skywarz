@@ -13,6 +13,7 @@ https://www.spigotmc.org/resources/skywarz.42739/
 Skywarz internally only uses Bufig (Bukkit configuration wrapper) from myself, ORMLite and Guava & commons processing libraries.
 - https://github.com/aparx/bufig-library
 - https://github.com/google/guava
+- https://github.com/j256/ormlite-jdbc
 - https://commons.apache.org/
 
 ... and spigot of course
