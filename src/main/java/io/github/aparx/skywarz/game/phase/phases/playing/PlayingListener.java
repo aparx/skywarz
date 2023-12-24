@@ -8,7 +8,6 @@ import io.github.aparx.skywarz.entity.data.stats.PlayerStatsKey;
 import io.github.aparx.skywarz.entity.data.types.PlayerMatchData;
 import io.github.aparx.skywarz.game.arena.GameArena;
 import io.github.aparx.skywarz.game.arena.ArenaBox;
-import io.github.aparx.skywarz.game.chest.ChestHandler;
 import io.github.aparx.skywarz.game.phase.GamePhaseListener;
 import io.github.aparx.skywarz.game.phase.features.GameSpectator;
 import io.github.aparx.skywarz.game.scoreboard.MatchScoreboard;
@@ -58,6 +57,34 @@ public class PlayingListener extends GamePhaseListener<PlayingPhase> {
     filterMatchFromPlayer(event.getPlayer()).ifPresent((match) -> {
       match.getChestHandler().open(chest.getLocation(), chest.getInventory());
     });
+  }
+
+  // Spectator target
+  @EventHandler(priority = EventPriority.MONITOR)
+  void onPlayerInteract(PlayerInteractAtEntityEvent event) {
+    Entity rightClicked = event.getRightClicked();
+    if (event.isCancelled()) return;
+    if (!(rightClicked instanceof Player)) return;
+    Player player = event.getPlayer();
+    if (filterMatchFromPlayer(((Player) rightClicked)).isPresent())
+      filterMatchFromPlayer(event.getPlayer()).ifPresent((match) -> {
+        player.setGameMode(GameMode.SPECTATOR);
+        player.setSpectatorTarget(rightClicked);
+      });
+  }
+
+  // Spectator target (teleportation cancellation)
+  @EventHandler(priority = EventPriority.HIGHEST)
+  void onTeleport(PlayerTeleportEvent event) {
+    if (event.isCancelled()) return;
+    Player player = event.getPlayer();
+    if (event.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE
+        && player.getSpectatorTarget() == null
+        && filterMatchFromPlayer(player).isPresent()) {
+      event.setCancelled(true);
+      event.setTo(event.getFrom());
+      event.getPlayer().setSpectatorTarget(null);
+    }
   }
 
   @EventHandler(priority = EventPriority.NORMAL)

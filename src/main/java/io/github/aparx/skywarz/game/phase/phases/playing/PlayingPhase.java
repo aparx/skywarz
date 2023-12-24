@@ -31,6 +31,7 @@ import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import io.github.aparx.skywarz.utils.tick.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.WeatherType;
 import org.bukkit.entity.Player;
@@ -128,6 +129,19 @@ public class PlayingPhase extends GamePhase {
     if (evaluateGameEnd()) return;
     GameMatch match = getMatch();
     TimeTicker ticker = getTicker();
+    if (ticker.isCycling(2))
+      // update every 2nd tick due to performance
+      match.getAudience().dead()
+          .map(SkywarsPlayer::findOnline)
+          .filter(Optional::isPresent)
+          .map(Optional::get)
+          .filter((x) -> x.getGameMode() == GameMode.SPECTATOR && x.getSpectatorTarget() == null)
+          .forEach((player) -> {
+            player.setGameMode(GameMode.ADVENTURE);
+            player.setAllowFlight(true);
+            player.setFlying(true);
+          });
+
     boolean wasProtecting = this.wasProtecting;
     this.wasProtecting = isProtectionPhase();
     if (this.wasProtecting) {

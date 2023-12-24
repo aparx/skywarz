@@ -109,9 +109,12 @@ public final class TickDuration implements ConfigurationSerializable {
     long targetAsTicks = target.toTicks();
     long thisAsTicks = unit.toTicks();
     long tickDiff = targetAsTicks - thisAsTicks;
-    return tickDiff == 0 ? amount : (tickDiff > 0
+    /*return tickDiff == 0 ? amount : (tickDiff > 0
         ? (amount / targetAsTicks) * thisAsTicks
-        : amount * (thisAsTicks / targetAsTicks));
+        : amount * (thisAsTicks / targetAsTicks));*/
+    return (tickDiff == 0 ? amount : (tickDiff > 0
+        ? (amount * thisAsTicks) / targetAsTicks
+        : amount * (thisAsTicks / targetAsTicks)));
   }
 
   public long toTicks() {

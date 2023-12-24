@@ -15,14 +15,17 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.bukkit.ChatColor;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import javax.swing.text.StyleContext;
 import java.util.*;
 
 /**
@@ -33,16 +36,12 @@ import java.util.*;
 @Getter
 public abstract class SkywarsItem extends ConfigObject {
 
-  private static final String ID_LORE_PREFIX =
-      String.valueOf(ChatColor.DARK_GRAY) + ChatColor.ITALIC;
-
   private final @NonNull GameMatchState[] states;
 
   private final int flags;
 
-  // TODO test ID collisions
   @Getter
-  private final String itemID = RandomStringUtils.random(10, "0123456789abcdef");
+  private final String itemID = UUID.randomUUID().toString();
 
   public SkywarsItem(@NonNull String name, @NonNull GameMatchState[] states) {
     this(name, states, 0);
@@ -67,17 +66,16 @@ public abstract class SkywarsItem extends ConfigObject {
    */
   protected abstract ItemStack createItemStack(@NonNull GameMatch match, @NonNull Player initiator);
 
+  private void applyItemIdentifier(ItemMeta itemMeta) {
+
+  }
+
   @CanIgnoreReturnValue
   public final ItemStack create(@NonNull GameMatch match, @NonNull Player initiator) {
     ItemStack stack = createDummy(match, initiator);
     ItemMeta meta = stack.getItemMeta();
     Preconditions.checkNotNull(meta, "Item has no meta");
-    // mark the item to be a GameItem (use a workaround involving lore instead of NBT tags)
-    List<String> lore = meta.getLore();
-    if (lore == null) lore = new ArrayList<>();
-    lore.add(StringUtils.SPACE);
-    lore.add(ID_LORE_PREFIX + itemID);
-    meta.setLore(lore);
+    meta.getPersistentDataContainer().set(getStampKey(), PersistentDataType.STRING, itemID);
     stack.setItemMeta(meta);
     return stack;
   }
@@ -95,13 +93,8 @@ public abstract class SkywarsItem extends ConfigObject {
     if (itemStack == null) return false;
     ItemMeta meta = itemStack.getItemMeta();
     if (meta == null) return false;
-    List<String> lore = meta.getLore();
-    if (lore == null || lore.isEmpty())
-      return false;
-    String s = lore.get(lore.size() - 1);
-    if (StringUtils.length(s) > ID_LORE_PREFIX.length())
-      return itemID.equals(s.substring(ID_LORE_PREFIX.length()));
-    return false;
+    return itemID.equals(meta.getPersistentDataContainer()
+        .get(getStampKey(), PersistentDataType.STRING));
   }
 
   public void register() {
@@ -129,6 +122,10 @@ public abstract class SkywarsItem extends ConfigObject {
         .filter(PlayerMatchData::isInMatch)
         .map(PlayerMatchData::getMatch)
         .filter((match) -> Arrays.stream(states).anyMatch(match::isState));
+  }
+
+  private NamespacedKey getStampKey() {
+    return new NamespacedKey(Skywars.plugin(), "gameItem");
   }
 
   @UtilityClass

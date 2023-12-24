@@ -7,6 +7,8 @@ import io.github.aparx.skywarz.entity.snapshot.PlayerSnapshot;
 import io.github.aparx.skywarz.game.kit.GameKit;
 import io.github.aparx.skywarz.game.match.GameMatch;
 import io.github.aparx.skywarz.game.team.GameTeam;
+import io.github.aparx.skywarz.utils.tick.Ticker;
+import io.github.aparx.skywarz.utils.tick.TimeTicker;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
