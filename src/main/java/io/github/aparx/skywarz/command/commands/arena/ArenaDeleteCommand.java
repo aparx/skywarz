@@ -11,6 +11,9 @@ import io.github.aparx.skywarz.language.Language;
 import io.github.aparx.skywarz.language.MessageKeys;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -64,5 +67,11 @@ public class ArenaDeleteCommand extends AbstractArenaCommand {
     context.getSender().sendMessage(Language.getInstance().substitute(
         "{successPrefix} Arena '{0}' was deleted successfully!",
         arena.getName()));
+    // remove arena signs in the physical block world
+    arena.getSignHandler().getRegister().getCollection().forEach((sign) -> {
+      Block block = sign.getLocation().getBlock();
+      if (block.getState() instanceof Sign)
+        block.setType(Material.AIR);
+    });
   }
 }

@@ -33,8 +33,8 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
   public ArenaRemoveSpawnCommand(@NonNull CommandNode parent) {
     super(CommandInfo.builder()
             .name("spawn")
-            .args("<Arena> <Team> (ID)")
-            .description("Removes a certain spawn from a team")
+            .args("<Arena> (Team) (ID)")
+            .description("Removes spawns from an arena")
             .build(),
         ARENA_ARGUMENT_INDEX,
         parent);
@@ -42,30 +42,36 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
 
   @Override
   protected void execute(GameArena arena, CommandContext context, CommandArgList args) {
-    if (args.length() < 1 + TEAM_ARGUMENT_INDEX
-        || args.length() > 1 + SPAWN_ARGUMENT_INDEX) {
+    if (args.isEmpty() || args.length() > 1 + SPAWN_ARGUMENT_INDEX) {
       context.setStatus(CommandContext.Status.ERROR_SYNTAX);
-      return;
-    }
-    TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
-    SpawnGroup spawns = arena.getData().getSpawns(team)
-        .filter(Predicate.not(SpawnGroup::isEmpty))
-        .orElseThrow(() -> new IllegalArgumentException(String.format(
-            "There is no spawn added for team %s", team.getDefaultName())));
-    if (args.length() == 1 + TEAM_ARGUMENT_INDEX) {
-      int size = spawns.size();
-      spawns.clear();
+    } else if (args.length() == TEAM_ARGUMENT_INDEX) {
+      EnumMap<TeamEnum, SpawnGroup> enumMap = arena.getData().getSpawns();
+      enumMap.forEach((__, spawnGroup) -> spawnGroup.clear());
+      enumMap.clear();
       context.getSender().sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Removed all {0} spawns in arena '{1}' from team {2}! (unsaved)",
-          size, arena.getName(), team.getChatColor() + team.getDefaultName()));
-    } else if (args.length() == 1 + SPAWN_ARGUMENT_INDEX) {
-      int targetId = args.get(SPAWN_ARGUMENT_INDEX).getInt();
-      Preconditions.checkState(spawns.remove(targetId) != null, String.format(
-          "There is no spawn %s added for team %s", targetId, team.getDefaultName()));
-      context.getSender().sendMessage(Language.getInstance().substitute(
-          "{successPrefix} Removed spawn {0} in arena '{1}' from team {2}! (unsaved)",
-          targetId, arena.getName(), team.getChatColor() + team.getDefaultName()
-      ));
+          "{successPrefix} Removed all spawns from arena '{0}'! (unsaved)",
+          arena.getName()));
+    } else {
+      TeamEnum team = args.get(TEAM_ARGUMENT_INDEX).getTeam();
+      SpawnGroup spawns = arena.getData().getSpawns(team)
+          .filter(Predicate.not(SpawnGroup::isEmpty))
+          .orElseThrow(() -> new IllegalArgumentException(String.format(
+              "There is no spawn added for team %s", team.getDefaultName())));
+      if (args.length() == 1 + TEAM_ARGUMENT_INDEX) {
+        int size = spawns.size();
+        spawns.clear();
+        context.getSender().sendMessage(Language.getInstance().substitute(
+            "{successPrefix} Removed all {0} spawns in arena '{1}' from team {2}! (unsaved)",
+            size, arena.getName(), team.getChatColor() + team.getDefaultName()));
+      } else if (args.length() == 1 + SPAWN_ARGUMENT_INDEX) {
+        int targetId = args.get(SPAWN_ARGUMENT_INDEX).getInt();
+        Preconditions.checkState(spawns.remove(targetId) != null, String.format(
+            "There is no spawn %s added for team %s", targetId, team.getDefaultName()));
+        context.getSender().sendMessage(Language.getInstance().substitute(
+            "{successPrefix} Removed spawn {0} in arena '{1}' from team {2}! (unsaved)",
+            targetId, arena.getName(), team.getChatColor() + team.getDefaultName()
+        ));
+      }
     }
   }
 
@@ -76,7 +82,8 @@ public class ArenaRemoveSpawnCommand extends AbstractArenaCommand {
       return suggestions;
     if (args.length() == 1 + TEAM_ARGUMENT_INDEX)
       return Arrays.stream(TeamEnum.values())
-          .filter((x) -> StringUtils.startsWithIgnoreCase(x.name(), args.getString(TEAM_ARGUMENT_INDEX)))
+          .filter((x) -> StringUtils.startsWithIgnoreCase(x.name(),
+              args.getString(TEAM_ARGUMENT_INDEX)))
           .map(TeamEnum::getDefaultName)
           .collect(Collectors.toList());
     if (args.length() == 1 + SPAWN_ARGUMENT_INDEX)
